@@ -57,7 +57,11 @@ int main(int argc, char** argv)
     int  nbytes;       /* Number of bytes read */
     int  tries;        /* Number of tries so far */
 
-    std::vector<uint8_t> v_buff(100);
+    std::vector<uint8_t> v_buff(255);
+    std::vector<uint8_t> dwm_init = {10, 10, 10};
+    std::vector<uint8_t> dwm_lec = {'l', 'e', 'c', 10, 10};
+
+    std::vector<uint8_t> rx_buff(255);
 
     try{
 /*
@@ -184,51 +188,60 @@ int main(int argc, char** argv)
 
         idx = 0;
         position = "";
+/*
         bytes_read = sp.read_port(read_data, 1);
         while(bytes_read>0)
         {
 
             if((read_data == "\r") || (read_data == "\n"))
                 break;
- 
+
             position = position + read_data;
             ++idx;
-   
+
             if(idx >= 200)
                 break;
         }
 
         std::cout << "P: " << position << std::endl;
+*/
+
+
+        std::vector<char> fw = {0x15, 0x00};
+        bytes_written = sp.write_port(fw);
+
+
 
         // do the intial check to see if the tag has been configured previously
-        bytes_read = sp.read_port(read_data, 66);
+        bytes_read = sp.read_port(rx_buff, 50);
         std::cout << "br: " << bytes_read << std::endl;
 
         if(bytes_read > 0)
         {
             // parse through the data to see if we've received at packet that contains the "DIST" indicator
-            params.clear();
-            parse_csv_line(read_data, params);
+            //params.clear();
+            //parse_csv_line(read_data, params);
 
-            for(idx=0; idx<params.size(); ++idx)
+//            for(idx=0; idx<params.size(); ++idx)
+            for(idx=0; idx<bytes_read; ++idx)
             {
-                std::cout << params[idx] << "," ;
+                std::cout << (uint32_t)rx_buff[idx] << "," ;
             }
             std::cout << std::endl;
         }
         else
         {
             // sent the init commands
-            //bytes_written = sp.write_port("\r\n\r\n");
-            bytes_written = write(sp.port, "\r", 1);
-            sleep_ms(2);
-            bytes_written = write(sp.port, "\n", 1);
-            std::cout << "1" << std::endl;
+            bytes_written = sp.write_port(dwm_init);
+            //sleep_ms(2);
+            //bytes_written = write(sp.port, "\n", 1);
+            std::cout << "bw: " << bytes_written << std::endl;
 
             // now set it to start printing out data
-            bytes_written = sp.write_port("lec");
-            bytes_written = write(sp.port, "\r\n\r\n", 4);
+            bytes_written = sp.write_port(dwm_lec);
+            //bytes_written = write(sp.port, "\r\n\r\n", 4);
             std::cout << "sent lec" << std::endl;
+            std::cout << "bw: " << bytes_written << std::endl;
 
             // now try to read in a string
             //std::vector<uint8_t> test;
