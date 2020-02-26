@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 
 // C/C++ includes
 #include <cstdint>
@@ -47,39 +48,37 @@ int main(int argc, char** argv)
     uint32_t wait_time = 10;
 
 #if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
-    std:string port_name = "COM8";
+    std::string port_name = "COM8";
 
 #else defined(__linux__)
     struct termios options;
     std:string port_name = "/dev/ttyACM0";
 #endif
 
-    std::string position = "";
-    std::string read_data = "";
     uint64_t bytes_read = 0;
     uint64_t bytes_written = 0;
 
-    std::vector<std::string> params;
+    //std::vector<std::string> params;
 
+    //char buffer[255];
+    //char *bufptr;      /* Current char in buffer */
+    //int  nbytes;       /* Number of bytes read */
+    //int  tries;        /* Number of tries so far */
 
+    //std::vector<uint8_t> v_buff(255);
+    //std::vector<uint8_t> dwm_init = {10, 10, 10};
+    //std::vector<uint8_t> dwm_lec = {'l', 'e', 'c', 10, 10};
 
-    char buffer[255];
-    char *bufptr;      /* Current char in buffer */
-    int  nbytes;       /* Number of bytes read */
-    int  tries;        /* Number of tries so far */
+    //std::vector<uint8_t> rx_buff;
+    //std::vector<uint8_t> rx_buff2;
 
-    std::vector<uint8_t> v_buff(255);
-    std::vector<uint8_t> dwm_init = {10, 10, 10};
-    std::vector<uint8_t> dwm_lec = {'l', 'e', 'c', 10, 10};
-
-    std::vector<uint8_t> rx_buff;
-    std::vector<uint8_t> rx_buff2;
-
+    // dwm variables
+    std::vector<dwm_version> version;
     std::vector<anchor_pos> anchor;
+    dwm_position tag_position;
+
 
     try{
-
-
 
         // open the serial port
         std::cout << "opening port..." << std::endl;
@@ -89,12 +88,15 @@ int main(int argc, char** argv)
 //        sp.write_port("\n\n");
 //        std::cout << "1" << std::endl;
 
-        std::vector<char> fw = {0x15, 0x00};
-        bytes_written = sp.write_port(fw);
+        // get the firmware/config/hardware versions
+        get_fw(sp, version);
 
-        // do the intial check to see if the tag has been configured previously
-        bytes_read = sp.read_port(rx_buff, 50);
-        std::cout << "br: " << bytes_read << std::endl;
+        //std::vector<char> fw = {0x15, 0x00};
+        //bytes_written = sp.write_port(fw);
+
+        //// do the intial check to see if the tag has been configured previously
+        //bytes_read = sp.read_port(rx_buff, 50);
+        //std::cout << "br: " << bytes_read << std::endl;
         //std::cout << rx_buff << std::endl;
 /*
         std::vector<char> pos = { 0x0C, 0x00 };
@@ -106,6 +108,8 @@ int main(int argc, char** argv)
         //bytes_read = sp.read_port(rx_buff2, 200);
         //std::cout << "br: " << bytes_read << std::endl;
 */
+
+        /*
         if(bytes_read > 0)
         {
             // parse through the data to see if we've received at packet that contains the "DIST" indicator
@@ -156,11 +160,17 @@ int main(int argc, char** argv)
 
 
         }
+        */
 
-        get_pos(sp, anchor);
+        // get the 
+        get_pos(sp, tag_position, anchor);
+
+        std::cout << "tag " << tag_position << std::endl;
 
         for (idx = 0; idx < anchor.size(); ++idx)
+        {
             std::cout << anchor[idx] << std::endl;
+        }
 
         // close the port
         sp.close_port();
