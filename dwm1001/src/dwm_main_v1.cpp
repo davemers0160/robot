@@ -78,38 +78,6 @@ int main(int argc, char** argv)
     std::vector<anchor_pos> anchor;
 
     try{
-/*
-        std::cout << "writing \\r\\n" << std::endl;
-        n = write(fd, "\n", 1);
-        std::cout << n << std::endl;
-
-        std::cout << "writing lec" << std::endl;
-        n = write(fd, "lec\n", 4);
-        std::cout << n << std::endl;
-
-//        std::cout << "reading buffer" << std::endl;
-//        n = read(fd, buffer, 66);
-//        std::cout << n << std::endl;
-
-        // wait 1s before trying to read the port
-        sleep_ms(1000);
-
-        std::cout << "reading v_buffer" << std::endl;
-        n = read(fd, &v_buff[0], 66);
-        std::cout << n << std::endl;
-
-
-        position.assign(v_buff.begin(), v_buff.end());
-        std::cout << "res: " << position << std::endl;
-
-        for(int idx=0; idx<n; ++idx)
-        {
-            std::cout << (int)v_buff[idx] << " ";
-        }
-
-        std::cout << std::endl;
-        close(fd);
-*/
 
 
 

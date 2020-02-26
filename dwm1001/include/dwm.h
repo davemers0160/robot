@@ -26,6 +26,31 @@ typedef struct dwm_error
 } dwm_error;
 
 //-----------------------------------------------------------------------------
+typedef struct dwm_fw
+{
+    uint8_t error;
+    uint8_t major;
+    uint8_t minor;
+    uint8_t patch;
+    uint8_t var;
+
+    dwm_fw() {}
+
+    dwm_fw(std::vector<uint8_t> data)
+    {
+        error = data[0];
+        major = data[];
+        minor = data[];
+        patch = data[];
+        var = data[1];
+
+
+
+    }
+
+} dwm_fw;
+
+//-----------------------------------------------------------------------------
 typedef struct anchor_pos
 {
     uint16_t address;
@@ -89,6 +114,12 @@ typedef struct anchor_pos
 } anchor_pos;
 
 //-----------------------------------------------------------------------------
+void get_fw(serial_port& sp)
+{
+
+}   // end of get_fw
+
+//-----------------------------------------------------------------------------
 void get_pos(serial_port& sp, std::vector<anchor_pos> &anchor)
 {
     uint8_t idx;
@@ -106,8 +137,6 @@ void get_pos(serial_port& sp, std::vector<anchor_pos> &anchor)
     // read in the error code, the position block and info which shows how many anchors are in range
     bytes_read = sp.read_port(frame_data, frame_size);
     anchor_count = frame_data[frame_data.size() - 1];
-
-    //data_size = anchor_data_size * frame_data[frame_data.size() - 1];
 
     anchor.clear();
 
