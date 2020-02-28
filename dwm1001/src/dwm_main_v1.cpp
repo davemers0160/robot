@@ -43,7 +43,6 @@ int main(int argc, char** argv)
 
     serial_port sp;
 
-
     uint32_t baud_rate = 115200;
     uint32_t wait_time = 10;
 
@@ -51,26 +50,12 @@ int main(int argc, char** argv)
     std::string port_name = "COM8";
 
 #else defined(__linux__)
-    struct termios options;
+    //struct termios options;
     std:string port_name = "/dev/ttyACM0";
 #endif
 
-    uint64_t bytes_read = 0;
-    uint64_t bytes_written = 0;
-
-    //std::vector<std::string> params;
-
-    //char buffer[255];
-    //char *bufptr;      /* Current char in buffer */
-    //int  nbytes;       /* Number of bytes read */
-    //int  tries;        /* Number of tries so far */
-
-    //std::vector<uint8_t> v_buff(255);
-    //std::vector<uint8_t> dwm_init = {10, 10, 10};
-    //std::vector<uint8_t> dwm_lec = {'l', 'e', 'c', 10, 10};
-
-    //std::vector<uint8_t> rx_buff;
-    //std::vector<uint8_t> rx_buff2;
+    //uint64_t bytes_read = 0;
+    //uint64_t bytes_written = 0;
 
     // dwm variables
     std::vector<dwm_version> version;
@@ -84,85 +69,10 @@ int main(int argc, char** argv)
         std::cout << "opening port..." << std::endl;
         sp.open_port(port_name, baud_rate, wait_time);
 
-        // this is the intial write to bring the DWM1001 into console mode
-//        sp.write_port("\n\n");
-//        std::cout << "1" << std::endl;
-
         // get the firmware/config/hardware versions
         get_fw(sp, version);
 
-        //std::vector<char> fw = {0x15, 0x00};
-        //bytes_written = sp.write_port(fw);
-
-        //// do the intial check to see if the tag has been configured previously
-        //bytes_read = sp.read_port(rx_buff, 50);
-        //std::cout << "br: " << bytes_read << std::endl;
-        //std::cout << rx_buff << std::endl;
-/*
-        std::vector<char> pos = { 0x0C, 0x00 };
-
-        bytes_written = sp.write_port(pos);
-        bytes_read = sp.read_port(rx_buff, 200);
-        std::cout << "br: " << bytes_read << std::endl;
-
-        //bytes_read = sp.read_port(rx_buff2, 200);
-        //std::cout << "br: " << bytes_read << std::endl;
-*/
-
-        /*
-        if(bytes_read > 0)
-        {
-            // parse through the data to see if we've received at packet that contains the "DIST" indicator
-            //params.clear();
-            //parse_csv_line(read_data, params);
-
-//            for(idx=0; idx<params.size(); ++idx)
-            for(idx=0; idx<bytes_read; ++idx)
-            {
-                std::cout << (uint32_t)rx_buff[idx] << "," ;
-            }
-            std::cout << std::endl;
-        }
-        else
-        {
-            // sent the init commands
-            bytes_written = sp.write_port(dwm_init);
-            //sleep_ms(2);
-            //bytes_written = write(sp.port, "\n", 1);
-            std::cout << "bw: " << bytes_written << std::endl;
-
-            // now set it to start printing out data
-            bytes_written = sp.write_port(dwm_lec);
-            //bytes_written = write(sp.port, "\r\n\r\n", 4);
-            std::cout << "sent lec" << std::endl;
-            std::cout << "bw: " << bytes_written << std::endl;
-
-            // now try to read in a string
-            //std::vector<uint8_t> test;
-            bytes_read = sp.read_port(read_data, 66);
-            std::cout << "br: " << bytes_read <<  std::endl;
-
-            //std::string test2;
-	    //test2.assign(test.begin(), test.end());
-
-            //std::cout << "string: " << test2 << std::endl;
-
-
-            // parse through the data to see if we've received at packet that contains the "DIST" indicator
-            params.clear();
-            parse_csv_line(read_data, params);
-
-            for(idx=0; idx<params.size(); ++idx)
-            {
-                std::cout << params[idx] << "," ;
-            }
-            std::cout << std::endl;
-
-
-        }
-        */
-
-        // get the 
+        // get the position of the tag, the position of the anchors and distance of anchors to the tag
         get_pos(sp, tag_position, anchor);
 
         std::cout << "tag " << tag_position << std::endl;
