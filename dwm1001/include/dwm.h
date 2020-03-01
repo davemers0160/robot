@@ -147,8 +147,18 @@ typedef struct anchor_pos
     float y;
     float z;
     uint8_t qf;
+    bool valid;
 
-    anchor_pos() {}
+    anchor_pos() 
+    {
+        address = 0;
+        range = 0;
+        x = 0;
+        y = 0;
+        z = 0;
+        qf = 0;
+        valid = false;
+    }
 
     anchor_pos(uint16_t add_, float r_, uint8_t qf_, float x_, float y_, float z_)
     {
@@ -158,30 +168,10 @@ typedef struct anchor_pos
         y = y_;
         z = z_;
         qf = qf_;
+        valid = true;
     }
 
-    anchor_pos(std::vector<uint8_t> data)
-    {
-        if (data.size() == anchor_packet_size)
-        {
-            address = (data[1] << 8) | data[0];
-            range = (float)((data[5] << 24) | (data[4] << 16) | (data[3] << 8) | data[2]) / 1000.0f;
-            qf = data[6];
-            x = (float)((data[10] << 24) | (data[9] << 16) | (data[8] << 8) | data[7]) / 1000.0f;
-            y = (float)((data[14] << 24) | (data[13] << 16) | (data[12] << 8) | data[11]) / 1000.0f;
-            z = (float)((data[18] << 24) | (data[17] << 16) | (data[16] << 8) | data[15]) / 1000.0f;
-        }
-        else
-        {
-            address = 0;
-            range = 0.0;
-            qf = 0;
-            x = 0.0;
-            y = 0.0;
-            z = 0.0;
-        }
 
-    }
 
     inline friend std::ostream& operator<< (
         std::ostream& out,
@@ -199,6 +189,28 @@ typedef struct anchor_pos
     }
 
 } anchor_pos;
+
+//-----------------------------------------------------------------------------
+anchor_pos build_anchor_pos(std::vector<uint8_t> data)
+{
+    anchor_pos ap;
+    ap.valid = false;
+    if (data.size() == anchor_packet_size)
+    {
+        ap.qf = data[6];
+        if (ap.qf > 5)
+        {
+            ap.address = (data[1] << 8) | data[0];
+            ap.range = (float)((data[5] << 24) | (data[4] << 16) | (data[3] << 8) | data[2]) / 1000.0f;
+            ap.x = (float)((data[10] << 24) | (data[9] << 16) | (data[8] << 8) | data[7]) / 1000.0f;
+            ap.y = (float)((data[14] << 24) | (data[13] << 16) | (data[12] << 8) | data[11]) / 1000.0f;
+            ap.z = (float)((data[18] << 24) | (data[17] << 16) | (data[16] << 8) | data[15]) / 1000.0f;
+            ap.valid = true;                
+        }
+    }
+
+    return ap;
+}   // end of build_anchor_pos
 
 //-----------------------------------------------------------------------------
 void get_fw(serial_port& sp, std::vector<dwm_version> &version)
@@ -288,7 +300,9 @@ void get_pos(serial_port& sp, dwm_position &position, std::vector<anchor_pos> &a
     for (idx = 0; idx < anchor_count; ++idx)
     {
         bytes_read = sp.read_port(packet_data, anchor_packet_size);
-        anchor.push_back(std::move(anchor_pos(packet_data)));
+        anchor_pos ap = build_anchor_pos(packet_data);
+        if(ap.valid)
+            anchor.push_back(std::move(ap));
     }
 
 }   // end of get_pos

@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>dwm_wrapper</name>
+  <version>1.0.0</version>
+  <description>dwm_wrapper is a ROS wrapper for interfacing with the dwm1001 UWB module.</description>
+
+  <maintainer email="user@todo.todo">user</maintainer>
+  <license>MIT</license>
+
+  <url type="repository">https://github.com/</url>
+
+  <buildtool_depend>catkin</buildtool_depend>  
+  
+  <depend>roscpp</depend>
+  <depend>rosconsole</depend>
+  <depend>std_msgs</depend>
+  <depend>dynamic_reconfigure</depend>
+  <depend>diagnostic_updater</depend>  
+
+  <build_depend>message_generation</build_depend>
+  <build_depend>roslint</build_depend>
+
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>rosconsole</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>urdf</exec_depend>
+  <exec_depend>message_runtime</exec_depend>
+  
+
+</package>

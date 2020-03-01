@@ -33,6 +33,8 @@ elseif(${PLATFORM} STREQUAL "MainGear")
     set(COMMON_ROOT "~/Common")
 elseif(${PLATFORM} STREQUAL "DLIB_DOCKER")
     set(COMMON_ROOT "~/Projects/Common")
+elseif(${PLATFORM} STREQUAL "JAX")
+    set(COMMON_ROOT "~/Projects/Common")	
 elseif()
     set(COMMON_ROOT "~/Projects/Common")
 endif()
@@ -40,12 +42,97 @@ endif()
 include(${COMMON_ROOT}/cmake_utils/use_cpp_11.cmake)
 include(${COMMON_ROOT}/cmake_utils/use_sse_avx.cmake)
 
+
+set(project_includes "include" "${COMMON_ROOT}/include")
+
+if(UNIX)
+if(false)
+
+	find_package(catkin COMPONENTS
+		#image_transport
+		roscpp
+		rosconsole
+		sensor_msgs
+		#stereo_msgs
+		std_msgs
+		dynamic_reconfigure
+		#tf2_ros
+		#nodelet
+		#tf2_geometry_msgs
+		message_generation
+		diagnostic_updater
+		roslint
+	)
+
+	#checkPackage("image_transport" "")
+	checkPackage("roscpp" "")
+	checkPackage("rosconsole" "")
+	checkPackage("sensor_msgs" "")
+	#checkPackage("stereo_msgs" "")
+	checkPackage("std_msgs" "")
+	checkPackage("dynamic_reconfigure" "")
+	#checkPackage("tf2_ros" "")
+	#checkPackage("nodelet" "")
+	#checkPackage("tf2_geometry_msgs" "")
+	checkPackage("message_generation" "")
+
+	add_message_files( FILES
+	#    object_stamped.msg
+	#    objects.msg
+		)
+
+	add_service_files( FILES
+	#    set_pose.srv
+	#    reset_odometry.srv
+	#    reset_tracking.srv
+	#    start_svo_recording.srv
+	#    stop_svo_recording.srv
+	#    start_remote_stream.srv
+	#    stop_remote_stream.srv
+	#    set_led_status.srv
+	#    toggle_led.srv
+	#    start_3d_mapping.srv
+	#    stop_3d_mapping.srv
+	#    start_object_detection.srv
+	#    stop_object_detection.srv
+		)
+
+	generate_messages(DEPENDENCIES
+		std_msgs
+	#    geometry_msgs
+		)
+
+	generate_dynamic_reconfigure_options(
+	#  cfg/Zed.cfg
+		)
+
+	catkin_package(
+		CATKIN_DEPENDS
+		roscpp
+		rosconsole
+		sensor_msgs
+	#    stereo_msgs
+	#    image_transport
+		dynamic_reconfigure
+	#    tf2_ros
+	#    tf2_geometry_msgs
+		message_runtime
+		)
+
+	set(project_includes ${project_includes} ${catkin_INCLUDE_DIRS})
+
+	add_definitions(-std=c++11)
+	set(LINK_LIBRARIES ${catkin_LIBRARIES})
+	
+endif()	
+endif()
+
+
 # look for any *.c and *.cpp files
 file(GLOB SOURCES "src/*.c*"
     "${COMMON_ROOT}/src/*.cpp"
     )
 
-set(project_includes "include" "${COMMON_ROOT}/include")
 
 message(" ")
 message("--------------------------------------------------------")
@@ -65,10 +152,11 @@ endforeach()
 message("--------------------------------------------------------")
 message(" ")
 
-include_directories(${project_includes})
-add_executable(${exe_name} ${SOURCES})
-
 if(WIN32)
+	include_directories(${project_includes})
+	add_executable(${exe_name} ${SOURCES})
+
+
     message("MSVC Version: " ${MSVC_VERSION})
     # uncomment for MSVC and cmake greater than 3.6.0
     set(default_build_type "Release")
@@ -76,6 +164,39 @@ if(WIN32)
         target_compile_options(${exe_name} PRIVATE "/MP")
         set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${exe_name})
     endif()
+	
+elseif(UNIX)
+if(false)
+	add_library(${exe_name} ${SOURCES})
+	target_link_libraries(${exe_name} ${LINK_LIBRARIES})
+	add_dependencies(${exe_name} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
+	
+	roslint_cpp()
+	
+	
+	install(TARGETS
+		${exe_name}
+		ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+		LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+		RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+		)
+		
+	#install(FILES
+	#	nodelet_plugins.xml
+	#	DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+	#)
+	
+	install(DIRECTORY
+		launch
+		urdf
+		params
+		DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+		)
+		
+else()
+	include_directories(${project_includes})
+	add_executable(${exe_name} ${SOURCES})
+endif()  
 
 endif()
 

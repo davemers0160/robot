@@ -39,7 +39,7 @@
 int main(int argc, char** argv)
 {
 
-    uint32_t idx;
+    uint32_t idx, jdx;
 
     serial_port sp;
 
@@ -81,6 +81,22 @@ int main(int argc, char** argv)
         {
             std::cout << anchor[idx] << std::endl;
         }
+
+        jdx = 0;
+        while (1)
+        {
+            get_pos(sp, tag_position, anchor);
+
+            for (idx = 0; idx < anchor.size(); ++idx)
+            {
+                std::cout << "0x" << num2str<uint16_t>(anchor[idx].address, "%04X") << ":" << anchor[idx].range << ", ";
+            }
+            std::cout << std::endl;
+            sleep_ms(100);
+            ++jdx;
+        }
+
+
 
         // close the port
         sp.close_port();
