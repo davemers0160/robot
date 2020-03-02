@@ -14,7 +14,7 @@
 #if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
 #include "win_serial_fcns.h"
 
-#else defined(__linux__)
+#elif defined(__linux__)
 //#include <string.h>  /* String function definitions */
 //#include <unistd.h>  /* UNIX standard function definitions */
 //#include <fcntl.h>   /* File control definitions */
@@ -42,15 +42,17 @@ int main(int argc, char** argv)
     uint32_t idx, jdx;
 
     serial_port sp;
-
+    uint32_t wait_time;
     uint32_t baud_rate = 115200;
-    uint32_t wait_time = 10;
+
 
 #if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
+    wait_time = 10;
     std::string port_name = "COM8";
 
-#else defined(__linux__)
+#elif defined(__linux__)
     //struct termios options;
+    wait_time = 10;
     std:string port_name = "/dev/ttyACM0";
 #endif
 
@@ -77,6 +79,8 @@ int main(int argc, char** argv)
 
         std::cout << "tag " << tag_position << std::endl;
 
+        sleep_ms(2000);
+        std::cout << "bytes avail: " << sp.bytes_available() << std::endl;
         for (idx = 0; idx < anchor.size(); ++idx)
         {
             std::cout << anchor[idx] << std::endl;

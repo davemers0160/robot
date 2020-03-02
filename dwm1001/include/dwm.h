@@ -11,15 +11,15 @@
 
 #if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
 #include "win_serial_fcns.h"
-#else defined(__linux__)
+#elif defined(__linux__)
 #include "linux_serial_fcns.h"
 #endif
 //-----------------------------------------------------------------------------
 
-const uint8_t error_packet_size = 3;
-const uint8_t version_packet_size = 6;
-const uint8_t position_packet_size = 15;
-const uint8_t anchor_packet_size = 20;
+const uint16_t error_packet_size = 3;
+const uint16_t version_packet_size = 6;
+const uint16_t position_packet_size = 15;
+const uint16_t anchor_packet_size = 20;
 
 
 typedef struct dwm_error
@@ -119,6 +119,12 @@ typedef struct dwm_position
         else
         {
             std::cout << "Not enough bytes received to decode position packet!" << std::endl;
+            std::cout << "packet length: " << (uint16_t)data[1] << std::endl;
+            for(uint32_t idx=0; idx<data.size(); ++idx)
+                std::cout << "0x" << num2str(data[idx], "%02X") << " ";
+                
+            std::cout << std::endl;
+
         }
     }
 
@@ -251,13 +257,16 @@ void get_fw(serial_port& sp, std::vector<dwm_version> &version)
     std::cout << "dwm version" << std::endl;
     std::cout << "fw: " << version[0] << ", cfg: " << version[1] << ", hw: " << version[2] << std::endl;
 
+    //std::cout << "bytes avail: " << sp.bytes_available() << std::endl;
+    //sp.flush_port();
+    
 }   // end of get_fw
 
 //-----------------------------------------------------------------------------
 void get_pos(serial_port& sp, dwm_position &position, std::vector<anchor_pos> &anchor)
 {
-    uint8_t idx;
-    const uint64_t frame_size = 21;
+    uint32_t idx;
+    //const uint64_t frame_size = 21;
     uint8_t anchor_count = 0;
     
     uint64_t bytes_read = 0;
@@ -268,6 +277,8 @@ void get_pos(serial_port& sp, dwm_position &position, std::vector<anchor_pos> &a
 
     anchor.clear();
 
+    //std::cout << "bytes avail: " << sp.bytes_available() << std::endl;
+    
     bytes_written = sp.write_port(pkt);
 
     // read in the error code and check
@@ -276,7 +287,12 @@ void get_pos(serial_port& sp, dwm_position &position, std::vector<anchor_pos> &a
 
     if (err.error != 0)
     {
+        std::cout << "Bytes Expected: " << error_packet_size << ", Bytes Received: " << bytes_read << std::endl;
         std::cout << "Error: " << err << std::endl;
+        for(uint32_t idx=0; idx<packet_data.size(); ++idx)
+            std::cout << "0x" << num2str(packet_data[idx], "%02X") << " ";
+                
+        std::cout << std::endl;
         return;
     }
 
@@ -292,6 +308,7 @@ void get_pos(serial_port& sp, dwm_position &position, std::vector<anchor_pos> &a
     }
     else
     {
+        std::cout << "Bytes Expected: " << error_packet_size << ", Bytes Received: " << bytes_read << std::endl;
         std::cout << "Not enough bytes received to decode anchor position packet!" << std::endl;
         return;
     }
@@ -304,6 +321,15 @@ void get_pos(serial_port& sp, dwm_position &position, std::vector<anchor_pos> &a
         if(ap.valid)
             anchor.push_back(std::move(ap));
     }
+    
+    //sp.flush_port();
+    //std::cout << "bytes avail: " << sp.bytes_available() << std::endl;
+    
+    //bytes_read = sp.read_port(packet_data, 30);
+    //for(uint32_t idx=0; idx<packet_data.size(); ++idx)
+    //    std::cout << "0x" << num2str(packet_data[idx], "%02X") << " ";
+            
+    //std::cout << std::endl;    
 
 }   // end of get_pos
 
