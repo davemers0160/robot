@@ -52,7 +52,7 @@ int main(int argc, char** argv)
 
 #elif defined(__linux__)
     //struct termios options;
-    wait_time = 10;
+    wait_time = 5;
     std:string port_name = "/dev/ttyACM0";
 #endif
 
