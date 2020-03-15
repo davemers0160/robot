@@ -1,4 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
+//#define USE_ROS 1
 
 // C/C++ includes
 #include <cstdint>
@@ -15,13 +16,15 @@
 #include "win_serial_fcns.h"
 
 #elif defined(__linux__)
-//#include <string.h>  /* String function definitions */
-//#include <unistd.h>  /* UNIX standard function definitions */
-//#include <fcntl.h>   /* File control definitions */
-//#include <errno.h>   /* Error number definitions */
-//#include <termios.h> /* POSIX terminal control definitions */
 #include <sys/ioctl.h>
 #include "linux_serial_fcns.h"
+
+#if defined(USE_ROS)
+// ROS includes
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+#endif
+
 #endif
 
 // custom includes
@@ -33,6 +36,8 @@
 
 // Project includes
 #include "dwm.h"
+
+
 
 // -------------------------------GLOBALS--------------------------------------
 
@@ -54,6 +59,22 @@ int main(int argc, char** argv)
     //struct termios options;
     wait_time = 5;
     std:string port_name = "/dev/ttyACM0";
+	
+	
+	#if defined(USE_ROS)
+	// initialize the ros node
+	ros::init(argc, argv, "dwm");
+
+	// NodeHandle is the main access point to communications with the ROS system
+	ros::NodeHandle dwm_node;
+	
+	// setup the publisher to send out the 
+	ros::Publisher dwm_pub = dwm_node.advertise<std_msgs::String>("range", 1);
+
+	// the rate at which the message is published in Hz
+	ros::Rate loop_rate(1);
+	
+	#endif
 #endif
 
     //uint64_t bytes_read = 0;
@@ -79,29 +100,58 @@ int main(int argc, char** argv)
 
         std::cout << "tag " << tag_position << std::endl;
 
-        sleep_ms(2000);
-        std::cout << "bytes avail: " << sp.bytes_available() << std::endl;
+        sleep_ms(200);
+        //std::cout << "bytes avail: " << sp.bytes_available() << std::endl;
         for (idx = 0; idx < anchor.size(); ++idx)
         {
             std::cout << anchor[idx] << std::endl;
         }
 
-        jdx = 0;
-        while (1)
-        {
+
+#if defined(USE_ROS)
+		while (ros::ok())
+		{
+			std_msgs::String msg;
+			
+			std::string position_msg = "";
+			
             get_pos(sp, tag_position, anchor);
 
             for (idx = 0; idx < anchor.size(); ++idx)
             {
-                std::cout << "0x" << num2str<uint16_t>(anchor[idx].address, "%04X") << ":" << anchor[idx].range << ", ";
+				position_msg = position_msg + "0x" + num2str<uint16_t>(anchor[idx].address, "%04X:") + num2str<float>(anchor[idx].range, "%2.4f,");
             }
-            std::cout << std::endl;
+			
+			position_msg = position_msg.substr(0, position_msg.length()-2);			
+						
+			msg.data = position_msg;
+			
+			dwm_pub.publish(msg);
+
+			ros::spinOnce();
+
+			loop_rate.sleep();
+
+		}
+#else
+        while (1)
+        {
+			std::string position_msg = "";
+			
+            get_pos(sp, tag_position, anchor);
+
+            for (idx = 0; idx < anchor.size(); ++idx)
+            {
+				position_msg = position_msg + "0x" + num2str<uint16_t>(anchor[idx].address, "%04X:") + num2str<float>(anchor[idx].range, "%2.4f,");
+                //std::cout << "0x" << num2str<uint16_t>(anchor[idx].address, "%04X") << ":" << anchor[idx].range << ", ";
+            }
+			
+			position_msg = position_msg.substr(0, position_msg.length()-2);
+            std::cout << position_msg << std::endl;
             sleep_ms(100);
-            ++jdx;
         }
-
-
-
+#endif				
+		
         // close the port
         sp.close_port();
 
