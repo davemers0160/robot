@@ -21,6 +21,13 @@ cmake_minimum_required(VERSION 2.8.12)
 PROJECT(dwm_project)
 set(exe_name "dwm_ex")
 
+# if CMAKE_BUILD_TYPE is not specified, take 'Release' as default
+IF(NOT CMAKE_BUILD_TYPE)
+    SET(CMAKE_BUILD_TYPE Release)
+ENDIF(NOT CMAKE_BUILD_TYPE)
+
+set(USE_ROS false)
+
 # This looks for an environment variable called PLATFORM.  This can be used to point
 # cmake to various locations based on the individual machines that the code is complied on
 set(PLATFORM "$ENV{PLATFORM}" CACHE INTERNAL "Copied from environment variable")
@@ -34,7 +41,7 @@ elseif(${PLATFORM} STREQUAL "MainGear")
 elseif(${PLATFORM} STREQUAL "DLIB_DOCKER")
     set(COMMON_ROOT "~/Projects/Common")
 elseif(${PLATFORM} STREQUAL "JAX")
-    set(COMMON_ROOT "~/Projects/Common")	
+    set(COMMON_ROOT "~/Projects/Common")    
 elseif()
     set(COMMON_ROOT "~/Projects/Common")
 endif()
@@ -46,85 +53,87 @@ include(${COMMON_ROOT}/cmake_utils/use_sse_avx.cmake)
 set(project_includes "include" "${COMMON_ROOT}/include")
 
 if(UNIX)
-if(false)
+if(USE_ROS)
 
-	find_package(catkin COMPONENTS
-		#image_transport
-		roscpp
-		rosconsole
-		sensor_msgs
-		#stereo_msgs
-		std_msgs
-		dynamic_reconfigure
-		#tf2_ros
-		#nodelet
-		#tf2_geometry_msgs
-		message_generation
-		diagnostic_updater
-		roslint
-	)
+    find_package(catkin COMPONENTS
+        #image_transport
+        roscpp
+        rosconsole
+        std_msgs
+        sensor_msgs
+        #stereo_msgs
+        dynamic_reconfigure
+        #tf2_ros
+        #nodelet
+        #tf2_geometry_msgs
+        #diagnostic_updater
+        #roslint
+        message_generation
+    )
 
-	#checkPackage("image_transport" "")
-	checkPackage("roscpp" "")
-	checkPackage("rosconsole" "")
-	checkPackage("sensor_msgs" "")
-	#checkPackage("stereo_msgs" "")
-	checkPackage("std_msgs" "")
-	checkPackage("dynamic_reconfigure" "")
-	#checkPackage("tf2_ros" "")
-	#checkPackage("nodelet" "")
-	#checkPackage("tf2_geometry_msgs" "")
-	checkPackage("message_generation" "")
+    #checkPackage("image_transport" "")
+    #checkPackage("roscpp" "")
+    #checkPackage("rosconsole" "")
+    #checkPackage("std_msgs" "")
+    #checkPackage("sensor_msgs" "")
+    #checkPackage("stereo_msgs" "")
+    #checkPackage("dynamic_reconfigure" "")
+    #checkPackage("tf2_ros" "")
+    #checkPackage("nodelet" "")
+    #checkPackage("tf2_geometry_msgs" "")
+    #checkPackage("message_generation" "")
 
-	add_message_files( FILES
-	#    object_stamped.msg
-	#    objects.msg
-		)
+    add_message_files( FILES
+    #    object_stamped.msg
+    #    objects.msg
+        )
 
-	add_service_files( FILES
-	#    set_pose.srv
-	#    reset_odometry.srv
-	#    reset_tracking.srv
-	#    start_svo_recording.srv
-	#    stop_svo_recording.srv
-	#    start_remote_stream.srv
-	#    stop_remote_stream.srv
-	#    set_led_status.srv
-	#    toggle_led.srv
-	#    start_3d_mapping.srv
-	#    stop_3d_mapping.srv
-	#    start_object_detection.srv
-	#    stop_object_detection.srv
-		)
+    add_service_files( FILES
+    #    set_pose.srv
+    #    reset_odometry.srv
+    #    reset_tracking.srv
+    #    start_svo_recording.srv
+    #    stop_svo_recording.srv
+    #    start_remote_stream.srv
+    #    stop_remote_stream.srv
+    #    set_led_status.srv
+    #    toggle_led.srv
+    #    start_3d_mapping.srv
+    #    stop_3d_mapping.srv
+    #    start_object_detection.srv
+    #    stop_object_detection.srv
+        )
 
-	generate_messages(DEPENDENCIES
-		std_msgs
-	#    geometry_msgs
-		)
+    #generate_messages(DEPENDENCIES
+    #    std_msgs
+    #    sensor_msgs
+    #    geometry_msgs
+    #    )
 
-	generate_dynamic_reconfigure_options(
-	#  cfg/Zed.cfg
-		)
+    #generate_dynamic_reconfigure_options(
+    #  cfg/Zed.cfg
+    #    )
 
-	catkin_package(
-		CATKIN_DEPENDS
-		roscpp
-		rosconsole
-		sensor_msgs
-	#    stereo_msgs
-	#    image_transport
-		dynamic_reconfigure
-	#    tf2_ros
-	#    tf2_geometry_msgs
-		message_runtime
-		)
+    catkin_package(
+        CATKIN_DEPENDS
+        roscpp
+        rosconsole
+        std_msgs
+        sensor_msgs
+    #    stereo_msgs
+    #    image_transport
+    #    dynamic_reconfigure
+    #    tf2_ros
+    #    tf2_geometry_msgs
+    #    message_runtime
+        )
 
-	set(project_includes ${project_includes} ${catkin_INCLUDE_DIRS})
+    set(project_includes ${project_includes} ${catkin_INCLUDE_DIRS})
 
-	add_definitions(-std=c++11)
-	set(LINK_LIBRARIES ${catkin_LIBRARIES})
-	
-endif()	
+    add_definitions(-std=c++11)
+    set(LINK_LIBRARIES ${catkin_LIBRARIES})
+    
+endif()    
 endif()
 
 
@@ -153,8 +162,8 @@ message("--------------------------------------------------------")
 message(" ")
 
 if(WIN32)
-	include_directories(${project_includes})
-	add_executable(${exe_name} ${SOURCES})
+    include_directories(${project_includes})
+    add_executable(${exe_name} ${SOURCES})
 
 
     message("MSVC Version: " ${MSVC_VERSION})
@@ -164,38 +173,38 @@ if(WIN32)
         target_compile_options(${exe_name} PRIVATE "/MP")
         set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${exe_name})
     endif()
-	
+    
 elseif(UNIX)
 if(false)
-	add_library(${exe_name} ${SOURCES})
-	target_link_libraries(${exe_name} ${LINK_LIBRARIES})
-	add_dependencies(${exe_name} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
-	
-	roslint_cpp()
-	
-	
-	install(TARGETS
-		${exe_name}
-		ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-		LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-		RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-		)
-		
-	#install(FILES
-	#	nodelet_plugins.xml
-	#	DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-	#)
-	
-	install(DIRECTORY
-		launch
-		urdf
-		params
-		DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-		)
-		
+    add_library(${exe_name} ${SOURCES})
+    target_link_libraries(${exe_name} ${LINK_LIBRARIES})
+    add_dependencies(${exe_name} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
+    
+    roslint_cpp()
+    
+    
+    install(TARGETS
+        ${exe_name}
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        )
+        
+    #install(FILES
+    #    nodelet_plugins.xml
+    #    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+    #)
+    
+    install(DIRECTORY
+        launch
+        urdf
+        params
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+        )
+        
 else()
-	include_directories(${project_includes})
-	add_executable(${exe_name} ${SOURCES})
+    include_directories(${project_includes})
+    add_executable(${exe_name} ${SOURCES})
 endif()  
 
 endif()
