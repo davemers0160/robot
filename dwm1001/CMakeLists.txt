@@ -121,10 +121,7 @@ if(USE_ROS)
         std_msgs
         sensor_msgs
     #    stereo_msgs
-    #    image_transport
     #    dynamic_reconfigure
-    #    tf2_ros
-    #    tf2_geometry_msgs
     #    message_runtime
         )
 
