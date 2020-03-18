@@ -4,7 +4,7 @@ import math
 import rospy
 import message_filters
 from sensor_msgs.msg import Image, CameraInfo
-from std_msgs.msg import String, Float32MultiArray, RegionOfInterest
+from std_msgs.msg import String, Float32MultiArray
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
@@ -65,8 +65,8 @@ class RosTensorFlow():
         self._box_pub = rospy.Publisher('obj_det/boxes', String, queue_size=1)
         self._razel_str = rospy.Publisher('obj_det/target_razel', String, queue_size=1)
         #self._razel = rospy.Publisher('obj_det/target_razel_f', Float32MultiArray, queue_size=1)
-        self.bp_roi_pub = rospy.Publisher("obj_det/roi_backpack", RegionOfInterest, queue_size = 1)
-        self.box_roi_pub = rospy.Publisher("obj_det/roi_box", RegionOfInterest, queue_size = 1)
+        #self.bp_roi_pub = rospy.Publisher("obj_det/roi_backpack", RegionOfInterest, queue_size = 1)
+        #self.box_roi_pub = rospy.Publisher("obj_det/roi_box", RegionOfInterest, queue_size = 1)
 
         #self.min_score = rospy.get_param('~min_score', 0.5)
         #self.use_top_k = rospy.get_param('~use_top_k', 5)
@@ -123,19 +123,19 @@ class RosTensorFlow():
                     az = self.h_res*(det_x - int(self.img_w/2.0))
                     el = self.v_res*(int(self.img_h/2.0) - det_y)
                     #target_string = target_string + "{" + "{},{},{}".format(avg_range, az, el) + "},"
-                    target_string = target_string + "{" + self.category_index[classes[idx]]['name']).lower() + ",{},{},{}".format(avg_range, az, el) + "},"
+                    target_string = target_string + "{" + (self.category_index[classes[idx]]['name']).lower() + ",{},{},{}".format(avg_range, az, el) + "},"
                     #razel.append([avg_range, az, el])
-                    bp_roi.x_offset = int(max(0, x_min))
-                    bp_roi.y_offset = int(max(0, y_min))
-                    bp_roi.width = int(x_max - x_min)
-                    bp_roi.height = int(y_max - y_min)
-                    self.bp_roi_pub.publish(bp_roi)
+                    #bp_roi.x_offset = int(max(0, x_min))
+                    #bp_roi.y_offset = int(max(0, y_min))
+                    #bp_roi.width = int(x_max - x_min)
+                    #bp_roi.height = int(y_max - y_min)
+                    #self.bp_roi_pub.publish(bp_roi)
                     #print("Range: {}".format(avg_range))
                     #print("Az: {}".format(az))
                     #print("El: {}".format(el))
 
-                    
-                if((self.category_index[classes[idx]]['name']).lower() == "box"):                    
+
+                if((self.category_index[classes[idx]]['name']).lower() == "box"):
                     bp_image = depth_img[y_min:y_max, x_min:x_max]
                     avg_range = np.nanmean(bp_image)
                     det_x = int(x_min + (x_max-x_min)/2.0)
@@ -143,14 +143,14 @@ class RosTensorFlow():
                     az = self.h_res*(det_x - int(self.img_w/2.0))
                     el = self.v_res*(int(self.img_h/2.0) - det_y)
                     #target_string = target_string + "{" + "{},{},{}".format(avg_range, az, el) + "},"
-                    target_string = target_string + "{" + self.category_index[classes[idx]]['name']).lower() + ",{},{},{}".format(avg_range, az, el) + "},"
+                    target_string = target_string + "{" + (self.category_index[classes[idx]]['name']).lower() + ",{},{},{}".format(avg_range, az, el) + "},"
                     #razel.append([avg_range, az, el])
-                    box_roi.x_offset = int(max(0, x_min))
-                    box_roi.y_offset = int(max(0, y_min))
-                    box_roi.width = int(x_max - x_min)
-                    box_roi.height = int(y_max - y_min)
-                    self.box_roi_pub.publish(box_roi)
-                   
+                    #box_roi.x_offset = int(max(0, x_min))
+                    #box_roi.y_offset = int(max(0, y_min))
+                    #box_roi.width = int(x_max - x_min)
+                    #box_roi.height = int(y_max - y_min)
+                    #self.box_roi_pub.publish(box_roi)
+
 
         target_string = target_string[:-1]
         self._razel_str.publish(target_string)
