@@ -26,15 +26,13 @@ IF(NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE Release)
 ENDIF(NOT CMAKE_BUILD_TYPE)
 
+# use this option to turn compilation with ROS off for Windows and non-ROS linux testing
 option(USE_ROS "Compile the program with ROS" ON)
-#set(USE_ROS true)
 
 # This looks for an environment variable called PLATFORM.  This can be used to point
 # cmake to various locations based on the individual machines that the code is complied on
 set(PLATFORM "$ENV{PLATFORM}" CACHE INTERNAL "Copied from environment variable")
 message("Platform: " ${PLATFORM})
-
-set(HOME "$ENV{HOME}" CACHE INTERNAL "Copied from environment variable")
 
 if(${PLATFORM} STREQUAL "Laptop")
     set(COMMON_ROOT "D:/Common")
@@ -52,99 +50,99 @@ endif()
 include(${COMMON_ROOT}/cmake_utils/use_cpp_11.cmake)
 include(${COMMON_ROOT}/cmake_utils/use_sse_avx.cmake)
 
-
 set(project_includes "include" "${COMMON_ROOT}/include")
 
+if (${USE_ROS})
+    message("")
+    message("Compiling with ROS!")    
+    list(APPEND active_preprocessor_switches "-DUSE_ROS")
+
+endif()
+
 if(UNIX)
-if(USE_ROS)
+    if(USE_ROS)
 
-    message("")
-    message("Compiling with ROS!")
-    message("")
-
-    find_package(catkin COMPONENTS
-        roscpp
-        rosconsole
-        std_msgs
-        sensor_msgs
-        dynamic_reconfigure
-        roslint
-        message_generation
-        #stereo_msgs
-        #tf2_ros
-        #nodelet
-        #tf2_geometry_msgs
-        #diagnostic_updater
-    )
-
-    #checkPackage("image_transport" "")
-    #checkPackage("roscpp" "")
-    #checkPackage("rosconsole" "")
-    #checkPackage("std_msgs" "")
-    #checkPackage("sensor_msgs" "")
-    #checkPackage("stereo_msgs" "")
-    #checkPackage("dynamic_reconfigure" "")
-    #checkPackage("tf2_ros" "")
-    #checkPackage("nodelet" "")
-    #checkPackage("tf2_geometry_msgs" "")
-    #checkPackage("message_generation" "")
-
-#    add_message_files( FILES
-    #    object_stamped.msg
-    #    objects.msg
-#        )
-
-#    add_service_files( FILES
-    #    set_pose.srv
-    #    reset_odometry.srv
-    #    reset_tracking.srv
-    #    start_svo_recording.srv
-    #    stop_svo_recording.srv
-    #    start_remote_stream.srv
-    #    stop_remote_stream.srv
-    #    set_led_status.srv
-    #    toggle_led.srv
-    #    start_3d_mapping.srv
-    #    stop_3d_mapping.srv
-    #    start_object_detection.srv
-    #    stop_object_detection.srv
-#        )
-
-    #generate_messages(DEPENDENCIES
-    #    std_msgs
-    #    sensor_msgs
-    #    geometry_msgs
-    #    )
-
-    #generate_dynamic_reconfigure_options(
-    #  cfg/Zed.cfg
-    #    )
-
-    catkin_package(
-        CATKIN_DEPENDS
-        roscpp
-        rosconsole
-        std_msgs
-        sensor_msgs
-        dynamic_reconfigure
-    #    stereo_msgs
-    #    message_runtime
+        find_package(catkin COMPONENTS
+            roscpp
+            rosconsole
+            std_msgs
+            sensor_msgs
+            dynamic_reconfigure
+            roslint
+            message_generation
+            #stereo_msgs
+            #tf2_ros
+            #nodelet
+            #tf2_geometry_msgs
+            #diagnostic_updater
         )
 
-    set(project_includes ${project_includes} ${catkin_INCLUDE_DIRS})
+        #checkPackage("image_transport" "")
+        #checkPackage("roscpp" "")
+        #checkPackage("rosconsole" "")
+        #checkPackage("std_msgs" "")
+        #checkPackage("sensor_msgs" "")
+        #checkPackage("stereo_msgs" "")
+        #checkPackage("dynamic_reconfigure" "")
+        #checkPackage("tf2_ros" "")
+        #checkPackage("nodelet" "")
+        #checkPackage("tf2_geometry_msgs" "")
+        #checkPackage("message_generation" "")
 
-    add_definitions(-std=c++11)
-    set(LINK_LIBRARIES ${catkin_LIBRARIES})
+    #    add_message_files( FILES
+        #    object_stamped.msg
+        #    objects.msg
+    #        )
 
+    #    add_service_files( FILES
+        #    set_pose.srv
+        #    reset_odometry.srv
+        #    reset_tracking.srv
+        #    start_svo_recording.srv
+        #    stop_svo_recording.srv
+        #    start_remote_stream.srv
+        #    stop_remote_stream.srv
+        #    set_led_status.srv
+        #    toggle_led.srv
+        #    start_3d_mapping.srv
+        #    stop_3d_mapping.srv
+        #    start_object_detection.srv
+        #    stop_object_detection.srv
+    #        )
+
+        #generate_messages(DEPENDENCIES
+        #    std_msgs
+        #    sensor_msgs
+        #    geometry_msgs
+        #    )
+
+        #generate_dynamic_reconfigure_options(
+        #  cfg/Zed.cfg
+        #    )
+
+        catkin_package(
+            CATKIN_DEPENDS
+            roscpp
+            rosconsole
+            std_msgs
+            sensor_msgs
+            dynamic_reconfigure
+        #    stereo_msgs
+        #    message_runtime
+            )
+
+        set(project_includes ${project_includes} ${catkin_INCLUDE_DIRS})
+
+        add_definitions(-std=c++11)
+        set(LINK_LIBRARIES ${catkin_LIBRARIES})
+
+    endif()
 endif()
-endif()
-
 
 # look for any *.c and *.cpp files
 file(GLOB SOURCES "src/*.c*"
     "${COMMON_ROOT}/src/*.cpp"
     )
-
 
 message(" ")
 message("--------------------------------------------------------")
@@ -153,7 +151,6 @@ foreach(S ${SOURCES})
     message("  " ${S})
 endforeach()
 message("--------------------------------------------------------")
-message(" ")
 
 message(" ")
 message("--------------------------------------------------------")
@@ -162,7 +159,16 @@ foreach(S ${project_includes})
     message("  " ${S})
 endforeach()
 message("--------------------------------------------------------")
+
 message(" ")
+message("--------------------------------------------------------")
+message("Preprocessor Switches: ")
+foreach(S ${active_preprocessor_switches})
+message("  " ${S})
+endforeach()
+message("--------------------------------------------------------")
+message(" ")
+
 
 if(WIN32)
     include_directories(${project_includes})
@@ -172,7 +178,7 @@ if(WIN32)
     # uncomment for MSVC and cmake greater than 3.6.0
     set(default_build_type "Release")
     if(MSVC AND (${CMAKE_VERSION} VERSION_GREATER "3.6.0"))
-        target_compile_options(${exe_name} PRIVATE "/MP")
+        target_compile_options(${exe_name} PRIVATE "/MP" ${active_preprocessor_switches})
         set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${exe_name})
     endif()
 
@@ -185,6 +191,7 @@ if(USE_ROS)
     add_executable(${exe_name} ${SOURCES})
     target_link_libraries(${exe_name} ${LINK_LIBRARIES})
     add_dependencies(${exe_name} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
+    target_compile_options(${exe_name} PRIVATE ${active_preprocessor_switches})
 
     roslint_cpp()
 

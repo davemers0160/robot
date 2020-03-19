@@ -1,5 +1,4 @@
 #define _CRT_SECURE_NO_WARNINGS
-#define USE_ROS 1
 
 // C/C++ includes
 #include <cstdint>
@@ -59,7 +58,7 @@ int main(int argc, char** argv)
     std:string port_name = "/dev/ttyACM0";
     
     
-    #if defined(USE_ROS)
+#if defined(USE_ROS)
     // initialize the ros node
     ros::init(argc, argv, "dwm");
 
@@ -72,17 +71,14 @@ int main(int argc, char** argv)
     // the rate at which the message is published in Hz
     ros::Rate loop_rate(1);
     
-    #endif
 #endif
 
-    //uint64_t bytes_read = 0;
-    //uint64_t bytes_written = 0;
+#endif
 
     // dwm variables
     std::vector<dwm_version> version;
     std::vector<anchor_pos> anchor;
     dwm_position tag_position;
-
 
     try{
 
@@ -104,7 +100,6 @@ int main(int argc, char** argv)
         {
             std::cout << anchor[idx] << std::endl;
         }
-
 
 #if defined(USE_ROS)
         while (ros::ok())
@@ -149,8 +144,6 @@ int main(int argc, char** argv)
             std::cout << position_msg << std::endl;
             sleep_ms(100);
         }
-
-
 
 #endif                
         
