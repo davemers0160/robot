@@ -26,16 +26,15 @@ IF(NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE Release)
 ENDIF(NOT CMAKE_BUILD_TYPE)
 
-set(USE_ROS true)
+option(USE_ROS "Compile the program with ROS" ON)
+#set(USE_ROS true)
 
 # This looks for an environment variable called PLATFORM.  This can be used to point
 # cmake to various locations based on the individual machines that the code is complied on
 set(PLATFORM "$ENV{PLATFORM}" CACHE INTERNAL "Copied from environment variable")
 message("Platform: " ${PLATFORM})
 
-
 set(HOME "$ENV{HOME}" CACHE INTERNAL "Copied from environment variable")
-
 
 if(${PLATFORM} STREQUAL "Laptop")
     set(COMMON_ROOT "D:/Common")
@@ -60,19 +59,18 @@ if(UNIX)
 if(USE_ROS)
 
     find_package(catkin COMPONENTS
-        #image_transport
         roscpp
         rosconsole
         std_msgs
         sensor_msgs
-        #stereo_msgs
         dynamic_reconfigure
+        roslint
+        message_generation
+        #stereo_msgs
         #tf2_ros
         #nodelet
         #tf2_geometry_msgs
         #diagnostic_updater
-        roslint
-        message_generation
     )
 
     #checkPackage("image_transport" "")
@@ -124,8 +122,8 @@ if(USE_ROS)
         rosconsole
         std_msgs
         sensor_msgs
+        dynamic_reconfigure
     #    stereo_msgs
-    #    dynamic_reconfigure
     #    message_runtime
         )
 
@@ -166,7 +164,6 @@ if(WIN32)
     include_directories(${project_includes})
     add_executable(${exe_name} ${SOURCES})
 
-
     message("MSVC Version: " ${MSVC_VERSION})
     # uncomment for MSVC and cmake greater than 3.6.0
     set(default_build_type "Release")
@@ -176,6 +173,7 @@ if(WIN32)
     endif()
 
 elseif(UNIX)
+
 if(USE_ROS)
     include_directories(${project_includes})
 
@@ -211,6 +209,7 @@ if(USE_ROS)
 else()
     include_directories(${project_includes})
     add_executable(${exe_name} ${SOURCES})
+    
 endif()
 
 endif()
