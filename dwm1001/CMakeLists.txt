@@ -47,7 +47,7 @@ elseif(${PLATFORM} STREQUAL "DLIB_DOCKER")
 elseif(${PLATFORM} STREQUAL "JAX")
     set(COMMON_ROOT "~/Projects/Common")    
 else()
-    set(COMMON_ROOT "${HOME}/Projects/Common")
+    set(COMMON_ROOT "~/Projects/Common")
 endif()
 
 include(${COMMON_ROOT}/cmake_utils/use_cpp_11.cmake)
