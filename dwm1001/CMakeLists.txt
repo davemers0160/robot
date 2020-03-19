@@ -18,7 +18,7 @@
 
 cmake_minimum_required(VERSION 2.8.12)
 
-PROJECT(dwm_project)
+PROJECT(dwm_wrapper)
 set(exe_name "dwm_ex")
 
 # if CMAKE_BUILD_TYPE is not specified, take 'Release' as default
@@ -26,12 +26,16 @@ IF(NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE Release)
 ENDIF(NOT CMAKE_BUILD_TYPE)
 
-set(USE_ROS false)
+set(USE_ROS true)
 
 # This looks for an environment variable called PLATFORM.  This can be used to point
 # cmake to various locations based on the individual machines that the code is complied on
 set(PLATFORM "$ENV{PLATFORM}" CACHE INTERNAL "Copied from environment variable")
 message("Platform: " ${PLATFORM})
+
+
+set(HOME "$ENV{HOME}" CACHE INTERNAL "Copied from environment variable")
+
 
 if(${PLATFORM} STREQUAL "Laptop")
     set(COMMON_ROOT "D:/Common")
@@ -42,8 +46,8 @@ elseif(${PLATFORM} STREQUAL "DLIB_DOCKER")
     set(COMMON_ROOT "~/Projects/Common")
 elseif(${PLATFORM} STREQUAL "JAX")
     set(COMMON_ROOT "~/Projects/Common")    
-elseif()
-    set(COMMON_ROOT "~/Projects/Common")
+else()
+    set(COMMON_ROOT "${HOME}/Projects/Common")
 endif()
 
 include(${COMMON_ROOT}/cmake_utils/use_cpp_11.cmake)
@@ -67,7 +71,7 @@ if(USE_ROS)
         #nodelet
         #tf2_geometry_msgs
         #diagnostic_updater
-        #roslint
+        roslint
         message_generation
     )
 
@@ -83,12 +87,12 @@ if(USE_ROS)
     #checkPackage("tf2_geometry_msgs" "")
     #checkPackage("message_generation" "")
 
-    add_message_files( FILES
+#    add_message_files( FILES
     #    object_stamped.msg
     #    objects.msg
-        )
+#        )
 
-    add_service_files( FILES
+#    add_service_files( FILES
     #    set_pose.srv
     #    reset_odometry.srv
     #    reset_tracking.srv
@@ -102,7 +106,7 @@ if(USE_ROS)
     #    stop_3d_mapping.srv
     #    start_object_detection.srv
     #    stop_object_detection.srv
-        )
+#        )
 
     #generate_messages(DEPENDENCIES
     #    std_msgs
@@ -129,8 +133,8 @@ if(USE_ROS)
 
     add_definitions(-std=c++11)
     set(LINK_LIBRARIES ${catkin_LIBRARIES})
-    
-endif()    
+
+endif()
 endif()
 
 
@@ -170,39 +174,44 @@ if(WIN32)
         target_compile_options(${exe_name} PRIVATE "/MP")
         set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${exe_name})
     endif()
-    
+
 elseif(UNIX)
-if(false)
-    add_library(${exe_name} ${SOURCES})
+if(USE_ROS)
+    include_directories(${project_includes})
+
+    #add_library(${exe_name} ${SOURCES})
+    add_executable(${exe_name} ${SOURCES})
     target_link_libraries(${exe_name} ${LINK_LIBRARIES})
-    add_dependencies(${exe_name} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
-    
+    add_dependencies(${exe_name} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
+
     roslint_cpp()
-    
-    
+
+###############################################################################
+# INSTALL
+
     install(TARGETS
         ${exe_name}
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         )
-        
+
     #install(FILES
     #    nodelet_plugins.xml
     #    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
     #)
-    
+
     install(DIRECTORY
         launch
         urdf
         params
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         )
-        
+
 else()
     include_directories(${project_includes})
     add_executable(${exe_name} ${SOURCES})
-endif()  
+endif()
 
 endif()
 

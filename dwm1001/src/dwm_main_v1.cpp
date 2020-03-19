@@ -1,5 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
-//#define USE_ROS 1
+#define USE_ROS 1
 
 // C/C++ includes
 #include <cstdint>
@@ -134,6 +134,7 @@ int main(int argc, char** argv)
 
 		}
 #else
+
         while (1)
         {
 			std::string position_msg = "";
@@ -150,6 +151,9 @@ int main(int argc, char** argv)
             std::cout << position_msg << std::endl;
             sleep_ms(100);
         }
+
+
+
 #endif				
 		
         // close the port
