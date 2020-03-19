@@ -23,7 +23,7 @@
     <!--<arg name="cam_yaw"               default="0.0" />  Orientation respect to base frame (i.e. "base_link) -->
 
 
-    <node name="$(arg node_name)" pkg="dwm1001" type="dwm_ex" output="screen" />
+    <node name="$(arg node_name)" pkg="dwm_wrapper" type="dwm_ex" output="screen" />
     <!-- </node> -->
 
 

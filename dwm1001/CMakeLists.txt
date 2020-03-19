@@ -58,6 +58,10 @@ set(project_includes "include" "${COMMON_ROOT}/include")
 if(UNIX)
 if(USE_ROS)
 
+    message("")
+    message("Compiling with ROS!")
+    message("")
+
     find_package(catkin COMPONENTS
         roscpp
         rosconsole
