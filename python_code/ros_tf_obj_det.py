@@ -63,7 +63,8 @@ class RosTensorFlow():
 
         self._img_pub = rospy.Publisher('obj_det/image', Image, queue_size=1)
         self._box_pub = rospy.Publisher('obj_det/boxes', String, queue_size=1)
-        self._razel_str = rospy.Publisher('obj_det/target_razel', String, queue_size=1)
+        self._razel_str = rospy.Publisher('obj_det/target_razel_str', String, queue_size=1)
+        seld._razel_arr = rospy.Publisher('obj_det/target_razel', Float32MultiArray, queue_size=1)
         #self._razel = rospy.Publisher('obj_det/target_razel_f', Float32MultiArray, queue_size=1)
         #self.bp_roi_pub = rospy.Publisher("obj_det/roi_backpack", RegionOfInterest, queue_size = 1)
         #self.box_roi_pub = rospy.Publisher("obj_det/roi_box", RegionOfInterest, queue_size = 1)
@@ -103,8 +104,8 @@ class RosTensorFlow():
         box_string = ""
         target_string = ""
         razel = []
-        bp_roi = RegionOfInterest()
-        box_roi = RegionOfInterest()
+        #bp_roi = RegionOfInterest()
+        #box_roi = RegionOfInterest()
         
         for idx in range(num_detections):
             if scores[idx] >= min_score:
