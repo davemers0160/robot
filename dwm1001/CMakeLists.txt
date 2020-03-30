@@ -89,10 +89,11 @@ if(UNIX)
         #checkPackage("tf2_geometry_msgs" "")
         #checkPackage("message_generation" "")
 
-    #    add_message_files( FILES
-        #    object_stamped.msg
-        #    objects.msg
-    #        )
+        add_message_files( 
+            FILES
+            object_det.msg
+            object_det_list.msg
+            )
 
     #    add_service_files( FILES
         #    set_pose.srv
@@ -110,11 +111,11 @@ if(UNIX)
         #    stop_object_detection.srv
     #        )
 
-        #generate_messages(DEPENDENCIES
-        #    std_msgs
+        generate_messages(DEPENDENCIES
+            std_msgs
         #    sensor_msgs
         #    geometry_msgs
-        #    )
+            )
 
         #generate_dynamic_reconfigure_options(
         #  cfg/Zed.cfg
@@ -128,7 +129,7 @@ if(UNIX)
             sensor_msgs
             dynamic_reconfigure
         #    stereo_msgs
-        #    message_runtime
+            message_runtime
             )
 
         set(project_includes ${project_includes} ${catkin_INCLUDE_DIRS})
