@@ -5,6 +5,10 @@ import rospy
 import message_filters
 from sensor_msgs.msg import Image, CameraInfo
 from std_msgs.msg import String, Float32MultiArray
+# requires that the dwm_wrapper is compiled
+from dwm_wrapper.msg import object_det
+from dwm_wrapper.msg import object_det_list
+
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
@@ -104,8 +108,8 @@ class RosTensorFlow():
         box_string = ""
         target_string = ""
         razel = []
-        #bp_roi = RegionOfInterest()
-        #box_roi = RegionOfInterest()
+        
+        obl = object_det_list()
         
         for idx in range(num_detections):
             if scores[idx] >= min_score:
@@ -125,11 +129,14 @@ class RosTensorFlow():
                     el = self.v_res*(int(self.img_h/2.0) - det_y)
                     #target_string = target_string + "{" + "{},{},{}".format(avg_range, az, el) + "},"
                     target_string = target_string + "{" + (self.category_index[classes[idx]]['name']).lower() + ",{},{},{}".format(avg_range, az, el) + "},"
+                    ob = object_det()
+                    ob.label = "backpack"
+                    ob.range = avg_range
+                    ob.az = az
+                    ob.el = el
+                    obl.det.append(ob)
+                    
                     #razel.append([avg_range, az, el])
-                    #bp_roi.x_offset = int(max(0, x_min))
-                    #bp_roi.y_offset = int(max(0, y_min))
-                    #bp_roi.width = int(x_max - x_min)
-                    #bp_roi.height = int(y_max - y_min)
                     #self.bp_roi_pub.publish(bp_roi)
                     #print("Range: {}".format(avg_range))
                     #print("Az: {}".format(az))
@@ -145,17 +152,22 @@ class RosTensorFlow():
                     el = self.v_res*(int(self.img_h/2.0) - det_y)
                     #target_string = target_string + "{" + "{},{},{}".format(avg_range, az, el) + "},"
                     target_string = target_string + "{" + (self.category_index[classes[idx]]['name']).lower() + ",{},{},{}".format(avg_range, az, el) + "},"
+                    ob = object_det()
+                    ob.label = "box"
+                    ob.range = avg_range
+                    ob.az = az
+                    ob.el = el
+                    obl.det.append(ob)
+                    
                     #razel.append([avg_range, az, el])
-                    #box_roi.x_offset = int(max(0, x_min))
-                    #box_roi.y_offset = int(max(0, y_min))
-                    #box_roi.width = int(x_max - x_min)
-                    #box_roi.height = int(y_max - y_min)
                     #self.box_roi_pub.publish(box_roi)
 
 
         target_string = target_string[:-1]
         self._razel_str.publish(target_string)
-        #self._razel.publish(np.asarray(razel, dtype=numpy.float32))
+        
+        if(len(obl.det) > 0):
+            self._razel.publish(obl)
 
         # Visualization of the results of a detection.
         vis_util.visualize_boxes_and_labels_on_image_array(
