@@ -31,30 +31,33 @@ option(USE_ROS "Compile the program with ROS" ON)
 
 # This looks for an environment variable called PLATFORM.  This can be used to point
 # cmake to various locations based on the individual machines that the code is complied on
-set(PLATFORM "$ENV{PLATFORM}" CACHE INTERNAL "Copied from environment variable")
-message("Platform: " ${PLATFORM})
+#set(PLATFORM "$ENV{PLATFORM}" CACHE INTERNAL "Copied from environment variable")
+#message("Platform: " ${PLATFORM})
 
-if(${PLATFORM} STREQUAL "Laptop")
-    set(COMMON_ROOT "D:/Common")
-elseif(${PLATFORM} STREQUAL "MainGear")
-    set(_ECLIPSE_VERSION "3.8")
-    set(COMMON_ROOT "~/Projects/Common")
-elseif(${PLATFORM} STREQUAL "DLIB_DOCKER")
-    set(COMMON_ROOT "~/Projects/Common")
-elseif(${PLATFORM} STREQUAL "JAX")
-    set(COMMON_ROOT "~/Projects/Common")    
-else()
-    set(COMMON_ROOT "~/Projects/Common")
-endif()
+#if(${PLATFORM} STREQUAL "Laptop")
+#    set(COMMON_ROOT "D:/Common")
+#elseif(${PLATFORM} STREQUAL "MainGear")
+#    set(_ECLIPSE_VERSION "3.8")
+#    set(COMMON_ROOT "~/Projects/Common")
+#elseif(${PLATFORM} STREQUAL "DLIB_DOCKER")
+#    set(COMMON_ROOT "~/Projects/Common")
+#elseif(${PLATFORM} STREQUAL "JAX")
+#    set(COMMON_ROOT "~/Projects/Common")
+#else()
+#    set(COMMON_ROOT "~/Projects/Common")
+#endif()
 
-include(${COMMON_ROOT}/cmake_utils/use_cpp_11.cmake)
-include(${COMMON_ROOT}/cmake_utils/use_sse_avx.cmake)
+#include(${COMMON_ROOT}/cmake_utils/use_cpp_11.cmake)
+#include(${COMMON_ROOT}/cmake_utils/use_sse_avx.cmake)
 
-set(project_includes "include" "${COMMON_ROOT}/include")
+set(project_includes
+    "include"
+    #"${COMMON_ROOT}/include"
+    )
 
 if (${USE_ROS})
     message("")
-    message("Compiling with ROS!")    
+    message("Compiling with ROS!")
     list(APPEND active_preprocessor_switches "-DUSE_ROS")
 
 endif()
@@ -141,7 +144,7 @@ endif()
 
 # look for any *.c and *.cpp files
 file(GLOB SOURCES "src/*.c*"
-    "${COMMON_ROOT}/src/*.cpp"
+#    "${COMMON_ROOT}/src/*.cpp"
     )
 
 message(" ")
@@ -170,19 +173,19 @@ message("--------------------------------------------------------")
 message(" ")
 
 
-if(WIN32)
-    include_directories(${project_includes})
-    add_executable(${exe_name} ${SOURCES})
+#if(WIN32)
+#    include_directories(${project_includes})
+#    add_executable(${exe_name} ${SOURCES})
+#
+#    message("MSVC Version: " ${MSVC_VERSION})
+#    # uncomment for MSVC and cmake greater than 3.6.0
+#    set(default_build_type "Release")
+#    if(MSVC AND (${CMAKE_VERSION} VERSION_GREATER "3.6.0"))
+#        target_compile_options(${exe_name} PRIVATE "/MP" ${active_preprocessor_switches})
+#        set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${exe_name})
+#    endif()
 
-    message("MSVC Version: " ${MSVC_VERSION})
-    # uncomment for MSVC and cmake greater than 3.6.0
-    set(default_build_type "Release")
-    if(MSVC AND (${CMAKE_VERSION} VERSION_GREATER "3.6.0"))
-        target_compile_options(${exe_name} PRIVATE "/MP" ${active_preprocessor_switches})
-        set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${exe_name})
-    endif()
-
-elseif(UNIX)
+#elseif(UNIX)
 
 if(USE_ROS)
     include_directories(${project_includes})
@@ -219,10 +222,10 @@ if(USE_ROS)
 else()
     include_directories(${project_includes})
     add_executable(${exe_name} ${SOURCES})
-    
-endif()
 
 endif()
+
+#endif()
 
 message(" ")
 message(STATUS "Build Complete!")
