@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>zed_obj_det</name>
+  <version>1.0.0</version>
+  <description>
+  zed_obj_det is a ROS project to define the messages for getting the object detection messages.
+  </description>
+
+  <maintainer email="user@todo.todo">user</maintainer>
+  <license>MIT</license>
+
+  <url type="repository">https://github.com/robot/zed_obj_det</url>
+
+  <buildtool_depend>catkin</buildtool_depend>  
+  
+  <!-- <build_depend>roscpp</build_depend> -->
+  <!-- <build_depend>rosconsole</build_depend> -->
+  <build_depend>std_msgs</build_depend>
+  <!-- <build_depend>sensor_msgs</build_depend> -->
+  <!-- <build_depend>dynamic_reconfigure</build_depend> -->
+  
+  <!-- <build_depend>diagnostic_updater</build_depend>   -->
+  <build_depend>message_generation</build_depend>
+  <!-- <build_depend>roslint</build_depend> -->
+
+  <!-- <exec_depend>roscpp</exec_depend> -->
+  <!-- <exec_depend>rosconsole</exec_depend> -->
+  <exec_depend>std_msgs</exec_depend>
+  <!-- <exec_depend>dynamic_reconfigure</exec_depend> -->
+  <!-- <exec_depend>sensor_msgs</exec_depend> -->
+  <!-- <exec_depend>message_generation</exec_depend> -->
+  <exec_depend>message_runtime</exec_depend>
+
+</package>
