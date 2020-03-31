@@ -89,11 +89,11 @@ if(UNIX)
         #checkPackage("tf2_geometry_msgs" "")
         #checkPackage("message_generation" "")
 
-        add_message_files( 
-            FILES
-            object_det.msg
-            object_det_list.msg
-            )
+#        add_message_files( 
+#            FILES
+#            object_det.msg
+#            object_det_list.msg
+#            )
 
     #    add_service_files( FILES
         #    set_pose.srv

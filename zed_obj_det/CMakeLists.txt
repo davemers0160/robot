@@ -124,7 +124,7 @@ if(UNIX)
         catkin_package(
             CATKIN_DEPENDS
             #roscpp
-            rosconsole
+            #rosconsole
             std_msgs
             #sensor_msgs
             #dynamic_reconfigure
@@ -192,7 +192,7 @@ if(USE_ROS)
     #add_dependencies(${exe_name} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
     #target_compile_options(${exe_name} PRIVATE ${active_preprocessor_switches})
 
-    roslint_cpp()
+    #roslint_cpp()
 
 ###############################################################################
 # INSTALL
