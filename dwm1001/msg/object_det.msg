@@ -1,5 +1,3 @@
-Header header
-
 string label
 float32 range
 float32 az

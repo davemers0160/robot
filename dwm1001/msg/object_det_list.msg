@@ -1,2 +1,1 @@
-
 object_det[] det
