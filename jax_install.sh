@@ -39,7 +39,11 @@ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key C1CF6E31E6
 sudo apt-get update -y
 
 sudo apt-get install -y ros-melodic-desktop-full 
-sudo apt-get install -y python-rosinstall python-rosinstall-generator python-wstool python-rosdep
+sudo apt-get install -y python-rosdep python-rosinstall python-rosinstall-generator python-wstool
+
+sudo rosdep init
+sudo rosdep update
+echo "source /opt/$USER/melodic/setup.bash" >> /home/$USER/.bashrc
 
 export DEBIAN_FRONTEND=$current_deb
 
@@ -52,13 +56,6 @@ python get-pip.py
 pip install launchpadlib pandas Cython contextlib2 pillow lxml jupyter matplotlib utils --user
 pip install tensorflow-gpu==1.14 tensorflow_hub --user --ignore-installed
 
-
-## ----------------------------------------------------------------------------
-## setup ROS
-sudo rosdep init
-sudo rosdep update
-echo "source /opt/$USER/melodic/setup.bash" >> /home/$USER/.bashrc
-#mkdir /home/$USER/src
 
 
 ## ----------------------------------------------------------------------------
@@ -127,7 +124,7 @@ echo "source /home/\$USER/catkin_ws/devel/setup.bash" >> /home/$USER/.bashrc
 echo "export PLATFORM=JAX" >> /home/$USER/.bashrc
 
 
-
+echo "Installation complete!"
 
 
 
