@@ -1,5 +1,6 @@
 #!/bin/bash
 # Install Robot Operating System (ROS) on NVIDIA Jetson AGX Xavier
+# https://raw.githubusercontent.com/davemers0160/robot/master/jax_install.sh
 
 ## ----------------------------------------------------------------------------
 # add the main repos 
