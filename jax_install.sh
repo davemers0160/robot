@@ -11,8 +11,8 @@
 # save the file and reboot
 # check: cat /sys/module/usbcore/parameters/usbfs_memory_mb
 
-# gsettings set org.gnome.desktop.screensaver lock-enabled false
-# gsettings set org.gnome.desktop.session idle-delay 1800
+gsettings set org.gnome.desktop.screensaver lock-enabled false
+gsettings set org.gnome.desktop.session idle-delay 0
 
 ## ----------------------------------------------------------------------------
 # add the main repos 
@@ -47,7 +47,7 @@ current_deb=$DEBIAN_FRONTEND
 sudo ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
 export DEBIAN_FRONTEND=noninteractive
 sudo apt-get install -y tzdata
-dpkg-reconfigure --frontend noninteractive tzdata
+sudo dpkg-reconfigure --frontend noninteractive tzdata
 
 sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list' 
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
@@ -57,7 +57,8 @@ sudo apt-get install -y ros-melodic-desktop-full
 sudo apt-get install -y python-rosdep python-rosinstall python-rosinstall-generator python-wstool
 
 sudo rosdep init
-sudo rosdep update
+sudo rosdep fix-permissions
+rosdep update
 echo "source /opt/$USER/melodic/setup.bash" >> /home/$USER/.bashrc
 
 export DEBIAN_FRONTEND=$current_deb
