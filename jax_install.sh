@@ -67,15 +67,17 @@ export DEBIAN_FRONTEND=$current_deb
 curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
 python get-pip.py
 
-/home/$USER/.local/bin/pip install launchpadlib pandas Cython contextlib2 pillow lxml jupyter matplotlib utils --user
+sudo reboot
+
+pip install -U tensorflow_hub numpy launchpadlib pandas Cython contextlib2 pillow lxml jupyter matplotlib utils --user
 #/home/$USER/.local/bin/pip install tensorflow-gpu==1.14 tensorflow_hub --user --ignore-installed
 #wget https://developer.download.nvidia.com/compute/redist/jp/v411/tensorflow-gpu/
 
-sudo pip install --extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v411 tensorflow==1.13.0rc0+nv19.2
+pip install --extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v411 tensorflow==1.13.0rc0+nv19.2 --user
 
-wget https://developer.download.nvidia.com/compute/redist/jp/v411/tensorflow-gpu/tensorflow_gpu-1.13.0rc0+nv19.2-cp27-cp27mu-linux_aarch64.whl
-/home/$USER/.local/bin/pip install tensorflow_gpu-1.13.0rc0+nv19.2-cp27-cp27mu-linux_aarch64.whl --user
-/home/$USER/.local/bin/pip install tensorflow_hub --user
+#wget https://developer.download.nvidia.com/compute/redist/jp/v411/tensorflow-gpu/tensorflow_gpu-1.13.0rc0+nv19.2-cp27-cp27mu-linux_aarch64.whl
+#/home/$USER/.local/bin/pip install tensorflow_gpu-1.13.0rc0+nv19.2-cp27-cp27mu-linux_aarch64.whl --user
+#pip install tensorflow_hub --user
 
 
 ## ----------------------------------------------------------------------------
