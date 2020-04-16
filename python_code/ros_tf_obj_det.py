@@ -5,9 +5,9 @@ import rospy
 import message_filters
 from sensor_msgs.msg import Image, CameraInfo
 from std_msgs.msg import String, Float32MultiArray
-# requires that the dwm_wrapper is compiled
-from dwm_wrapper.msg import object_det
-from dwm_wrapper.msg import object_det_list
+# requires that the zed_obj_det wrapper is compiled
+from zed_obj_det.msg import object_det
+from zed_obj_det.msg import object_det_list
 
 from cv_bridge import CvBridge
 import cv2
@@ -26,21 +26,22 @@ from utils import visualization_utils as vis_util
 
 min_score = 0.5
 
-MODEL_PATH = '/home/ros/'
+home = os.path.expanduser("~")
+MODEL_PATH = home + '/'
 
 # MSCOCO
 MODEL_NAME = 'ssd_resnet50_v1_fpn'
-PATH_TO_LABELS = os.path.join('/home/ros/models/research/object_detection/data', 'mscoco_label_map.pbtxt')
+PATH_TO_LABELS = os.path.join(home, 'models/research/object_detection/data', 'mscoco_label_map.pbtxt')
 NUM_CLASSES = 90
 
 #Open Image
 #MODEL_NAME = 'ssd_mobilenet_v2_oid'
-#PATH_TO_LABELS = os.path.join('/home/ros/models/research/object_detection/data', 'oid_v4_label_map.pbtxt')
+#PATH_TO_LABELS = os.path.join(home, 'models/research/object_detection/data', 'oid_v4_label_map.pbtxt')
 #NUM_CLASSES = 600
 
 #Open Image
 #MODEL_NAME = 'faster_rcnn_inception_resnet_v2_oid'
-#PATH_TO_LABELS = os.path.join('/home/ros/models/research/object_detection/data', 'oid_v4_label_map.pbtxt')
+#PATH_TO_LABELS = os.path.join(home, 'models/research/object_detection/data', 'oid_v4_label_map.pbtxt')
 #NUM_CLASSES = 600
 
 PATH_TO_CKPT = MODEL_PATH + MODEL_NAME + '/frozen_inference_graph.pb'
@@ -68,10 +69,7 @@ class RosTensorFlow():
         self._img_pub = rospy.Publisher('obj_det/image', Image, queue_size=1)
         self._box_pub = rospy.Publisher('obj_det/boxes', String, queue_size=1)
         self._razel_str = rospy.Publisher('obj_det/target_razel_str', String, queue_size=1)
-        seld._razel_arr = rospy.Publisher('obj_det/target_razel', Float32MultiArray, queue_size=1)
-        #self._razel = rospy.Publisher('obj_det/target_razel_f', Float32MultiArray, queue_size=1)
-        #self.bp_roi_pub = rospy.Publisher("obj_det/roi_backpack", RegionOfInterest, queue_size = 1)
-        #self.box_roi_pub = rospy.Publisher("obj_det/roi_box", RegionOfInterest, queue_size = 1)
+        self._razel = rospy.Publisher('obj_det/target_razel', object_det_list, queue_size=1)
 
         #self.min_score = rospy.get_param('~min_score', 0.5)
         #self.use_top_k = rospy.get_param('~use_top_k', 5)
@@ -107,10 +105,10 @@ class RosTensorFlow():
 
         box_string = ""
         target_string = ""
-        razel = []
-        
+        #razel = []
+
         obl = object_det_list()
-        
+
         for idx in range(num_detections):
             if scores[idx] >= min_score:
                 x_min = int(math.floor(boxes[idx][1]*self.img_w))
@@ -120,7 +118,7 @@ class RosTensorFlow():
                 box_string = box_string + "{Class=" + self.category_index[classes[idx]]['name'] + "; xmin={}, ymin={}, xmax={}, ymax={}".format(x_min, y_min, x_max, y_max) + "},"
 
                 if((self.category_index[classes[idx]]['name']).lower() == "backpack"):
-                #if((self.category_index[classes[idx]]['name']).lower() == "chair"):
+                #if((self.category_index[classes[idx]]['name']).lower() == "mouse"):
                     bp_image = depth_img[y_min:y_max, x_min:x_max]
                     avg_range = np.nanmean(bp_image)
                     det_x = int(x_min + (x_max-x_min)/2.0)
@@ -135,9 +133,7 @@ class RosTensorFlow():
                     ob.az = az
                     ob.el = el
                     obl.det.append(ob)
-                    
-                    #razel.append([avg_range, az, el])
-                    #self.bp_roi_pub.publish(bp_roi)
+
                     #print("Range: {}".format(avg_range))
                     #print("Az: {}".format(az))
                     #print("El: {}".format(el))
@@ -158,16 +154,13 @@ class RosTensorFlow():
                     ob.az = az
                     ob.el = el
                     obl.det.append(ob)
-                    
-                    #razel.append([avg_range, az, el])
-                    #self.box_roi_pub.publish(box_roi)
 
 
-        target_string = target_string[:-1]
-        self._razel_str.publish(target_string)
-        
         if(len(obl.det) > 0):
+            target_string = target_string[:-1]
+            self._razel_str.publish(target_string)
             self._razel.publish(obl)
+
 
         # Visualization of the results of a detection.
         vis_util.visualize_boxes_and_labels_on_image_array(
