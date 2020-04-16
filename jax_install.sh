@@ -14,6 +14,9 @@
 gsettings set org.gnome.desktop.screensaver lock-enabled false
 gsettings set org.gnome.desktop.session idle-delay 0
 
+# set the power mode to 30W all cores
+sudo nvpmodel -m 3
+
 ## ----------------------------------------------------------------------------
 # add the main repos 
 sudo apt-add-repository universe
@@ -100,7 +103,7 @@ git clone https://github.com/davemers0160/Common.git
 
 # source /opt/ros/melodic/setup.bash
 cd /home/$USER/catkin_ws
-catkin_make -- -j4
+catkin_make -j6
 
 
 ## ----------------------------------------------------------------------------
