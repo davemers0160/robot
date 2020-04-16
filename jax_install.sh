@@ -11,7 +11,8 @@
 # save the file and reboot
 # check: cat /sys/module/usbcore/parameters/usbfs_memory_mb
 
-
+# gsettings set org.gnome.desktop.screensaver lock-enabled false
+# gsettings set org.gnome.desktop.session idle-delay 1800
 
 ## ----------------------------------------------------------------------------
 # add the main repos 
