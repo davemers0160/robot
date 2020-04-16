@@ -69,9 +69,8 @@ export DEBIAN_FRONTEND=$current_deb
 curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
 python get-pip.py
 
-pip install launchpadlib pandas Cython contextlib2 pillow lxml jupyter matplotlib utils --user
-pip install tensorflow-gpu==1.14 tensorflow_hub --user --ignore-installed
-
+/home/$USER/.local/bin/pip install launchpadlib pandas Cython contextlib2 pillow lxml jupyter matplotlib utils --user
+/home/$USER/.local/bin/pip install tensorflow-gpu==1.14 tensorflow_hub --user --ignore-installed
 
 
 ## ----------------------------------------------------------------------------
