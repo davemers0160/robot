@@ -107,7 +107,8 @@ cd /home/$USER
 git clone https://github.com/tensorflow/models /home/$USER/models
 
 cd /home/$USER/models/research
-wget -O protobuf.zip https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip
+#wget -O protobuf.zip https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip
+wget -O protobuf.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.7.0/protoc-3.7.0-linux-aarch_64.zip
 unzip protobuf.zip ./bin/protoc object_detection/protos/*.proto --python_out=.
 
 cd /home/$USER
