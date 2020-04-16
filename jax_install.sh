@@ -58,9 +58,11 @@ sudo rosdep init
 sudo rosdep fix-permissions
 rosdep update
 echo "source /opt/ros/melodic/setup.bash" >> /home/$USER/.bashrc
+echo "export PLATFORM=JAX" >> /home/$USER/.bashrc
 
 export DEBIAN_FRONTEND=$current_deb
 
+source /home/$USER/.bashrc
 
 ## ----------------------------------------------------------------------------
 ## Install some python packages
@@ -95,12 +97,10 @@ mkdir -p /home/$USER/Projects
 cd Projects
 git clone https://github.com/davemers0160/Common.git
     
-    
 
-# /bin/bash -c "source /opt/ros/melodic/setup.bash; cd /home/$USER/catkin_ws; catkin_make"
-source /opt/ros/melodic/setup.bash
+# source /opt/ros/melodic/setup.bash
 cd /home/$USER/catkin_ws
-catkin_make
+catkin_make -- -j4
 
 
 ## ----------------------------------------------------------------------------
@@ -130,21 +130,15 @@ mv faster_rcnn_inception_resnet_v2_atrous_oid_v4_2018_12_12 faster_rcnn_inceptio
 rm faster_rcnn_inception_resnet_v2_atrous_oid_v4_2018_12_12.tar.gz
 
 
-
-
 #mkdir tf_obj_det
 #cd tf_obj_det
 #wget https://raw.githubusercontent.com/davemers0160/robot/master/python_code/ros_tf_obj_det.py
-
-
-    
 
 ## ----------------------------------------------------------------------------
 ## put the everything in the right paths
 echo "export PYTHONPATH=\$PYTHONPATH:/home/\$USER/models:/home/\$USER/models/research:/home/\$USER/models/research/slim:/home/\$USER/models/research/object_detection" >> /home/$USER/.bashrc
 echo "PATH=\$PATH:/home/\$USER/.local/bin" >> /home/$USER/.bashrc
 echo "source /home/\$USER/catkin_ws/devel/setup.bash" >> /home/$USER/.bashrc
-echo "export PLATFORM=JAX" >> /home/$USER/.bashrc
 
 
 echo "Installation complete!"
