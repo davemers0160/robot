@@ -59,7 +59,7 @@ sudo apt-get install -y python-rosdep python-rosinstall python-rosinstall-genera
 sudo rosdep init
 sudo rosdep fix-permissions
 rosdep update
-echo "source /opt/$USER/melodic/setup.bash" >> /home/$USER/.bashrc
+echo "source /opt/ros/melodic/setup.bash" >> /home/$USER/.bashrc
 
 export DEBIAN_FRONTEND=$current_deb
 
