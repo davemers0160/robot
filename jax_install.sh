@@ -24,13 +24,11 @@ sudo apt-add-repository restricted
 sudo apt-get update -y
 sudo apt-get upgrade -y
 
-sudo apt-get install -y lsb-release wget less udev apt-transport-https nano cmake cmake-gui usbutils git build-essential && \
-     libusb-dev curl putty software-properties-common iputils-ping
-     
+sudo apt-get install -y lsb-release wget less udev apt-transport-https nano cmake cmake-gui usbutils git build-essential
+sudo apt-get install -y libusb-dev curl putty software-properties-common iputils-ping zip gfortran
+sudo apt-get install -y libhdf5-serial-dev hdf5-tools libhdf5-dev zlib1g-dev libjpeg8-dev liblapack-dev libblas-dev 
+
 #sudo apt-get install -y libqt5xml5 libxmu-dev libxi-dev libturbojpeg
-
-
-
 
 ## ----------------------------------------------------------------------------
 ## Get the ZED SDK - ZED_SDK_Tegra_JP43_v3.1.2.run
@@ -70,7 +68,11 @@ curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
 python get-pip.py
 
 /home/$USER/.local/bin/pip install launchpadlib pandas Cython contextlib2 pillow lxml jupyter matplotlib utils --user
-/home/$USER/.local/bin/pip install tensorflow-gpu==1.14 tensorflow_hub --user --ignore-installed
+#/home/$USER/.local/bin/pip install tensorflow-gpu==1.14 tensorflow_hub --user --ignore-installed
+#wget https://developer.download.nvidia.com/compute/redist/jp/v411/tensorflow-gpu/
+wget https://developer.download.nvidia.com/compute/redist/jp/v411/tensorflow-gpu/tensorflow_gpu-1.13.0rc0+nv19.2-cp27-cp27mu-linux_aarch64.whl
+/home/$USER/.local/bin/pip install tensorflow_gpu-1.13.0rc0+nv19.2-cp27-cp27mu-linux_aarch64.whl --user
+/home/$USER/.local/bin/pip install tensorflow_hub --user
 
 
 ## ----------------------------------------------------------------------------
