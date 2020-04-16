@@ -2,6 +2,17 @@
 # Install Robot Operating System (ROS) on NVIDIA Jetson AGX Xavier
 # https://raw.githubusercontent.com/davemers0160/robot/master/jax_install.sh
 
+#sudo nano /media/boot/boot.ini ---- find the line that contains the "bootargs" add the following to the end of the line within the quotes: usbcore.usbfs_memory_mb=1000
+#          /boot/extlinux/extlinux.conf ---- APPEND line: usbcore.usbfs_memory_mb=1000
+#          /sys/module/usbcore/parameters/usbfs_memory_mb
+#          /etc/default/grub file     ---- GRUB_CMDLINE_LINUX_DEFAULT="quiet splash usbcore.usbfs_memory_mb=1000"
+#
+#
+# save the file and reboot
+# check: cat /sys/module/usbcore/parameters/usbfs_memory_mb
+
+
+
 ## ----------------------------------------------------------------------------
 # add the main repos 
 sudo apt-add-repository universe
@@ -16,6 +27,8 @@ sudo apt-get install -y lsb-release wget less udev apt-transport-https nano cmak
      libusb-dev curl putty software-properties-common iputils-ping
      
 #sudo apt-get install -y libqt5xml5 libxmu-dev libxi-dev libturbojpeg
+
+
 
 
 ## ----------------------------------------------------------------------------
