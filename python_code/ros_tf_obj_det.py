@@ -83,8 +83,11 @@ class RosTensorFlow():
         cv_image = self._cv_bridge.imgmsg_to_cv2(image_msg, "rgb8")
         depth_img = self._cv_bridge.imgmsg_to_cv2(depth_msg)
 
-        #img_height = cv_image.shape[0]
-        #img_width  = cv_image.shape[1]
+        cv_image = cv_image(120:500, 320:960, 0:2)
+        depth_img = depth_img(120:500, 320:960)
+
+        img_h = cv_image.shape[0]
+        img_w = cv_image.shape[1]
 
         # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
         image_np_expanded = np.expand_dims(cv_image, axis=0)
@@ -110,16 +113,15 @@ class RosTensorFlow():
 
         box_string = ""
         target_string = ""
-        #razel = []
 
         obl = object_det_list()
 
         for idx in range(num_detections):
             if scores[idx] >= min_score:
-                x_min = int(math.floor(boxes[idx][1]*self.img_w))
-                y_min = int(math.floor(boxes[idx][0]*self.img_h))
-                x_max = int(math.ceil(boxes[idx][3]*self.img_w))
-                y_max = int(math.ceil(boxes[idx][2]*self.img_h))
+                x_min = int(math.floor(boxes[idx][1]*img_w))
+                y_min = int(math.floor(boxes[idx][0]*img_h))
+                x_max = int(math.ceil(boxes[idx][3]*img_w))
+                y_max = int(math.ceil(boxes[idx][2]*img_h))
                 box_string = box_string + "{Class=" + self.category_index[classes[idx]]['name'] + "; xmin={}, ymin={}, xmax={}, ymax={}".format(x_min, y_min, x_max, y_max) + "},"
 
                 if((self.category_index[classes[idx]]['name']).lower() == "backpack"):
@@ -128,8 +130,8 @@ class RosTensorFlow():
                     avg_range = np.nanmean(bp_image)
                     det_x = int(x_min + (x_max-x_min)/2.0)
                     det_y = int(y_min + (y_max-y_min)/2.0)
-                    az = self.h_res*(det_x - int(self.img_w/2.0))
-                    el = self.v_res*(int(self.img_h/2.0) - det_y)
+                    az = self.h_res*(det_x - int(img_w/2.0))
+                    el = self.v_res*(int(img_h/2.0) - det_y)
                     #target_string = target_string + "{" + "{},{},{}".format(avg_range, az, el) + "},"
                     target_string = target_string + "{" + (self.category_index[classes[idx]]['name']).lower() + ",{},{},{}".format(avg_range, az, el) + "},"
                     ob = object_det()
@@ -149,8 +151,8 @@ class RosTensorFlow():
                     avg_range = np.nanmean(bp_image)
                     det_x = int(x_min + (x_max-x_min)/2.0)
                     det_y = int(y_min + (y_max-y_min)/2.0)
-                    az = self.h_res*(det_x - int(self.img_w/2.0))
-                    el = self.v_res*(int(self.img_h/2.0) - det_y)
+                    az = self.h_res*(det_x - int(img_w/2.0))
+                    el = self.v_res*(int(img_h/2.0) - det_y)
                     #target_string = target_string + "{" + "{},{},{}".format(avg_range, az, el) + "},"
                     target_string = target_string + "{" + (self.category_index[classes[idx]]['name']).lower() + ",{},{},{}".format(avg_range, az, el) + "},"
                     ob = object_det()
