@@ -29,18 +29,23 @@ min_score = 0.5
 home = os.path.expanduser("~")
 MODEL_PATH = home + '/'
 
-# MSCOCO
+# MSCOCO - 76ms, 35 mAP
 MODEL_NAME = 'ssd_resnet50_v1_fpn'
 PATH_TO_LABELS = os.path.join(home, 'models/research/object_detection/data', 'mscoco_label_map.pbtxt')
 NUM_CLASSES = 90
 
-#Open Image
+#Open Image - 89ms, 36 mAP
 #MODEL_NAME = 'ssd_mobilenet_v2_oid'
 #PATH_TO_LABELS = os.path.join(home, 'models/research/object_detection/data', 'oid_v4_label_map.pbtxt')
 #NUM_CLASSES = 600
 
-#Open Image
+#Open Image - 727ms, 38 mAP
 #MODEL_NAME = 'faster_rcnn_inception_resnet_v2_oid'
+#PATH_TO_LABELS = os.path.join(home, 'models/research/object_detection/data', 'oid_v4_label_map.pbtxt')
+#NUM_CLASSES = 600
+
+#Open Image - 237ms, 38 mAP
+#MODEL_NAME = 'ssd_resnet101_v1_fpn_oid'
 #PATH_TO_LABELS = os.path.join(home, 'models/research/object_detection/data', 'oid_v4_label_map.pbtxt')
 #NUM_CLASSES = 600
 
