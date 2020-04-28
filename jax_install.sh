@@ -30,6 +30,7 @@ sudo apt-get upgrade -y
 sudo apt-get install -y lsb-release wget less udev apt-transport-https nano cmake cmake-gui usbutils git build-essential
 sudo apt-get install -y libusb-dev curl putty software-properties-common iputils-ping zip gfortran
 sudo apt-get install -y libhdf5-serial-dev hdf5-tools libhdf5-dev zlib1g-dev libjpeg8-dev liblapack-dev libblas-dev 
+sudo apt-get install -y libxml2-dev libxslt-dev
 
 #sudo apt-get install -y libqt5xml5 libxmu-dev libxi-dev libturbojpeg
 
@@ -38,6 +39,8 @@ sudo apt-get install -y libhdf5-serial-dev hdf5-tools libhdf5-dev zlib1g-dev lib
 wget https://stereolabs.sfo2.digitaloceanspaces.com/zedsdk/3.1/ZED_SDK_Tegra_JP43_v3.1.2.run
 chmod +x ZED_SDK_Tegra_JP43_v3.1.2.run
 sudo ./ZED_SDK_Tegra_JP43_v3.1.2.run silent
+sudo chmod 755 -R /usr/local/zed
+
 #rm -rf /var/lib/apt/lists/*
 sudo mkdir -p /root/Documents/ZED/
 sudo usermod -a -G video $USER
@@ -78,7 +81,7 @@ pip install -U tensorflow_hub numpy launchpadlib pandas Cython contextlib2 pillo
 #/home/$USER/.local/bin/pip install tensorflow-gpu==1.14 tensorflow_hub --user --ignore-installed
 #wget https://developer.download.nvidia.com/compute/redist/jp/v411/tensorflow-gpu/
 
-pip install --extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v411 tensorflow==1.13.0rc0+nv19.2 --user
+pip install --extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v411/ tensorflow-gpu==1.13.0rc0+nv19.2 --user
 
 #wget https://developer.download.nvidia.com/compute/redist/jp/v411/tensorflow-gpu/tensorflow_gpu-1.13.0rc0+nv19.2-cp27-cp27mu-linux_aarch64.whl
 #/home/$USER/.local/bin/pip install tensorflow_gpu-1.13.0rc0+nv19.2-cp27-cp27mu-linux_aarch64.whl --user
@@ -114,7 +117,8 @@ git clone https://github.com/tensorflow/models /home/$USER/models
 cd /home/$USER/models/research
 #wget -O protobuf.zip https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip
 wget -O protobuf.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.7.0/protoc-3.7.0-linux-aarch_64.zip
-unzip protobuf.zip ./bin/protoc object_detection/protos/*.proto --python_out=.
+unzip protobuf.zip 
+./bin/protoc object_detection/protos/*.proto --python_out=.
 
 cd /home/$USER
 wget http://download.tensorflow.org/models/object_detection/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
