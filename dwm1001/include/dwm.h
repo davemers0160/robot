@@ -177,8 +177,6 @@ typedef struct anchor_pos
         valid = true;
     }
 
-
-
     inline friend std::ostream& operator<< (
         std::ostream& out,
         const anchor_pos& item
