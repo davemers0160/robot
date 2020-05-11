@@ -34,10 +34,8 @@ echo "--------------------------------------------------------------------------
 echo $n "Select phase to run: $c"
 
 read -n 1 option
-
-echo $option
-
-
+echo
+#echo $option
 
 if  [ "$option" == "1" ]; then
 
@@ -171,8 +169,6 @@ echo "export PYTHONPATH=\$PYTHONPATH:/home/\$USER/models:/home/\$USER/models/res
 echo "PATH=\$PATH:/home/\$USER/.local/bin" >> /home/$USER/.bashrc
 echo "source /home/\$USER/catkin_ws/devel/setup.bash" >> /home/$USER/.bashrc
 
-exit 1
-
 fi
 
 echo "Installation complete!"
@@ -180,7 +176,7 @@ echo
 
 echo "Run the following command:"
 echo "sudo nano /boot/extlinux/extlinux.conf"
-echo "and add the following the the APPEND line: \" usbcore.usbfs_memory_mb=2000 \" "
+echo "- add the following the the APPEND line: \" usbcore.usbfs_memory_mb=2000 \" "
 
 
 
