@@ -51,7 +51,7 @@ elseif(${PLATFORM} STREQUAL "DLIB_DOCKER")
     option(DLIB_USE_CUDA "" OFF)
     include(~/dlib-19.19/dlib/cmake)
 elseif(${PLATFORM} STREQUAL "JAX")
-    set(COMMON_ROOT "~/Projects/Common")    
+    set(COMMON_ROOT "~/Projects/Common")
     option(DLIB_USE_CUDA "" OFF)
     include(~/dlib-19.19/dlib/cmake)
 else()
@@ -68,7 +68,7 @@ set(project_includes "include" "${COMMON_ROOT}/include")
 
 if (${USE_ROS})
     message("")
-    message("Compiling with ROS!")    
+    message("Compiling with ROS!")
     list(APPEND active_preprocessor_switches "-DUSE_ROS")
 
 endif()
@@ -80,13 +80,13 @@ if(UNIX)
             roscpp
             rosconsole
             std_msgs
-            nav_msgs
+#            nav_msgs
             sensor_msgs
-            geometry_msgs
+ #           geometry_msgs
             dynamic_reconfigure
             roslint
             message_generation
-            
+
             #stereo_msgs
             #tf2_ros
             #nodelet
@@ -106,13 +106,11 @@ if(UNIX)
         #checkPackage("tf2_geometry_msgs" "")
         #checkPackage("message_generation" "")
 
-        add_message_files( 
-            FILES
-            target_location.msg
-            target_location_list.msg
-#            object_det.msg
-#            object_det_list.msg
-            )
+#        add_message_files( 
+#            FILES
+#            target_location.msg
+#            target_location_list.msg
+#            )
 
     #    add_service_files( FILES
         #    set_pose.srv
@@ -132,14 +130,10 @@ if(UNIX)
 
         generate_messages(DEPENDENCIES
             std_msgs
-            nav_msgs
-        #    sensor_msgs
-            geometry_msgs
+#            nav_msgs
+#    	     sensor_msgs
+#            geometry_msgs
             )
-
-        #generate_dynamic_reconfigure_options(
-        #  cfg/Zed.cfg
-        #    )
 
         catkin_package(
             CATKIN_DEPENDS
@@ -147,10 +141,10 @@ if(UNIX)
             rosconsole
             std_msgs
             sensor_msgs
-            nav_msgs
-            geometry_msgs
+#            nav_msgs
+#            geometry_msgs
             dynamic_reconfigure
-        #    stereo_msgs
+#           stereo_msgs
             message_runtime
             )
 
