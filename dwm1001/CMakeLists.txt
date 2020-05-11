@@ -1,9 +1,9 @@
 # ----------------------------------------------------------------------------
-#  Root CMake file for DfD Graph Cuts
+#  Root CMake file for the DWM1001 Project
 # ----------------------------------------------------------------------------
 #
 # To perform an out of source build do the following on the command line:
-# 1. navigate to the root project directory (in this case DfD2)
+# 1. navigate to the root project directory
 # 2. mkdir build
 # 3. cd build
 # 4. depending on your system (windows/linux) type the following

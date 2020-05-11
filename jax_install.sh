@@ -116,9 +116,15 @@ pip install --extra-index-url https://developer.download.nvidia.com/compute/redi
 
 ## ----------------------------------------------------------------------------
 ## get the required ROS wrapper packages and the required support repos
+
+cd /home/$USER
 mkdir -p /home/$USER/catkin_ws
 mkdir -p /home/$USER/catkin_ws/src
 mkdir -p /home/$USER/Projects
+
+wget http://dlib.net/files/dlib-19.19.tar.bz2
+tar -xf dlib-19.19.tar.bz2
+rm dlib-19.19.tar.bz2
 
 git clone -b 'v3.0.3' --single-branch https://github.com/stereolabs/zed-ros-wrapper.git /home/$USER/catkin_ws/src/zed-ros-wrapper
 git clone https://github.com/davemers0160/robot.git /home/$USER/catkin_ws/src/robot
