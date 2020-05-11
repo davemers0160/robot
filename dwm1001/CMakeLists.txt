@@ -106,11 +106,11 @@ if(UNIX)
         #checkPackage("tf2_geometry_msgs" "")
         #checkPackage("message_generation" "")
 
-#        add_message_files( 
-#            FILES
-#            target_location.msg
-#            target_location_list.msg
-#            )
+        add_message_files(
+            FILES
+            target_location.msg
+            target_location_list.msg
+            )
 
     #    add_service_files( FILES
         #    set_pose.srv
