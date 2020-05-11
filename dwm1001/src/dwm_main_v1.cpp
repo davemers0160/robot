@@ -22,12 +22,12 @@
 #if defined(USE_ROS)
 // ROS includes
 #include "ros/ros.h"
-#include "nav_msgs/Odometry.h"
+//#include "nav_msgs/Odometry.h"
 #include "std_msgs/String.h"
-#include "geometry_msgs/Pose.h"
+//#include "geometry_msgs/Pose.h"
 
-#include "dwm_wrapper/target_location.h"
-#include "dwm_wrapper/target_location_list.h"
+//#include "dwm_wrapper/target_location.h"
+//#include "dwm_wrapper/target_location_list.h"
 
 #endif
 
@@ -47,7 +47,7 @@
 // -------------------------------GLOBALS--------------------------------------
 std::vector<float> current_location(2);
 
-
+/*
 #if defined(USE_ROS)
 void pose_callback(const nav_msgs::Odometry::ConstPtr& msg)
 {
@@ -62,7 +62,7 @@ void pose_callback(const nav_msgs::Odometry::ConstPtr& msg)
     ROS_INFO("Vel-> Linear: [%f], Angular: [%f]", msg->twist.twist.linear.x, msg->twist.twist.angular.z);
 }
 #endif
-
+*/
 
 // ----------------------------------------------------------------------------
 int main(int argc, char** argv)
@@ -108,7 +108,7 @@ int main(int argc, char** argv)
     ros::Publisher dwm_pub = dwm_node.advertise<std_msgs::String>("range", 1);
 
     // setup the subscriber to the odomotry ROS topic to get the platform [x, y, z] location
-    ros::Subscriber location_sub = dwm_node.subscribe("odom", 1, pose_callback);
+    //ros::Subscriber location_sub = dwm_node.subscribe("odom", 1, pose_callback);
 
     // the rate at which the message is published in Hz
     ros::Rate loop_rate(1);
@@ -151,9 +151,9 @@ int main(int argc, char** argv)
         while (ros::ok())
         {
             std_msgs::String msg;
-            
+
             std::string position_msg = "";
-            
+
             // get the position of the platform from the correct ROS topic
 
 
@@ -164,11 +164,11 @@ int main(int argc, char** argv)
             {
                 position_msg = position_msg + "0x" + num2str<uint16_t>(anchor[idx].address, "%04X:") + num2str<float>(anchor[idx].range, "%2.4f,");
             }
-            
-            position_msg = position_msg.substr(0, position_msg.length()-2);            
-                        
+
+            position_msg = position_msg.substr(0, position_msg.length()-2);
+
             msg.data = position_msg;
-            
+
             dwm_pub.publish(msg);
 
             ros::spinOnce();
@@ -177,18 +177,18 @@ int main(int argc, char** argv)
 
         }
 #else
-      
+
         while (1)
         {
             std::string position_msg = "";
-            
+
             // programtically this is where the position of the platform should be determined
-            // get_platform location            
+            // get_platform location
             std::cout << "enter x: ";
             std::getline(std::cin, x_input);
             std::cout << "enter y: ";
-            std::getline(std::cin, y_input);            
-            
+            std::getline(std::cin, y_input);
+
             try{
                 current_location[0] = std::stof(x_input);
                 current_location[1] = std::stof(y_input);
@@ -197,16 +197,14 @@ int main(int argc, char** argv)
             {
                 std::cout << "nope!" << std::endl;
             }
-            
-            
+
             //get_pos(sp, tag_position, anchor);
             tag.get_anchor_locations(sp, anchor);
-            
 
             for (idx = 0; idx < anchor.size(); ++idx)
             {
                 position_msg = position_msg + "0x" + num2str<uint16_t>(anchor[idx].address, "%04X:") + num2str<float>(anchor[idx].range, "%2.4f,");
-                
+
                 // this is where each anchor detection should be checked
                 // 1. check the unique ID for the anchor against the unique ID for the target_locator object
                 // if it matches then add the new observation and move on
@@ -223,7 +221,7 @@ int main(int argc, char** argv)
                             break;
                         }
                     }
-                    
+
                     if (match == false)
                     {
                         target.push_back(target_locator(anchor[idx].address, observation(anchor[idx].range, current_location), { anchor[idx].range + current_location[0], current_location[1] }));
@@ -234,9 +232,9 @@ int main(int argc, char** argv)
                     // add the very first detect automatically
                     target.push_back(target_locator(anchor[idx].address, observation(anchor[idx].range, current_location), { anchor[idx].range + current_location[0], current_location[1] }));
                 }
-                
+
             }
-            
+
             for (auto& t : target)
             {
                 stop_code = t.get_position();
@@ -253,8 +251,8 @@ int main(int argc, char** argv)
             sleep_ms(100);
         }
 
-#endif                
-        
+#endif
+
         // close the port
         sp.close_port();
 
