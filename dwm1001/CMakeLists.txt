@@ -208,6 +208,7 @@ if(USE_ROS)
     #add_library(${exe_name} ${SOURCES})
     add_executable(${exe_name} ${SOURCES})
     target_link_libraries(${exe_name} dlib::dlib ${LINK_LIBRARIES})
+    add_dependencies(${SOURCES} ${PROJECT_NAME}_generate_messages_cpp)
     add_dependencies(${exe_name} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
     target_compile_options(${exe_name} PRIVATE ${active_preprocessor_switches})
 
