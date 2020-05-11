@@ -36,19 +36,33 @@ message("Platform: " ${PLATFORM})
 
 if(${PLATFORM} STREQUAL "Laptop")
     set(COMMON_ROOT "D:/Common")
+    option(USE_AVX_INSTRUCTIONS  "Compile your program with AVX instructions"  ON)
+    option(DLIB_USE_CUDA "" OFF)
+    include(D:/dlib-19.17/dlib/cmake)
 elseif(${PLATFORM} STREQUAL "MainGear")
     set(_ECLIPSE_VERSION "3.8")
     set(COMMON_ROOT "~/Projects/Common")
+    option(USE_AVX_INSTRUCTIONS  "Compile your program with AVX instructions"  ON)
+    option(DLIB_USE_CUDA "" OFF)
+    include(~/dlib-19.17/dlib/cmake)
 elseif(${PLATFORM} STREQUAL "DLIB_DOCKER")
     set(COMMON_ROOT "~/Projects/Common")
+    option(USE_AVX_INSTRUCTIONS  "Compile your program with AVX instructions"  ON)
+    option(DLIB_USE_CUDA "" OFF)
+    include(~/dlib-19.19/dlib/cmake)
 elseif(${PLATFORM} STREQUAL "JAX")
     set(COMMON_ROOT "~/Projects/Common")    
+    option(DLIB_USE_CUDA "" OFF)
+    include(~/dlib-19.19/dlib/cmake)
 else()
     set(COMMON_ROOT "~/Projects/Common")
+    option(USE_AVX_INSTRUCTIONS  "Compile your program with AVX instructions"  ON)
+    option(DLIB_USE_CUDA "" OFF)
+    include(~/dlib-19.19/dlib/cmake)
 endif()
 
-include(${COMMON_ROOT}/cmake_utils/use_cpp_11.cmake)
-include(${COMMON_ROOT}/cmake_utils/use_sse_avx.cmake)
+#include(${COMMON_ROOT}/cmake_utils/use_cpp_11.cmake)
+#include(${COMMON_ROOT}/cmake_utils/use_sse_avx.cmake)
 
 set(project_includes "include" "${COMMON_ROOT}/include")
 
@@ -66,10 +80,13 @@ if(UNIX)
             roscpp
             rosconsole
             std_msgs
+            nav_msgs
             sensor_msgs
+            geometry_msgs
             dynamic_reconfigure
             roslint
             message_generation
+            
             #stereo_msgs
             #tf2_ros
             #nodelet
@@ -89,11 +106,13 @@ if(UNIX)
         #checkPackage("tf2_geometry_msgs" "")
         #checkPackage("message_generation" "")
 
-#        add_message_files( 
-#            FILES
+        add_message_files( 
+            FILES
+            target_location.msg
+            target_location_list.msg
 #            object_det.msg
 #            object_det_list.msg
-#            )
+            )
 
     #    add_service_files( FILES
         #    set_pose.srv
@@ -113,8 +132,9 @@ if(UNIX)
 
         generate_messages(DEPENDENCIES
             std_msgs
+            nav_msgs
         #    sensor_msgs
-        #    geometry_msgs
+            geometry_msgs
             )
 
         #generate_dynamic_reconfigure_options(
@@ -127,6 +147,8 @@ if(UNIX)
             rosconsole
             std_msgs
             sensor_msgs
+            nav_msgs
+            geometry_msgs
             dynamic_reconfigure
         #    stereo_msgs
             message_runtime
@@ -174,7 +196,8 @@ message(" ")
 if(WIN32)
     include_directories(${project_includes})
     add_executable(${exe_name} ${SOURCES})
-
+    target_link_libraries(${exe_name} dlib::dlib)
+    
     message("MSVC Version: " ${MSVC_VERSION})
     # uncomment for MSVC and cmake greater than 3.6.0
     set(default_build_type "Release")
@@ -190,7 +213,7 @@ if(USE_ROS)
 
     #add_library(${exe_name} ${SOURCES})
     add_executable(${exe_name} ${SOURCES})
-    target_link_libraries(${exe_name} ${LINK_LIBRARIES})
+    target_link_libraries(${exe_name} dlib::dlib ${LINK_LIBRARIES})
     add_dependencies(${exe_name} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
     target_compile_options(${exe_name} PRIVATE ${active_preprocessor_switches})
 
@@ -221,6 +244,7 @@ if(USE_ROS)
 else()
     include_directories(${project_includes})
     add_executable(${exe_name} ${SOURCES})
+    target_link_libraries(${exe_name} dlib::dlib)
     
 endif()
 
