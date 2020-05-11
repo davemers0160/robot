@@ -24,10 +24,10 @@
 #include "ros/ros.h"
 //#include "nav_msgs/Odometry.h"
 #include "std_msgs/String.h"
-//#include "geometry_msgs/Pose.h"
+#include "geometry_msgs/Point.h"
 
-//#include "dwm_wrapper/target_location.h"
-//#include "dwm_wrapper/target_location_list.h"
+#include "dwm_wrapper/target_location.h"
+#include "dwm_wrapper/target_location_list.h"
 
 #endif
 
@@ -95,15 +95,15 @@ int main(int argc, char** argv)
     //struct termios options;
     wait_time = 5;
     std:string port_name = "/dev/ttyACM0";
-    
-    
+
 #if defined(USE_ROS)
+
     // initialize the ros node
     ros::init(argc, argv, "dwm");
 
     // NodeHandle is the main access point to communications with the ROS system
     ros::NodeHandle dwm_node;
-    
+
     // setup the publisher to send out the target location messages
     ros::Publisher dwm_pub = dwm_node.advertise<std_msgs::String>("range", 1);
 
@@ -112,7 +112,7 @@ int main(int argc, char** argv)
 
     // the rate at which the message is published in Hz
     ros::Rate loop_rate(1);
-    
+
 #endif
 
 #endif

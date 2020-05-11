@@ -1,4 +1,4 @@
-UInt16 id
-Float32 x
-Float32 y
-Float32 z
+uint16 id
+float32 x
+float32 y
+float32 z

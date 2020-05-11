@@ -81,30 +81,13 @@ if(UNIX)
             rosconsole
             std_msgs
 #            nav_msgs
-            sensor_msgs
- #           geometry_msgs
+#            sensor_msgs
+            geometry_msgs
             dynamic_reconfigure
             roslint
             message_generation
-
             #stereo_msgs
-            #tf2_ros
-            #nodelet
-            #tf2_geometry_msgs
-            #diagnostic_updater
         )
-
-        #checkPackage("image_transport" "")
-        #checkPackage("roscpp" "")
-        #checkPackage("rosconsole" "")
-        #checkPackage("std_msgs" "")
-        #checkPackage("sensor_msgs" "")
-        #checkPackage("stereo_msgs" "")
-        #checkPackage("dynamic_reconfigure" "")
-        #checkPackage("tf2_ros" "")
-        #checkPackage("nodelet" "")
-        #checkPackage("tf2_geometry_msgs" "")
-        #checkPackage("message_generation" "")
 
         add_message_files(
             FILES
@@ -112,27 +95,11 @@ if(UNIX)
             target_location_list.msg
             )
 
-    #    add_service_files( FILES
-        #    set_pose.srv
-        #    reset_odometry.srv
-        #    reset_tracking.srv
-        #    start_svo_recording.srv
-        #    stop_svo_recording.srv
-        #    start_remote_stream.srv
-        #    stop_remote_stream.srv
-        #    set_led_status.srv
-        #    toggle_led.srv
-        #    start_3d_mapping.srv
-        #    stop_3d_mapping.srv
-        #    start_object_detection.srv
-        #    stop_object_detection.srv
-    #        )
-
         generate_messages(DEPENDENCIES
             std_msgs
 #            nav_msgs
 #    	     sensor_msgs
-#            geometry_msgs
+            geometry_msgs
             )
 
         catkin_package(
@@ -140,9 +107,9 @@ if(UNIX)
             roscpp
             rosconsole
             std_msgs
-            sensor_msgs
+#            sensor_msgs
 #            nav_msgs
-#            geometry_msgs
+            geometry_msgs
             dynamic_reconfigure
 #           stereo_msgs
             message_runtime
@@ -191,7 +158,7 @@ if(WIN32)
     include_directories(${project_includes})
     add_executable(${exe_name} ${SOURCES})
     target_link_libraries(${exe_name} dlib::dlib)
-    
+
     message("MSVC Version: " ${MSVC_VERSION})
     # uncomment for MSVC and cmake greater than 3.6.0
     set(default_build_type "Release")
@@ -208,7 +175,7 @@ if(USE_ROS)
     #add_library(${exe_name} ${SOURCES})
     add_executable(${exe_name} ${SOURCES})
     target_link_libraries(${exe_name} dlib::dlib ${LINK_LIBRARIES})
-    add_dependencies(${SOURCES} ${PROJECT_NAME}_generate_messages_cpp)
+    #add_dependencies(${SOURCES} ${PROJECT_NAME}_generate_messages_cpp)
     add_dependencies(${exe_name} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
     target_compile_options(${exe_name} PRIVATE ${active_preprocessor_switches})
 
