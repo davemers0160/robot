@@ -83,10 +83,9 @@ if(UNIX)
 #            nav_msgs
 #            sensor_msgs
             geometry_msgs
-            dynamic_reconfigure
-            roslint
+#            dynamic_reconfigure
+#            roslint
             message_generation
-            #stereo_msgs
         )
 
         add_message_files(
@@ -110,7 +109,7 @@ if(UNIX)
 #            sensor_msgs
 #            nav_msgs
             geometry_msgs
-            dynamic_reconfigure
+#            dynamic_reconfigure
 #           stereo_msgs
             message_runtime
             )
@@ -160,7 +159,7 @@ if(WIN32)
     target_link_libraries(${exe_name} dlib::dlib)
 
     message("MSVC Version: " ${MSVC_VERSION})
-    # uncomment for MSVC and cmake greater than 3.6.0
+
     set(default_build_type "Release")
     if(MSVC AND (${CMAKE_VERSION} VERSION_GREATER "3.6.0"))
         target_compile_options(${exe_name} PRIVATE "/MP" ${active_preprocessor_switches})
@@ -172,14 +171,14 @@ elseif(UNIX)
 if(USE_ROS)
     include_directories(${project_includes})
 
-    #add_library(${exe_name} ${SOURCES})
     add_executable(${exe_name} ${SOURCES})
     target_link_libraries(${exe_name} dlib::dlib ${LINK_LIBRARIES})
-    #add_dependencies(${SOURCES} ${PROJECT_NAME}_generate_messages_cpp)
-    add_dependencies(${exe_name} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
+    add_dependencies(${exe_name} ${catkin_EXPORTED_TARGETS}) # ${PROJECT_NAME}_gencfg)
     target_compile_options(${exe_name} PRIVATE ${active_preprocessor_switches})
 
-    roslint_cpp()
+    message("")
+#    message("catkin_EXPORTED_TARGETS: ${catkin_EXPORTED_TARGETS}")
+#    roslint_cpp()
 
 ###############################################################################
 # INSTALL
@@ -207,7 +206,7 @@ else()
     include_directories(${project_includes})
     add_executable(${exe_name} ${SOURCES})
     target_link_libraries(${exe_name} dlib::dlib)
-    
+
 endif()
 
 endif()
