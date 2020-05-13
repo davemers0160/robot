@@ -15,7 +15,6 @@
 
 # run this script sudo sh jax_install.sh
 
-
 # old school check for *nix echo styles
 if [ "`echo -n`" = "-n" ]; then
   n=""
@@ -26,12 +25,21 @@ else
 fi
 
 # menu for the interactive selection of which phases of the install occur
-echo "----------------------------------------------------------------------------"
-echo "Phase 1 - "
-echo "Phase 2 - "
-
-echo "----------------------------------------------------------------------------"
-echo $n "Select phase to run: $c"
+echo "-------------------------------------------------------------------------------------------"
+echo "Phase 1 - This does the first half of the installation process for all of the support code:"
+echo " - Performs the standard Ubuntu updates and installs the required programs/libraries"
+echo " - Installs the ZED SDK"
+echo " - Installs ROS"
+echo " - Reboots.  Phase 2 must be run after Phase 1 has been completed"
+echo
+echo "Phase 2 - This phase finishes the installation process"
+echo " - Installs Tensorflow"
+echo " - Installs the Tensorflow model zoo"
+echo " - Downloads the required Tensorflow models"
+echo " - Clones the require support libraries"
+echo " - Finishes teh installation"
+echo "-------------------------------------------------------------------------------------------"
+echo $n "Select which phase (1 or 2) to run: $c"
 
 read -n 1 option
 echo
