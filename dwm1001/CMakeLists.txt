@@ -90,8 +90,9 @@ if(UNIX)
 
         add_message_files(
             FILES
-            target_location.msg
-            target_location_list.msg
+#            target_location.msg
+#            target_location_list.msg
+            point_array.msg
             )
 
         generate_messages(DEPENDENCIES
