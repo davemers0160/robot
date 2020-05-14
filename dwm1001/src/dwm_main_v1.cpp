@@ -49,17 +49,17 @@ std::vector<float> current_location(2);
 
 
 #if defined(USE_ROS)
-void pose_callback(const nav_msgs::Odometry::ConstPtr& msg)
+void pose_callback(const geometry_msgs::Pose::ConstPtr& msg)
 {
 
-    current_location[0] = msg->pose.pose.position.x;
-    current_location[1] = msg->pose.pose.position.y;
-    //current_location[2] = msg->pose.pose.position.z;
+    current_location[0] = msg->position.x;
+    current_location[1] = msg->position.y;
+    current_location[2] = msg->position.z;
 
-    ROS_INFO("Seq: [%d]", msg->header.seq);
-    ROS_INFO("Position-> x: [%f], y: [%f], z: [%f]", msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
-    ROS_INFO("Orientation-> x: [%f], y: [%f], z: [%f], w: [%f]", msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z, msg->pose.pose.orientation.w);
-    ROS_INFO("Vel-> Linear: [%f], Angular: [%f]", msg->twist.twist.linear.x, msg->twist.twist.angular.z);
+    //ROS_INFO("Seq: [%d]", msg->header.seq);
+    //ROS_INFO("Position-> x: [%f], y: [%f], z: [%f]", msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
+    //ROS_INFO("Orientation-> x: [%f], y: [%f], z: [%f], w: [%f]", msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z, msg->pose.pose.orientation.w);
+    //ROS_INFO("Vel-> Linear: [%f], Angular: [%f]", msg->twist.twist.linear.x, msg->twist.twist.angular.z);
 }
 #endif
 
