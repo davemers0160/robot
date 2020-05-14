@@ -15,7 +15,6 @@
 
 # run this script sudo sh jax_install.sh
 
-
 # old school check for *nix echo styles
 if [ "`echo -n`" = "-n" ]; then
   n=""
@@ -26,18 +25,25 @@ else
 fi
 
 # menu for the interactive selection of which phases of the install occur
-echo "----------------------------------------------------------------------------"
-echo "Phase 1 - "
-echo "Phase 2 - "
-
-echo "----------------------------------------------------------------------------"
-echo $n "Select phase to run: $c"
+echo "-------------------------------------------------------------------------------------------"
+echo "Phase 1 - This does the first half of the installation process for all of the support code:"
+echo " - Performs the standard Ubuntu updates and installs the required programs/libraries"
+echo " - Installs the ZED SDK"
+echo " - Installs ROS"
+echo " - Reboots.  Phase 2 must be run after Phase 1 has been completed"
+echo
+echo "Phase 2 - This phase finishes the installation process"
+echo " - Installs Tensorflow"
+echo " - Installs the Tensorflow model zoo"
+echo " - Downloads the required Tensorflow models"
+echo " - Clones the require support libraries"
+echo " - Finishes teh installation"
+echo "-------------------------------------------------------------------------------------------"
+echo $n "Select which phase (1 or 2) to run: $c"
 
 read -n 1 option
-
-echo $option
-
-
+echo
+#echo $option
 
 if  [ "$option" == "1" ]; then
 
@@ -118,9 +124,15 @@ pip install --extra-index-url https://developer.download.nvidia.com/compute/redi
 
 ## ----------------------------------------------------------------------------
 ## get the required ROS wrapper packages and the required support repos
+
+cd /home/$USER
 mkdir -p /home/$USER/catkin_ws
 mkdir -p /home/$USER/catkin_ws/src
 mkdir -p /home/$USER/Projects
+
+wget http://dlib.net/files/dlib-19.19.tar.bz2
+tar -xf dlib-19.19.tar.bz2
+rm dlib-19.19.tar.bz2
 
 git clone -b 'v3.0.3' --single-branch https://github.com/stereolabs/zed-ros-wrapper.git /home/$USER/catkin_ws/src/zed-ros-wrapper
 git clone https://github.com/davemers0160/robot.git /home/$USER/catkin_ws/src/robot
@@ -171,8 +183,6 @@ echo "export PYTHONPATH=\$PYTHONPATH:/home/\$USER/models:/home/\$USER/models/res
 echo "PATH=\$PATH:/home/\$USER/.local/bin" >> /home/$USER/.bashrc
 echo "source /home/\$USER/catkin_ws/devel/setup.bash" >> /home/$USER/.bashrc
 
-exit 1
-
 fi
 
 echo "Installation complete!"
@@ -180,7 +190,7 @@ echo
 
 echo "Run the following command:"
 echo "sudo nano /boot/extlinux/extlinux.conf"
-echo "and add the following the the APPEND line: \" usbcore.usbfs_memory_mb=2000 \" "
+echo "- add the following the the APPEND line: \" usbcore.usbfs_memory_mb=2000 \" "
 
 
 
