@@ -27,10 +27,9 @@
 #include "geometry_msgs/Pose.h"
 #include "geometry_msgs/Point.h"
 
-
-#include "dwm_wrapper/target_location.h"
-#include "dwm_wrapper/target_location_list.h"
-
+//#include "dwm_wrapper/target_location.h"
+//#include "dwm_wrapper/target_location_list.h"
+#include "dwm_wrapper/point_array.h"
 #endif
 
 #endif
