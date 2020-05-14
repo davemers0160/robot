@@ -6,7 +6,7 @@ import sys
 #from std_msgs.msg import String
 #from geometry_msgs import Pose
 
-'''
+
 class test_pose():
 
     def __init__(self):
@@ -46,8 +46,9 @@ if __name__ == '__main__':
     tp = test_pose()
     tp.main()        
     
-'''
 
+
+'''
 while(1):
     x, y, z = input("Enter a point (x,y,z): ").split()
     
@@ -57,4 +58,5 @@ while(1):
     
     print("Point (x, y, z): {}, {}, {}".format(x, y, z))
     
-    
+'''
+ 
