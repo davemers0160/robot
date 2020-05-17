@@ -109,7 +109,7 @@ int main(int argc, char** argv)
     std::string pose_topic = "robot_pose";
 
     // the message to be published
-    dwm_warpper::point_array point_array_msg;
+    ::dwm_wrapper::point_array point_array_msg;
 
     // initialize the ros node
     ros::init(argc, argv, "dwm");
@@ -243,7 +243,7 @@ int main(int argc, char** argv)
             }   // end of if
 
             // publish the message
-            if (point_array_msg.size() > 0)
+            if (point_array_msg.points.size() > 0)
             {
                 dwm_pub.publish(point_array_msg);
             }
