@@ -1,8 +1,8 @@
 ## ----------------------------------------------------------------------------
 ## Need nvidia-docker to run https://github.com/NVIDIA/nvidia-docker
 ## Image from https://gitlab.com/nvidia/cuda/
-FROM nvidia/cudagl:10.0-devel-ubuntu16.04
-##FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu16.04
+##FROM nvidia/cudagl:10.0-devel-ubuntu16.04
+FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu16.04
 
 ## ----------------------------------------------------------------------------
 ## set up the ability to get out to the rest of the world for app user

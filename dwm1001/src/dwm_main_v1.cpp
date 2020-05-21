@@ -10,6 +10,7 @@
 #include <chrono>
 #include <string>
 #include <vector>
+#include <list>
 
 #if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
 #include "win_serial_fcns.h"
@@ -21,7 +22,14 @@
 #if defined(USE_ROS)
 // ROS includes
 #include "ros/ros.h"
+//#include "nav_msgs/Odometry.h"
 #include "std_msgs/String.h"
+#include "geometry_msgs/Pose.h"
+#include "geometry_msgs/Point.h"
+
+//#include "dwm_wrapper/target_location.h"
+//#include "dwm_wrapper/target_location_list.h"
+#include "dwm_wrapper/point_array.h"
 #endif
 
 #endif
@@ -35,18 +43,57 @@
 
 // Project includes
 #include "dwm.h"
+#include "target_locator.h"
 
 // -------------------------------GLOBALS--------------------------------------
+std::vector<float> current_location(3);
+bool valid_pose_msg;
 
-int main(int argc, char** argv)
+
+#if defined(USE_ROS)
+void pose_callback(const geometry_msgs::Pose::ConstPtr& msg)
 {
 
+    current_location[0] = msg->position.x;
+    current_location[1] = msg->position.y;
+    current_location[2] = msg->position.z;
+    valid_pose_msg = true;
+
+    //ROS_INFO("Seq: [%d]", msg->header.seq);
+    //ROS_INFO("Position-> x: [%f], y: [%f], z: [%f]", msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
+    //ROS_INFO("Orientation-> x: [%f], y: [%f], z: [%f], w: [%f]", msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z, msg->pose.pose.orientation.w);
+    //ROS_INFO("Vel-> Linear: [%f], Angular: [%f]", msg->twist.twist.linear.x, msg->twist.twist.angular.z);
+}
+#endif
+
+
+// ----------------------------------------------------------------------------
+int main(int argc, char** argv)
+{
     uint32_t idx, jdx;
 
     serial_port sp;
     uint32_t wait_time;
     uint32_t baud_rate = 115200;
 
+    // dwm variables
+    dwm_object tag;
+    std::vector<dwm_location> anchor;
+    //std::vector<dwm_version> version;
+    //std::vector<anchor_pos> anchor;
+    //dwm_location tag_position;
+
+    list<target_locator> target;
+
+    std::string x_input, y_input;
+    float x = 0.0f, y = 0.0f, z = 0.0f;
+    bool match = false;
+    int32_t stop_code;
+
+    current_location[0] = x;
+    current_location[1] = y;
+    current_location[2] = z;
+    valid_pose_msg = false;
 
 #if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
     wait_time = 10;
@@ -56,30 +103,34 @@ int main(int argc, char** argv)
     //struct termios options;
     wait_time = 5;
     std:string port_name = "/dev/ttyACM0";
-    
-    
+
 #if defined(USE_ROS)
+
+    std::string pose_topic = "robot_pose";
+
+    // the message to be published
+    ::dwm_wrapper::point_array point_array_msg;
+
     // initialize the ros node
     ros::init(argc, argv, "dwm");
 
     // NodeHandle is the main access point to communications with the ROS system
     ros::NodeHandle dwm_node;
-    
-    // setup the publisher to send out the 
+
+    // setup the publisher to send out the target location messages
     ros::Publisher dwm_pub = dwm_node.advertise<std_msgs::String>("range", 1);
+
+    // setup the subscriber to the odomotry ROS topic to get the platform [x, y, z] location
+    ros::Subscriber location_sub = dwm_node.subscribe(pose_topic, 1, pose_callback);
 
     // the rate at which the message is published in Hz
     ros::Rate loop_rate(1);
-    
-#endif
 
 #endif
 
-    // dwm variables
-    std::vector<dwm_version> version;
-    std::vector<anchor_pos> anchor;
-    dwm_position tag_position;
+#endif
 
+    // ----------------------------------------------------------------------------------------
     try{
 
         // open the serial port
@@ -87,69 +138,200 @@ int main(int argc, char** argv)
         sp.open_port(port_name, baud_rate, wait_time);
 
         // get the firmware/config/hardware versions
-        get_fw(sp, version);
+        //tag.get_version(sp, version);
+        tag.get_version(sp);
+        tag.print_versions();
 
+
+        /*
         // get the position of the tag, the position of the anchors and distance of anchors to the tag
-        get_pos(sp, tag_position, anchor);
-
-        std::cout << "tag " << tag_position << std::endl;
-
+        //get_position(sp, tag_position, anchor);
+        tag.get_anchor_locations(sp, anchor);
+        std::cout << "tag " << tag.position << std::endl;
         sleep_ms(200);
+
+        current_location[0] = x;
+        current_location[1] = y;
+
         //std::cout << "bytes avail: " << sp.bytes_available() << std::endl;
         for (idx = 0; idx < anchor.size(); ++idx)
         {
-            std::cout << anchor[idx] << std::endl;
+            std::cout << "anchor " << anchor[idx] << std::endl;
+
+            // add the anchors to the target list
+            target.push_back(target_locator(anchor[idx].address, observation(anchor[idx].range, current_location), { anchor[idx].range + current_location[0], current_location[1] }));
         }
+        */
+
 
 #if defined(USE_ROS)
+        
+        // wait for the node that we are subscribing to to become available
+        sleep_ms(200);
+
         while (ros::ok())
         {
-            std_msgs::String msg;
-            
-            std::string position_msg = "";
-            
-            get_pos(sp, tag_position, anchor);
+            //std_msgs::String msg;
+            point_array_msg.points.clear();
 
-            for (idx = 0; idx < anchor.size(); ++idx)
+            // std::string position_msg = "";
+
+            // get the position of the platform from the correct ROS topic
+            if (valid_pose_msg)
             {
-                position_msg = position_msg + "0x" + num2str<uint16_t>(anchor[idx].address, "%04X:") + num2str<float>(anchor[idx].range, "%2.4f,");
+
+                // get the anchor locations
+                tag.get_anchor_locations(sp, anchor);
+
+                // cycle through the detected anchors
+                for (idx = 0; idx < anchor.size(); ++idx)
+                {
+                    //position_msg = position_msg + "0x" + num2str<uint16_t>(anchor[idx].address, "%04X:") + num2str<float>(anchor[idx].range, "%2.4f,");
+
+                    // 1. check the unique ID for the anchor against the unique ID for the target_locator object
+                    // if it matches then add the new observation and move on
+                    // if there is no match then add a brand new target_locator object and add the new observation
+                    if (target.size() > 0)
+                    {
+                        match = false;
+                        for (auto& t : target)
+                        {
+                            if (t.id == anchor[idx].address)
+                            {
+                                t.add_observation(observation(anchor[idx].range, current_location));
+                                match = true;
+                                break;
+                            }
+                        }
+
+                        if (match == false)
+                        {
+                            target.push_back(target_locator(anchor[idx].address, observation(anchor[idx].range, current_location), { anchor[idx].range + current_location[0], current_location[1] }));
+                        }
+                    }
+                    else
+                    {
+                        // add the very first detect automatically
+                        target.push_back(target_locator(anchor[idx].address, observation(anchor[idx].range, current_location), { anchor[idx].range + current_location[0], current_location[1] }));
+                    }
+
+                }   // end of for loop
+
+                // cycle through the list of targets and try to get the locations
+                for (auto& t : target)
+                {
+                    stop_code = t.get_position();
+                    if (t.valid_location)
+                    {
+                        geometry_msgs::Point p;
+                        p.x = t.location[0];
+                        p.y = t.location[1];
+                        p.z = t.location[2];
+
+                        point_array_msg.points.push_back(p);
+
+                        std::cout << "target id: " << num2str(t.id, "0x%04X") << std::endl;
+                        std::cout << "  x=" << num2str(t.location[0], "%3.6f") << " y=" << num2str(t.location[1], "%3.6f") << std::endl;
+                    }
+                }
+
+                //position_msg = position_msg.substr(0, position_msg.length() - 2);
+                //msg.data = position_msg;
+
+                valid_pose_msg = false;
+
+            }   // end of if
+
+            // publish the message
+            if (point_array_msg.points.size() > 0)
+            {
+                dwm_pub.publish(point_array_msg);
             }
-            
-            position_msg = position_msg.substr(0, position_msg.length()-2);            
-                        
-            msg.data = position_msg;
-            
-            dwm_pub.publish(msg);
 
             ros::spinOnce();
-
             loop_rate.sleep();
 
-        }
+        }   // end of while(ros::ok())
+
 #else
 
         while (1)
         {
             std::string position_msg = "";
-            
-            get_pos(sp, tag_position, anchor);
+
+            // programtically this is where the position of the platform should be determined
+            // get_platform location
+            std::cout << "enter x: ";
+            std::getline(std::cin, x_input);
+            std::cout << "enter y: ";
+            std::getline(std::cin, y_input);
+
+            try{
+                current_location[0] = std::stof(x_input);
+                current_location[1] = std::stof(y_input);
+            }
+            catch(...)
+            {
+                std::cout << "nope!" << std::endl;
+            }
+
+            //get_pos(sp, tag_position, anchor);
+            tag.get_anchor_locations(sp, anchor);
 
             for (idx = 0; idx < anchor.size(); ++idx)
             {
                 position_msg = position_msg + "0x" + num2str<uint16_t>(anchor[idx].address, "%04X:") + num2str<float>(anchor[idx].range, "%2.4f,");
-                //std::cout << "0x" << num2str<uint16_t>(anchor[idx].address, "%04X") << ":" << anchor[idx].range << ", ";
+
+                // this is where each anchor detection should be checked
+                // 1. check the unique ID for the anchor against the unique ID for the target_locator object
+                // if it matches then add the new observation and move on
+                // if there is no match then add a brand new target_locator object and add the new observation
+                if (target.size() > 0)
+                {
+                    match = false;
+                    for (auto &t : target)
+                    {
+                        if (t.id == anchor[idx].address)
+                        {
+                            t.add_observation(observation(anchor[idx].range, current_location));
+                            match = true;
+                            break;
+                        }
+                    }
+
+                    if (match == false)
+                    {
+                        target.push_back(target_locator(anchor[idx].address, observation(anchor[idx].range, current_location), { anchor[idx].range + current_location[0], current_location[1] }));
+                    }
+                }
+                else
+                {
+                    // add the very first detect automatically
+                    target.push_back(target_locator(anchor[idx].address, observation(anchor[idx].range, current_location), { anchor[idx].range + current_location[0], current_location[1] }));
+                }
+
+            }   // end of for loop
+
+            for (auto& t : target)
+            {
+                stop_code = t.get_position();
+                if (t.valid_location)
+                {
+                    std::cout << "target id: " << num2str(t.id, "0x%04X") << std::endl;
+                    std::cout << "  x=" << num2str(t.location[0], "%3.6f") << " y=" << num2str(t.location[1], "%3.6f") << std::endl;
+                }
             }
-            
+
+
             position_msg = position_msg.substr(0, position_msg.length()-2);
             std::cout << position_msg << std::endl;
             sleep_ms(100);
         }
 
-#endif                
-        
+#endif
+
         // close the port
         sp.close_port();
-
 
     }
     catch(std::exception e)

@@ -3,13 +3,49 @@
 # https://raw.githubusercontent.com/davemers0160/robot/master/jax_install.sh
 
 #sudo nano /media/boot/boot.ini ---- find the line that contains the "bootargs" add the following to the end of the line within the quotes: usbcore.usbfs_memory_mb=1000
-#          /boot/extlinux/extlinux.conf ---- APPEND line: usbcore.usbfs_memory_mb=1000
+#
+# this is the one to run 
+#sudo nano /boot/extlinux/extlinux.conf ---- APPEND line: usbcore.usbfs_memory_mb=1000
+#
 #          /sys/module/usbcore/parameters/usbfs_memory_mb
 #          /etc/default/grub file     ---- GRUB_CMDLINE_LINUX_DEFAULT="quiet splash usbcore.usbfs_memory_mb=1000"
 #
-#
 # save the file and reboot
 # check: cat /sys/module/usbcore/parameters/usbfs_memory_mb
+
+# run this script sudo sh jax_install.sh
+
+# old school check for *nix echo styles
+if [ "`echo -n`" = "-n" ]; then
+  n=""
+  c="\c"
+else
+  n="-n"
+  c=""
+fi
+
+# menu for the interactive selection of which phases of the install occur
+echo "-------------------------------------------------------------------------------------------"
+echo "Phase 1 - This does the first half of the installation process for all of the support code:"
+echo " - Performs the standard Ubuntu updates and installs the required programs/libraries"
+echo " - Installs the ZED SDK"
+echo " - Installs ROS"
+echo " - Reboots.  Phase 2 must be run after Phase 1 has been completed"
+echo
+echo "Phase 2 - This phase finishes the installation process"
+echo " - Installs Tensorflow"
+echo " - Installs the Tensorflow model zoo"
+echo " - Downloads the required Tensorflow models"
+echo " - Clones the require support libraries"
+echo " - Finishes teh installation"
+echo "-------------------------------------------------------------------------------------------"
+echo $n "Select which phase (1 or 2) to run: $c"
+
+read -n 1 option
+echo
+#echo $option
+
+if  [ "$option" == "1" ]; then
 
 gsettings set org.gnome.desktop.screensaver lock-enabled false
 gsettings set org.gnome.desktop.session idle-delay 0
@@ -23,21 +59,21 @@ sudo apt-add-repository universe
 sudo apt-add-repository multiverse
 sudo apt-add-repository restricted
 
-
 sudo apt-get update -y
 sudo apt-get upgrade -y
 
 sudo apt-get install -y lsb-release wget less udev apt-transport-https nano cmake cmake-gui usbutils git build-essential
 sudo apt-get install -y libusb-dev curl putty software-properties-common iputils-ping zip gfortran
 sudo apt-get install -y libhdf5-serial-dev hdf5-tools libhdf5-dev zlib1g-dev libjpeg8-dev liblapack-dev libblas-dev 
-
-#sudo apt-get install -y libqt5xml5 libxmu-dev libxi-dev libturbojpeg
+sudo apt-get install -y libxml2-dev libxslt-dev
 
 ## ----------------------------------------------------------------------------
 ## Get the ZED SDK - ZED_SDK_Tegra_JP43_v3.1.2.run
 wget https://stereolabs.sfo2.digitaloceanspaces.com/zedsdk/3.1/ZED_SDK_Tegra_JP43_v3.1.2.run
 chmod +x ZED_SDK_Tegra_JP43_v3.1.2.run
 sudo ./ZED_SDK_Tegra_JP43_v3.1.2.run silent
+sudo chmod 755 -R /usr/local/zed
+
 #rm -rf /var/lib/apt/lists/*
 sudo mkdir -p /root/Documents/ZED/
 sudo usermod -a -G video $USER
@@ -67,40 +103,43 @@ export DEBIAN_FRONTEND=$current_deb
 
 source /home/$USER/.bashrc
 
+sudo reboot
+exit 1
+
+elif [ "$option" == "2" ]; then
+
 ## ----------------------------------------------------------------------------
 ## Install some python packages
 curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
 python get-pip.py
 
-sudo reboot
-
 pip install -U tensorflow_hub numpy launchpadlib pandas Cython contextlib2 pillow lxml jupyter matplotlib utils --user
 #/home/$USER/.local/bin/pip install tensorflow-gpu==1.14 tensorflow_hub --user --ignore-installed
 #wget https://developer.download.nvidia.com/compute/redist/jp/v411/tensorflow-gpu/
 
-pip install --extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v411 tensorflow==1.13.0rc0+nv19.2 --user
-
+pip install --extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v411/ tensorflow-gpu==1.13.0rc0+nv19.2 --user
 #wget https://developer.download.nvidia.com/compute/redist/jp/v411/tensorflow-gpu/tensorflow_gpu-1.13.0rc0+nv19.2-cp27-cp27mu-linux_aarch64.whl
 #/home/$USER/.local/bin/pip install tensorflow_gpu-1.13.0rc0+nv19.2-cp27-cp27mu-linux_aarch64.whl --user
-#pip install tensorflow_hub --user
 
 
 ## ----------------------------------------------------------------------------
-## clone the ROS wrapper packages
+## get the required ROS wrapper packages and the required support repos
+
+cd /home/$USER
 mkdir -p /home/$USER/catkin_ws
 mkdir -p /home/$USER/catkin_ws/src
+mkdir -p /home/$USER/Projects
+
+wget http://dlib.net/files/dlib-19.19.tar.bz2
+tar -xf dlib-19.19.tar.bz2
+rm dlib-19.19.tar.bz2
+
 git clone -b 'v3.0.3' --single-branch https://github.com/stereolabs/zed-ros-wrapper.git /home/$USER/catkin_ws/src/zed-ros-wrapper
 git clone https://github.com/davemers0160/robot.git /home/$USER/catkin_ws/src/robot
+git clone https://github.com/davemers0160/Common.git /home/$USER/Projects/Common
 
 
 ## ----------------------------------------------------------------------------
-## get the required support repos
-cd /home/$USER
-mkdir -p /home/$USER/Projects
-cd Projects
-git clone https://github.com/davemers0160/Common.git
-    
-
 # source /opt/ros/melodic/setup.bash
 cd /home/$USER/catkin_ws
 catkin_make -j6
@@ -114,13 +153,14 @@ git clone https://github.com/tensorflow/models /home/$USER/models
 cd /home/$USER/models/research
 #wget -O protobuf.zip https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip
 wget -O protobuf.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.7.0/protoc-3.7.0-linux-aarch_64.zip
-unzip protobuf.zip ./bin/protoc object_detection/protos/*.proto --python_out=.
+unzip protobuf.zip 
+./bin/protoc object_detection/protos/*.proto --python_out=.
 
 cd /home/$USER
-wget http://download.tensorflow.org/models/object_detection/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
-tar -xzvf ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
-mv ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03 ssd_resnet50_v1_fpn
-rm ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
+#wget http://download.tensorflow.org/models/object_detection/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
+#tar -xzvf ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
+#mv ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03 ssd_resnet50_v1_fpn
+#rm ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
 
 wget http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v2_oid_v4_2018_12_12.tar.gz
 tar -xzvf ssd_mobilenet_v2_oid_v4_2018_12_12.tar.gz
@@ -134,12 +174,8 @@ rm faster_rcnn_inception_resnet_v2_atrous_oid_v4_2018_12_12.tar.gz
 
 wget http://download.tensorflow.org/models/object_detection/ssd_resnet101_v1_fpn_shared_box_predictor_oid_512x512_sync_2019_01_20.tar.gz
 tar -xzvf ssd_resnet101_v1_fpn_shared_box_predictor_oid_512x512_sync_2019_01_20.tar.gz
-mv ssd_resnet101_v1_fpn_shared_box_predictor_oid_512x512_sync_2019_01_20.tar.gz ssd_resnet101_v1_fpn_oid
+mv ssd_resnet101_v1_fpn_shared_box_predictor_oid_512x512_sync_2019_01_20 ssd_resnet101_v1_fpn_oid
 rm ssd_resnet101_v1_fpn_shared_box_predictor_oid_512x512_sync_2019_01_20.tar.gz
-
-#mkdir tf_obj_det
-#cd tf_obj_det
-#wget https://raw.githubusercontent.com/davemers0160/robot/master/python_code/ros_tf_obj_det.py
 
 ## ----------------------------------------------------------------------------
 ## put the everything in the right paths
@@ -147,8 +183,14 @@ echo "export PYTHONPATH=\$PYTHONPATH:/home/\$USER/models:/home/\$USER/models/res
 echo "PATH=\$PATH:/home/\$USER/.local/bin" >> /home/$USER/.bashrc
 echo "source /home/\$USER/catkin_ws/devel/setup.bash" >> /home/$USER/.bashrc
 
+fi
 
 echo "Installation complete!"
+echo
+
+echo "Run the following command:"
+echo "sudo nano /boot/extlinux/extlinux.conf"
+echo "- add the following the the APPEND line: \" usbcore.usbfs_memory_mb=2000 \" "
 
 
 

@@ -1,9 +1,9 @@
 # ----------------------------------------------------------------------------
-#  Root CMake file for DfD Graph Cuts
+#  Root CMake file for the DWM1001 Project
 # ----------------------------------------------------------------------------
 #
 # To perform an out of source build do the following on the command line:
-# 1. navigate to the root project directory (in this case DfD2)
+# 1. navigate to the root project directory
 # 2. mkdir build
 # 3. cd build
 # 4. depending on your system (windows/linux) type the following
@@ -36,25 +36,39 @@ message("Platform: " ${PLATFORM})
 
 if(${PLATFORM} STREQUAL "Laptop")
     set(COMMON_ROOT "D:/Common")
+    option(USE_AVX_INSTRUCTIONS  "Compile your program with AVX instructions"  ON)
+    option(DLIB_USE_CUDA "" OFF)
+    include(D:/dlib-19.17/dlib/cmake)
 elseif(${PLATFORM} STREQUAL "MainGear")
     set(_ECLIPSE_VERSION "3.8")
     set(COMMON_ROOT "~/Projects/Common")
+    option(USE_AVX_INSTRUCTIONS  "Compile your program with AVX instructions"  ON)
+    option(DLIB_USE_CUDA "" OFF)
+    include(~/dlib-19.17/dlib/cmake)
 elseif(${PLATFORM} STREQUAL "DLIB_DOCKER")
     set(COMMON_ROOT "~/Projects/Common")
+    option(USE_AVX_INSTRUCTIONS  "Compile your program with AVX instructions"  ON)
+    option(DLIB_USE_CUDA "" OFF)
+    include(~/dlib-19.19/dlib/cmake)
 elseif(${PLATFORM} STREQUAL "JAX")
-    set(COMMON_ROOT "~/Projects/Common")    
+    set(COMMON_ROOT "~/Projects/Common")
+    option(DLIB_USE_CUDA "" OFF)
+    include(~/dlib-19.19/dlib/cmake)
 else()
     set(COMMON_ROOT "~/Projects/Common")
+    option(USE_AVX_INSTRUCTIONS  "Compile your program with AVX instructions"  ON)
+    option(DLIB_USE_CUDA "" OFF)
+    include(~/dlib-19.19/dlib/cmake)
 endif()
 
-include(${COMMON_ROOT}/cmake_utils/use_cpp_11.cmake)
-include(${COMMON_ROOT}/cmake_utils/use_sse_avx.cmake)
+#include(${COMMON_ROOT}/cmake_utils/use_cpp_11.cmake)
+#include(${COMMON_ROOT}/cmake_utils/use_sse_avx.cmake)
 
 set(project_includes "include" "${COMMON_ROOT}/include")
 
 if (${USE_ROS})
     message("")
-    message("Compiling with ROS!")    
+    message("Compiling with ROS!")
     list(APPEND active_preprocessor_switches "-DUSE_ROS")
 
 endif()
@@ -66,69 +80,38 @@ if(UNIX)
             roscpp
             rosconsole
             std_msgs
-            sensor_msgs
-            dynamic_reconfigure
-            roslint
+#            nav_msgs
+#            sensor_msgs
+            geometry_msgs
+#            dynamic_reconfigure
+#            roslint
             message_generation
-            #stereo_msgs
-            #tf2_ros
-            #nodelet
-            #tf2_geometry_msgs
-            #diagnostic_updater
         )
 
-        #checkPackage("image_transport" "")
-        #checkPackage("roscpp" "")
-        #checkPackage("rosconsole" "")
-        #checkPackage("std_msgs" "")
-        #checkPackage("sensor_msgs" "")
-        #checkPackage("stereo_msgs" "")
-        #checkPackage("dynamic_reconfigure" "")
-        #checkPackage("tf2_ros" "")
-        #checkPackage("nodelet" "")
-        #checkPackage("tf2_geometry_msgs" "")
-        #checkPackage("message_generation" "")
-
-#        add_message_files( 
-#            FILES
-#            object_det.msg
-#            object_det_list.msg
-#            )
-
-    #    add_service_files( FILES
-        #    set_pose.srv
-        #    reset_odometry.srv
-        #    reset_tracking.srv
-        #    start_svo_recording.srv
-        #    stop_svo_recording.srv
-        #    start_remote_stream.srv
-        #    stop_remote_stream.srv
-        #    set_led_status.srv
-        #    toggle_led.srv
-        #    start_3d_mapping.srv
-        #    stop_3d_mapping.srv
-        #    start_object_detection.srv
-        #    stop_object_detection.srv
-    #        )
+        add_message_files(
+            FILES
+#            target_location.msg
+#            target_location_list.msg
+            point_array.msg
+            )
 
         generate_messages(DEPENDENCIES
             std_msgs
-        #    sensor_msgs
-        #    geometry_msgs
+#            nav_msgs
+#    	     sensor_msgs
+            geometry_msgs
             )
-
-        #generate_dynamic_reconfigure_options(
-        #  cfg/Zed.cfg
-        #    )
 
         catkin_package(
             CATKIN_DEPENDS
             roscpp
             rosconsole
             std_msgs
-            sensor_msgs
-            dynamic_reconfigure
-        #    stereo_msgs
+#            sensor_msgs
+#            nav_msgs
+            geometry_msgs
+#            dynamic_reconfigure
+#           stereo_msgs
             message_runtime
             )
 
@@ -174,9 +157,10 @@ message(" ")
 if(WIN32)
     include_directories(${project_includes})
     add_executable(${exe_name} ${SOURCES})
+    target_link_libraries(${exe_name} dlib::dlib)
 
     message("MSVC Version: " ${MSVC_VERSION})
-    # uncomment for MSVC and cmake greater than 3.6.0
+
     set(default_build_type "Release")
     if(MSVC AND (${CMAKE_VERSION} VERSION_GREATER "3.6.0"))
         target_compile_options(${exe_name} PRIVATE "/MP" ${active_preprocessor_switches})
@@ -188,13 +172,14 @@ elseif(UNIX)
 if(USE_ROS)
     include_directories(${project_includes})
 
-    #add_library(${exe_name} ${SOURCES})
     add_executable(${exe_name} ${SOURCES})
-    target_link_libraries(${exe_name} ${LINK_LIBRARIES})
-    add_dependencies(${exe_name} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
+    target_link_libraries(${exe_name} dlib::dlib ${LINK_LIBRARIES})
+    add_dependencies(${exe_name} ${catkin_EXPORTED_TARGETS}) # ${PROJECT_NAME}_gencfg)
     target_compile_options(${exe_name} PRIVATE ${active_preprocessor_switches})
 
-    roslint_cpp()
+    message("")
+#    message("catkin_EXPORTED_TARGETS: ${catkin_EXPORTED_TARGETS}")
+#    roslint_cpp()
 
 ###############################################################################
 # INSTALL
@@ -221,7 +206,8 @@ if(USE_ROS)
 else()
     include_directories(${project_includes})
     add_executable(${exe_name} ${SOURCES})
-    
+    target_link_libraries(${exe_name} dlib::dlib)
+
 endif()
 
 endif()
