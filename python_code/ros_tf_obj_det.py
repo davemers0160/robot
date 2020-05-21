@@ -83,11 +83,13 @@ class RosTensorFlow():
         cv_image = self._cv_bridge.imgmsg_to_cv2(image_msg, "rgb8")
         depth_img = self._cv_bridge.imgmsg_to_cv2(depth_msg)
 
-        cv_image = cv_image(120:500, 320:960, 0:2)
-        depth_img = depth_img(120:500, 320:960)
+        #cv_image = cv_image[120:600, 320:960]
+        #depth_img = depth_img[120:600, 320:960]
 
         img_h = cv_image.shape[0]
         img_w = cv_image.shape[1]
+
+        print("{}, {}".format(img_h, img_w))
 
         # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
         image_np_expanded = np.expand_dims(cv_image, axis=0)
