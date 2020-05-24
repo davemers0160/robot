@@ -346,8 +346,10 @@ int main(int argc, char** argv)
         std::cout << "Error: " << e.what() << std::endl;
     }
 
+#if !defined(USE_ROS)
     std::cout << "Program Complete!  Press Enter to Close..." << std::endl;
     std::cin.ignore();
+#endif
 
 } // end of main
 
