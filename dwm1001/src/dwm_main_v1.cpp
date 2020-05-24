@@ -238,6 +238,10 @@ int main(int argc, char** argv)
                         //std::cout << "target id: " << num2str(t.id, "0x%04X") << std::endl;
                         //std::cout << "  x=" << num2str(t.location[0], "%3.6f") << " y=" << num2str(t.location[1], "%3.6f") << " z=" << num2str(t.location[2], "%3.6f") << std::endl;
                     }
+                    else
+                    {
+                        ROS_INFO("%s", t.stop_code_list[stop_code]);
+                    }
                 }
 
                 valid_pose_msg = false;
