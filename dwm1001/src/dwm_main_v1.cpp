@@ -94,14 +94,19 @@ int main(int argc, char** argv)
     current_location[2] = z;
     valid_pose_msg = false;
 
+    std::string port_name;
+    int max_obs;
+
 #if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
     wait_time = 10;
-    std::string port_name = "COM8";
+    port_name = "COM8";
+    max_obs = 20;
 
 #elif defined(__linux__)
     //struct termios options;
     wait_time = 5;
-    std:string port_name = "/dev/ttyACM0";
+    port_name = "/dev/ttyACM0";
+    max_obs = 20;
 
 #if defined(USE_ROS)
 
@@ -125,6 +130,11 @@ int main(int argc, char** argv)
     // the rate at which the message is published in Hz
     ros::Rate loop_rate(1);
 
+    // get the required parameters /enemy_locations/max_observations
+    dwm_node.param("enemy_locations/max_observations", max_obs, 20);
+    dwm_node.param<std::string>("enemy_locations/serial_port", port_name, "/dev/ttyACM0");
+
+
 #endif
 
 #endif
@@ -132,15 +142,21 @@ int main(int argc, char** argv)
     // ----------------------------------------------------------------------------------------
     try{
 
+        // display the parameters
+        std::cout << std::endl << "Parameters:" <<std::endl;
+        std::cout << "  max_observations: " << max_obs << std::endl;
+        std::cout << "  serial_port:      " << port_name << std::endl;
+        std::cout << std::endl;
+
         // open the serial port
-        std::cout << "opening port..." << std::endl;
+        std::cout << "Opening port: " << port_name;
         sp.open_port(port_name, baud_rate, wait_time);
+        std::cout << " - Success!" << std::endl << std::endl;
 
         // get the firmware/config/hardware versions
         //tag.get_version(sp, version);
         tag.get_version(sp);
         tag.print_versions();
-
 
         /*
         // get the position of the tag, the position of the anchors and distance of anchors to the tag
