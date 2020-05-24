@@ -110,7 +110,7 @@ RUN /bin/bash -c "source /opt/ros/kinetic/setup.bash; cd /home/ros/catkin_ws; ca
 
 
 ## ----------------------------------------------------------------------------
-RUN sudo apt-get install -y software-properties-common iputils-ping
+RUN sudo apt-get install -y software-properties-common iputils-ping net-tools iproute2
 
 
 ## ----------------------------------------------------------------------------
@@ -192,6 +192,11 @@ CMD ["bash"]
 # To start the container run the following command
 # xhost +local:docker
 # docker container run --rm -it --gpus all --name zed_ros --privileged -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix zed_ros
+
+## Use this to allow the docker conatiner to be placed on the local network so that other computers on the LAN can access
+# docker network create -d macvlan --subnet=10.127.1.0/24 --gateway=10.127.1.1 --ip-range=10.127.1.248/29 -o parent=enp35s0 zed_net
+# docker container run --net=zed_net -it --gpus all --name zed_ros --privileged -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix zed_ros
+
 # xhost -local:docker
 
 # To get into an existing/open conatainer while it is running execute the following

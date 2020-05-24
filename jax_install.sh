@@ -65,7 +65,7 @@ sudo apt-get upgrade -y
 sudo apt-get install -y lsb-release wget less udev apt-transport-https nano cmake cmake-gui usbutils git build-essential
 sudo apt-get install -y libusb-dev curl putty software-properties-common iputils-ping zip gfortran
 sudo apt-get install -y libhdf5-serial-dev hdf5-tools libhdf5-dev zlib1g-dev libjpeg8-dev liblapack-dev libblas-dev 
-sudo apt-get install -y libxml2-dev libxslt-dev
+sudo apt-get install -y libxml2-dev libxslt-dev net-tools
 
 ## ----------------------------------------------------------------------------
 ## Get the ZED SDK - ZED_SDK_Tegra_JP43_v3.1.2.run
@@ -77,6 +77,7 @@ sudo chmod 755 -R /usr/local/zed
 #rm -rf /var/lib/apt/lists/*
 sudo mkdir -p /root/Documents/ZED/
 sudo usermod -a -G video $USER
+sudo usermod -a -G dialout $USER
 
 ## ----------------------------------------------------------------------------
 ## Setup and install ROS
@@ -182,6 +183,8 @@ rm ssd_resnet101_v1_fpn_shared_box_predictor_oid_512x512_sync_2019_01_20.tar.gz
 echo "export PYTHONPATH=\$PYTHONPATH:/home/\$USER/models:/home/\$USER/models/research:/home/\$USER/models/research/slim:/home/\$USER/models/research/object_detection" >> /home/$USER/.bashrc
 echo "PATH=\$PATH:/home/\$USER/.local/bin" >> /home/$USER/.bashrc
 echo "source /home/\$USER/catkin_ws/devel/setup.bash" >> /home/$USER/.bashrc
+echo "export ROS_IP=$(hostname -I)" >> /home/$USER/.bashrc
+
 
 fi
 
