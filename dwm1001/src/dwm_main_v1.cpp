@@ -240,7 +240,7 @@ int main(int argc, char** argv)
                     }
                     else
                     {
-                        ROS_INFO("%s", t.stop_code_list[stop_code]);
+                        ROS_INFO("%s", t.stop_code_list[stop_code].c_str());
                     }
                 }
 
