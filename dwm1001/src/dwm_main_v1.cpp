@@ -60,8 +60,7 @@ void pose_callback(const geometry_msgs::Pose::ConstPtr& msg)
 
     //ROS_INFO("Seq: [%d]", msg->header.seq);
     ROS_INFO("Robot Position-> x: [%f], y: [%f], z: [%f]", msg->position.x, msg->position.y, msg->position.z);
-    //ROS_INFO("Orientation-> x: [%f], y: [%f], z: [%f], w: [%f]", msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z, msg->pose.pose.orientation.w);
-    //ROS_INFO("Vel-> Linear: [%f], Angular: [%f]", msg->twist.twist.linear.x, msg->twist.twist.angular.z);
+    //ROS_INFO("Orientation-> x: [%f], y: [%f], z: [%f], w: [%f]", msg->orientation.x, msg->orientation.y, msg->orientation.z, msg->orientation.w);
 }
 #endif
 
@@ -96,17 +95,20 @@ int main(int argc, char** argv)
 
     std::string port_name;
     int max_obs;
+    double min_range;
 
 #if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
     wait_time = 10;
     port_name = "COM8";
     max_obs = 20;
+    min_range = 1.0;
 
 #elif defined(__linux__)
     //struct termios options;
     wait_time = 5;
     port_name = "/dev/ttyACM0";
     max_obs = 20;
+    min_range = 1.0;
 
 #if defined(USE_ROS)
 
@@ -131,8 +133,9 @@ int main(int argc, char** argv)
     ros::Rate loop_rate(1);
 
     // get the required parameters /enemy_locations/max_observations
-    dwm_node.param("enemy_locations/max_observations", max_obs, 20);
     dwm_node.param<std::string>("enemy_locations/serial_port", port_name, "/dev/ttyACM0");
+    dwm_node.param("enemy_locations/max_observations", max_obs, 20);
+    dwm_node.param("enemy_locations/min_range", min_range, 1.0);
 
 
 #endif
@@ -144,8 +147,9 @@ int main(int argc, char** argv)
 
         // display the parameters
         std::cout << std::endl << "Parameters:" <<std::endl;
-        std::cout << "  max_observations: " << max_obs << std::endl;
         std::cout << "  serial_port:      " << port_name << std::endl;
+        std::cout << "  max_observations: " << max_obs << std::endl;
+        std::cout << "  min_range:        " << min_range << std::endl;
         std::cout << std::endl;
 
         // open the serial port
@@ -221,19 +225,22 @@ int main(int argc, char** argv)
 
                         if (match == false)
                         {
-                            target.push_back(target_locator(anchor[idx].address, observation(anchor[idx].range, current_location), { anchor[idx].range + current_location[0], current_location[1], current_location[2] }));
+                            target.push_back(target_locator(anchor[idx].address, observation(anchor[idx].range, current_location), 
+                                { anchor[idx].range + current_location[0], current_location[1], current_location[2] }, 
+                                max_obs, min_range));
                         }
                     }
                     else
                     {
                         // add the very first detect automatically
-                        target.push_back(target_locator(anchor[idx].address, observation(anchor[idx].range, current_location), { anchor[idx].range + current_location[0], current_location[1], current_location[2] }));
+                        target.push_back(target_locator(anchor[idx].address, 
+                            observation(anchor[idx].range, current_location), { anchor[idx].range + current_location[0], current_location[1], current_location[2] },
+                            max_obs, min_range));
                     }
 
                 }   // end of for loop
 
                 position_msg = position_msg.substr(0, position_msg.length() - 2);
-                //std::cout << position_msg << std::endl;
                 ROS_INFO("%s", position_msg.c_str());
 
                 // cycle through the list of targets and try to get the locations
@@ -324,13 +331,17 @@ int main(int argc, char** argv)
 
                     if (match == false)
                     {
-                        target.push_back(target_locator(anchor[idx].address, observation(anchor[idx].range, current_location), { anchor[idx].range + current_location[0], current_location[1] }));
+                        target.push_back(target_locator(anchor[idx].address, 
+                            observation(anchor[idx].range, current_location), { anchor[idx].range + current_location[0], current_location[1] },
+                            max_obs, min_range));
                     }
                 }
                 else
                 {
                     // add the very first detect automatically
-                    target.push_back(target_locator(anchor[idx].address, observation(anchor[idx].range, current_location), { anchor[idx].range + current_location[0], current_location[1] }));
+                    target.push_back(target_locator(anchor[idx].address, 
+                        observation(anchor[idx].range, current_location), { anchor[idx].range + current_location[0], current_location[1] },
+                        max_obs, min_range));
                 }
 
             }   // end of for loop
@@ -340,8 +351,12 @@ int main(int argc, char** argv)
                 stop_code = t.get_position();
                 if (t.valid_location)
                 {
-                    std::cout << "target id: " << num2str(t.id, "0x%04X") << std::endl;
-                    std::cout << "  x=" << num2str(t.location[0], "%3.6f") << " y=" << num2str(t.location[1], "%3.6f") << std::endl;
+                    std::cout << "Target ID: " << num2str(t.id, "0x%04X");
+                    std::cout << "  Position-> x: " << num2str(t.location[0], "%9.6f") << ", y:" << num2str(t.location[1], "%9.6f") << ", z:" << num2str(t.location[2], "%9.6f") << std::endl;
+                }
+                else
+                {
+                    std::cout << t.stop_code_list[stop_code] <<  std::endl;
                 }
             }
 
