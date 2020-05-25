@@ -19,12 +19,9 @@
     <!-- <node name="$(arg node_name)" pkg="dwm_wrapper" type="dwm_ex" output="screen"> -->
     <node name="enemy_locations" pkg="$(arg package_name)" type="dwm_ex" output="screen">
 
-    <!-- <param name="max_observations" value="20" /> -->
-    <!-- <param name="serial_port" value="ttyACM0" /> -->
-
     </node>
 
-    <rosparam file="/home/ros/catkin_ws/src/robot/dwm1001/params/dwm_params.yaml" />
+    <rosparam file="$(find dwm_wrapper)/params/dwm_params.yaml" />
 
 </launch>
 

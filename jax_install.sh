@@ -73,6 +73,7 @@ wget https://stereolabs.sfo2.digitaloceanspaces.com/zedsdk/3.1/ZED_SDK_Tegra_JP4
 chmod +x ZED_SDK_Tegra_JP43_v3.1.2.run
 sudo ./ZED_SDK_Tegra_JP43_v3.1.2.run silent
 sudo chmod 755 -R /usr/local/zed
+sudo chown -R jax:jax /usr/local/zed
 
 #rm -rf /var/lib/apt/lists/*
 sudo mkdir -p /root/Documents/ZED/
