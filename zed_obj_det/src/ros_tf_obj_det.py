@@ -26,21 +26,27 @@ from utils import visualization_utils as vis_util
 
 min_score = 0.5
 
-MODEL_PATH = '/home/ros/'
+home = os.path.expanduser("~")
+MODEL_PATH = home + '/'
 
-# MSCOCO
-MODEL_NAME = 'ssd_resnet50_v1_fpn'
-PATH_TO_LABELS = os.path.join('/home/ros/models/research/object_detection/data', 'mscoco_label_map.pbtxt')
-NUM_CLASSES = 90
+# MSCOCO - 76ms, 35 mAP
+#MODEL_NAME = 'ssd_resnet50_v1_fpn'
+#PATH_TO_LABELS = os.path.join(home, 'models/research/object_detection/data', 'mscoco_label_map.pbtxt')
+#NUM_CLASSES = 90
 
-#Open Image
-#MODEL_NAME = 'ssd_mobilenet_v2_oid'
-#PATH_TO_LABELS = os.path.join('/home/ros/models/research/object_detection/data', 'oid_v4_label_map.pbtxt')
+#Open Image - 89ms, 36 mAP
+MODEL_NAME = 'ssd_mobilenet_v2_oid'
+PATH_TO_LABELS = os.path.join(home, 'models/research/object_detection/data', 'oid_v4_label_map.pbtxt')
+NUM_CLASSES = 600
+
+#Open Image - 727ms, 38 mAP
+#MODEL_NAME = 'faster_rcnn_inception_resnet_v2_oid'
+#PATH_TO_LABELS = os.path.join(home, 'models/research/object_detection/data', 'oid_v4_label_map.pbtxt')
 #NUM_CLASSES = 600
 
-#Open Image
-#MODEL_NAME = 'faster_rcnn_inception_resnet_v2_oid'
-#PATH_TO_LABELS = os.path.join('/home/ros/models/research/object_detection/data', 'oid_v4_label_map.pbtxt')
+#Open Image - 237ms, 38 mAP
+#MODEL_NAME = 'ssd_resnet101_v1_fpn_oid'
+#PATH_TO_LABELS = os.path.join(home, 'models/research/object_detection/data', 'oid_v4_label_map.pbtxt')
 #NUM_CLASSES = 600
 
 PATH_TO_CKPT = MODEL_PATH + MODEL_NAME + '/frozen_inference_graph.pb'
@@ -77,8 +83,14 @@ class RosTensorFlow():
         cv_image = self._cv_bridge.imgmsg_to_cv2(image_msg, "rgb8")
         depth_img = self._cv_bridge.imgmsg_to_cv2(depth_msg)
 
-        #img_height = cv_image.shape[0]
-        #img_width  = cv_image.shape[1]
+        # this needs to be tweaked to improve detection performance
+        #cv_image = cv_image[120:600, 320:960]
+        #depth_img = depth_img[120:600, 320:960]
+
+        img_h = cv_image.shape[0]
+        img_w = cv_image.shape[1]
+
+        #print("{}, {}".format(img_h, img_w))
 
         # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
         image_np_expanded = np.expand_dims(cv_image, axis=0)
@@ -104,26 +116,25 @@ class RosTensorFlow():
 
         box_string = ""
         target_string = ""
-        #razel = []
 
         obl = object_det_list()
 
         for idx in range(num_detections):
             if scores[idx] >= min_score:
-                x_min = int(math.floor(boxes[idx][1]*self.img_w))
-                y_min = int(math.floor(boxes[idx][0]*self.img_h))
-                x_max = int(math.ceil(boxes[idx][3]*self.img_w))
-                y_max = int(math.ceil(boxes[idx][2]*self.img_h))
+                x_min = int(math.floor(boxes[idx][1]*img_w))
+                y_min = int(math.floor(boxes[idx][0]*img_h))
+                x_max = int(math.ceil(boxes[idx][3]*img_w))
+                y_max = int(math.ceil(boxes[idx][2]*img_h))
                 box_string = box_string + "{Class=" + self.category_index[classes[idx]]['name'] + "; xmin={}, ymin={}, xmax={}, ymax={}".format(x_min, y_min, x_max, y_max) + "},"
 
-                #if((self.category_index[classes[idx]]['name']).lower() == "backpack"):
-                if((self.category_index[classes[idx]]['name']).lower() == "mouse"):
+                if((self.category_index[classes[idx]]['name']).lower() == "backpack"):
+                #if((self.category_index[classes[idx]]['name']).lower() == "mouse"):
                     bp_image = depth_img[y_min:y_max, x_min:x_max]
                     avg_range = np.nanmean(bp_image)
                     det_x = int(x_min + (x_max-x_min)/2.0)
                     det_y = int(y_min + (y_max-y_min)/2.0)
-                    az = self.h_res*(det_x - int(self.img_w/2.0))
-                    el = self.v_res*(int(self.img_h/2.0) - det_y)
+                    az = self.h_res*(det_x - int(img_w/2.0))
+                    el = self.v_res*(int(img_h/2.0) - det_y)
                     #target_string = target_string + "{" + "{},{},{}".format(avg_range, az, el) + "},"
                     target_string = target_string + "{" + (self.category_index[classes[idx]]['name']).lower() + ",{},{},{}".format(avg_range, az, el) + "},"
                     ob = object_det()
@@ -143,8 +154,8 @@ class RosTensorFlow():
                     avg_range = np.nanmean(bp_image)
                     det_x = int(x_min + (x_max-x_min)/2.0)
                     det_y = int(y_min + (y_max-y_min)/2.0)
-                    az = self.h_res*(det_x - int(self.img_w/2.0))
-                    el = self.v_res*(int(self.img_h/2.0) - det_y)
+                    az = self.h_res*(det_x - int(img_w/2.0))
+                    el = self.v_res*(int(img_h/2.0) - det_y)
                     #target_string = target_string + "{" + "{},{},{}".format(avg_range, az, el) + "},"
                     target_string = target_string + "{" + (self.category_index[classes[idx]]['name']).lower() + ",{},{},{}".format(avg_range, az, el) + "},"
                     ob = object_det()
