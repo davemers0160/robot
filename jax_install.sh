@@ -1,19 +1,9 @@
 #!/bin/bash
 # Install Robot Operating System (ROS) on NVIDIA Jetson AGX Xavier
-# https://raw.githubusercontent.com/davemers0160/robot/master/jax_install.sh
-
-#sudo nano /media/boot/boot.ini ---- find the line that contains the "bootargs" add the following to the end of the line within the quotes: usbcore.usbfs_memory_mb=1000
-#
-# this is the one to run 
-#sudo nano /boot/extlinux/extlinux.conf ---- APPEND line: usbcore.usbfs_memory_mb=1000
-#
-#          /sys/module/usbcore/parameters/usbfs_memory_mb
-#          /etc/default/grub file     ---- GRUB_CMDLINE_LINUX_DEFAULT="quiet splash usbcore.usbfs_memory_mb=1000"
-#
-# save the file and reboot
-# check: cat /sys/module/usbcore/parameters/usbfs_memory_mb
-
-# run this script sudo sh jax_install.sh
+# to run this script run the following from the home folder:
+# wget https://raw.githubusercontent.com/davemers0160/robot/master/jax_install.sh
+# chmod a+x jax_install.sh
+# sudo ./jax_install.sh
 
 # old school check for *nix echo styles
 if [ "`echo -n`" = "-n" ]; then
@@ -98,12 +88,17 @@ sudo apt-get install -y python-rosdep python-rosinstall python-rosinstall-genera
 sudo rosdep init
 sudo rosdep fix-permissions
 rosdep update
-echo "source /opt/ros/melodic/setup.bash" >> /home/$USER/.bashrc
+
+echo "source /opt/\${USER}/melodic/setup.bash" >> /home/$USER/.bashrc
 echo "export PLATFORM=JAX" >> /home/$USER/.bashrc
 
 export DEBIAN_FRONTEND=$current_deb
 
 source /home/$USER/.bashrc
+
+# add a faux user name and email to git to push and pull changes
+git config --global user.name "jax"
+git config --global user.email "jax@example.com"
 
 sudo reboot
 exit 1
@@ -186,7 +181,6 @@ echo "PATH=\$PATH:/home/\$USER/.local/bin" >> /home/$USER/.bashrc
 echo "source /home/\$USER/catkin_ws/devel/setup.bash" >> /home/$USER/.bashrc
 echo "export ROS_IP=$(hostname -I)" >> /home/$USER/.bashrc
 
-
 fi
 
 echo "Installation complete!"
@@ -196,5 +190,6 @@ echo "Run the following command:"
 echo "sudo nano /boot/extlinux/extlinux.conf"
 echo "- add the following the the APPEND line: \" usbcore.usbfs_memory_mb=2000 \" "
 
+# check: cat /sys/module/usbcore/parameters/usbfs_memory_mb
 
 
