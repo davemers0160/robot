@@ -127,9 +127,9 @@ mkdir -p /home/$USER/catkin_ws
 mkdir -p /home/$USER/catkin_ws/src
 mkdir -p /home/$USER/Projects
 
-wget http://dlib.net/files/dlib-19.19.tar.bz2
-tar -xf dlib-19.19.tar.bz2
-rm dlib-19.19.tar.bz2
+wget http://dlib.net/files/dlib-19.19.zip
+unzip dlib-19.19.zip
+rm dlib-19.19.zip
 
 git clone -b 'v3.0.3' --single-branch https://github.com/stereolabs/zed-ros-wrapper.git /home/$USER/catkin_ws/src/zed-ros-wrapper
 git clone https://github.com/davemers0160/robot.git /home/$USER/catkin_ws/src/robot
@@ -179,7 +179,7 @@ rm ssd_resnet101_v1_fpn_shared_box_predictor_oid_512x512_sync_2019_01_20.tar.gz
 echo "export PYTHONPATH=$PYTHONPATH:/home/$USER/models:/home/$USER/models/research:/home/$USER/models/research/slim:/home/$USER/models/research/object_detection" >> /home/$USER/.bashrc
 echo "PATH=$PATH:/home/$USER/.local/bin" >> /home/$USER/.bashrc
 echo "source /home/$USER/catkin_ws/devel/setup.bash" >> /home/$USER/.bashrc
-echo "export ROS_IP=$(hostname -I)" >> /home/$USER/.bashrc
+echo "export ROS_IP=\$(hostname -I)" >> /home/$USER/.bashrc
 
 fi
 
