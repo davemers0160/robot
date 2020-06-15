@@ -27,7 +27,7 @@ echo " - Installs Tensorflow"
 echo " - Installs the Tensorflow model zoo"
 echo " - Downloads the required Tensorflow models"
 echo " - Clones the require support libraries"
-echo " - Finishes teh installation"
+echo " - Finishes the installation"
 echo "-------------------------------------------------------------------------------------------"
 echo $n "Select which phase (1 or 2) to run: $c"
 
@@ -89,7 +89,7 @@ sudo rosdep init
 sudo rosdep fix-permissions
 rosdep update
 
-echo "source /opt/\${USER}/melodic/setup.bash" >> /home/$USER/.bashrc
+echo "source /opt/ros/melodic/setup.bash" >> /home/$USER/.bashrc
 echo "export PLATFORM=JAX" >> /home/$USER/.bashrc
 
 export DEBIAN_FRONTEND=$current_deb
@@ -176,9 +176,9 @@ rm ssd_resnet101_v1_fpn_shared_box_predictor_oid_512x512_sync_2019_01_20.tar.gz
 
 ## ----------------------------------------------------------------------------
 ## put the everything in the right paths
-echo "export PYTHONPATH=\$PYTHONPATH:/home/\$USER/models:/home/\$USER/models/research:/home/\$USER/models/research/slim:/home/\$USER/models/research/object_detection" >> /home/$USER/.bashrc
-echo "PATH=\$PATH:/home/\$USER/.local/bin" >> /home/$USER/.bashrc
-echo "source /home/\$USER/catkin_ws/devel/setup.bash" >> /home/$USER/.bashrc
+echo "export PYTHONPATH=$PYTHONPATH:/home/$USER/models:/home/$USER/models/research:/home/$USER/models/research/slim:/home/$USER/models/research/object_detection" >> /home/$USER/.bashrc
+echo "PATH=$PATH:/home/$USER/.local/bin" >> /home/$USER/.bashrc
+echo "source /home/$USER/catkin_ws/devel/setup.bash" >> /home/$USER/.bashrc
 echo "export ROS_IP=$(hostname -I)" >> /home/$USER/.bashrc
 
 fi
