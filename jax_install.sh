@@ -186,7 +186,7 @@ rm ssd_resnet101_v1_fpn_shared_box_predictor_oid_512x512_sync_2019_01_20.tar.gz
 echo "export PYTHONPATH=$PYTHONPATH:/home/$USER/models:/home/$USER/models/research:/home/$USER/models/research/slim:/home/$USER/models/research/object_detection" >> /home/$USER/.bashrc
 echo "export PATH=$PATH:/home/$USER/.local/bin" >> /home/$USER/.bashrc
 echo "source /home/$USER/catkin_ws/devel/setup.bash" >> /home/$USER/.bashrc
-echo "export ROS_IP=\$(hostname -I)" >> /home/$USER/.bashrc
+echo "export ROS_IP=\$(echo \$(hostname -I) | awk '{split(\$0,a,\" \"); print a[1]}')" >> /home/$USER/.bashrc
 
 fi
 
