@@ -146,6 +146,13 @@ catkin_make -j6
 ## get a couple of object detection models
 cd /home/$USER
 git clone https://github.com/tensorflow/models /home/$USER/models
+#git checkout 7b95816b5384c32219782bc60c0403e03e57b121 <- nope
+#git checkout 8518d053936aaf30afb9ed0a4ea01baddca5bd17 <- nope
+# last commit that works
+git checkout 0fc994b6762b7bfe971cc9f370b40d2cd987fb66 
+#git checkout c627506ff35030eb1f64d4e926b7e5a177718b6e <- works
+#git checkout 898cc54020ba3b11ac8b6a10b288a99dece083a1 <- works
+#git checkout a17ba721befc53479f4a5aaecb0b3bb66e1e22bb <- works
 
 cd /home/$USER/models/research
 #wget -O protobuf.zip https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip
@@ -188,7 +195,7 @@ echo
 
 echo "Run the following command:"
 echo "sudo nano /boot/extlinux/extlinux.conf"
-echo "- add the following the the APPEND line: \" usbcore.usbfs_memory_mb=2000 \" "
+echo "- add the following the the APPEND line before QUIET: \" usbcore.usbfs_memory_mb=2000 \" "
 
 # check: cat /sys/module/usbcore/parameters/usbfs_memory_mb
 
