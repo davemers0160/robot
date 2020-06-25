@@ -4,6 +4,7 @@
 # wget https://raw.githubusercontent.com/davemers0160/robot/master/jax_install.sh
 # chmod a+x jax_install.sh
 # ./jax_install.sh <- do not run as sudo.  This will modify root vs the user in some cases
+# you may want to increase the sudo timeout period while running this script
 
 # old school check for *nix echo styles
 if [ "`echo -n`" = "-n" ]; then
@@ -190,12 +191,13 @@ echo "export ROS_IP=\$(echo \$(hostname -I) | awk '{split(\$0,a,\" \"); print a[
 
 fi
 
+echo
 echo "Installation complete!"
 echo
 
 echo "Run the following command:"
 echo "sudo nano /boot/extlinux/extlinux.conf"
-echo "- add the following the the APPEND line before QUIET: \" usbcore.usbfs_memory_mb=2000 \" "
+echo "- add the following to the APPEND line before QUIET: \" usbcore.usbfs_memory_mb=2000 \" "
 
 # check: cat /sys/module/usbcore/parameters/usbfs_memory_mb
 
