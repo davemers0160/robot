@@ -3,7 +3,7 @@
 # to run this script run the following from the home folder:
 # wget https://raw.githubusercontent.com/davemers0160/robot/master/jax_install.sh
 # chmod a+x jax_install.sh
-# ./jax_install.sh <- do run as sudo.  This will modify root vs the user in some cases
+# ./jax_install.sh <- do not run as sudo.  This will modify root vs the user in some cases
 
 # old school check for *nix echo styles
 if [ "`echo -n`" = "-n" ]; then
