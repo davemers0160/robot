@@ -97,13 +97,10 @@ public:
         const std::string& cam_info_topic_
     ) : obj_det_node(obj_det_node_), image_topic(image_topic_), depth_topic(depth_topic_), cam_info_topic(cam_info_topic_)
     {
-
         // create the subscribers to read the camera parameters from ROS
         image_sub = obj_det_node.subscribe<sensor_msgs::Image>(image_topic, 1, &object_detector::get_image_cb, this);
         depth_sub = obj_det_node.subscribe<sensor_msgs::Image>(depth_topic, 1, &object_detector::get_depth_cb, this);
         cam_info_sub = obj_det_node.subscribe<sensor_msgs::CameraInfo>(cam_info_topic, 1, &object_detector::get_cam_info_cb, this);
-
-//        loop_rate(1);
     }
 
     ~object_detector() = default;
@@ -158,8 +155,6 @@ public:
             // remember that we are accessing it from another thread too.
             std::lock_guard<std::mutex> lock(mtx);
             image = tmp_img->image;
-
-            //++frame_number;
         }
         catch (cv_bridge::Exception& e)
         {
@@ -192,7 +187,18 @@ public:
 
         // since the calibration don't change we stop the subscriber once we receive the parameters
         if (cam_info != nullptr)
+        {
+            img_w = cam_info->width;
+            img_h = cam_info->height;
+            h_res = 90.0/(double)img_w;
+            v_res = 60.0/(double)img_h;
+
+            std::cout << std::endl << "cam info:" << std::endl;
+            std::cout << "Image Size (h x w): " << img_h << " x " << img_w << std::endl;
+            std::cout << "Angular Resolution (AZ, EL): " << h_res << ", " << v_res << std::endl;
+
             cam_info_sub.shutdown();
+        }
     }
 
     // ----------------------------------------------------------------------------
@@ -204,7 +210,7 @@ public:
         uint64_t x_min, x_max;
         uint64_t y_min, y_max;
 
-        uint64_t det_x, det_y;
+        dlib::point c;
 
         double az, el, range;
 
@@ -212,7 +218,7 @@ public:
         long nc;
 
         ::object_detect::object_det_list detect_list;
-        ros::Rate loop_rate(1);
+        ros::Rate loop_rate(4);
 
         while (ros::ok())
         {
@@ -227,8 +233,6 @@ public:
             if (!img.empty() && !dm.empty())
             {
                 box_string = "";
-
-                cv::imshow("color image", img);
 
                 // copy the image over
 
@@ -248,7 +252,7 @@ public:
 
                     x_min = d[idx].rect.left();
                     x_max = d[idx].rect.right();
-                    y_min = d[idx].rect. top();
+                    y_min = d[idx].rect.top();
                     y_max = d[idx].rect.bottom();
 
                     // fill in the box string
@@ -261,11 +265,10 @@ public:
                     cv::Mat bp_image = dm(rows, cols);
                     range = nan_mean<float>(bp_image);
 
-                    det_x = (uint64_t)(x_min + (x_max-x_min)/2.0);
-                    det_y = (uint64_t)(y_min + (y_max-y_min)/2.0);
-                    double h_res = 1.0, v_res = 1.0;
-                    az = h_res*(det_x - (uint64_t)(img.cols>>1));
-                    el = v_res*((uint64_t)(img.rows>>1) - det_y);
+                    c = dlib::center(d[idx].rect);
+
+                    az = h_res*(c.x() - (int64_t)(img.cols>>1));
+                    el = v_res*((int64_t)(img.rows>>1) - c.y());
 
                     ::object_detect::object_det obj_det;
                     obj_det.label = d[idx].label;
@@ -276,10 +279,10 @@ public:
 
                 }
 
-                box_string = box_string.substr(0, box_string.length()-2);
+                box_string = box_string.substr(0, box_string.length()-1);
 
                 boxes_pub.publish(box_string);
-                // razel_pub.publish(detect_list);
+                razel_pub.publish(detect_list);
                 image_det_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "bgr8", img).toImageMsg());
 
             }
@@ -303,9 +306,9 @@ private:
     std::string image_topic;
     std::string depth_topic;
     std::string cam_info_topic;
-    ros::Subscriber image_sub;          // = obj_det_node.subscribe(image_topic, 1, run_net_callback);
-    ros::Subscriber depth_sub;          // = obj_det_node.subscribe(depth_topic, 1, run_net_callback);
-    ros::Subscriber cam_info_sub;       // = obj_det_node.subscribe(cam_info_topic, 1, run_net_callback);
+    ros::Subscriber image_sub;
+    ros::Subscriber depth_sub;
+    ros::Subscriber cam_info_sub;
 
 
     // ROS publisher topics
@@ -320,6 +323,8 @@ private:
     ros::Publisher razel_pub = obj_det_node.advertise<::object_detect::object_det_list>(razel_topic, 1);
 
     cv::Mat image, depth_map;
+    uint64_t img_w, img_h;
+    double h_res, v_res;
 
     anet_type net;
     std::vector<std::string> class_names;
