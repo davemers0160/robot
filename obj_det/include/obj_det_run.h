@@ -7,12 +7,18 @@
 #include <mutex>
 #include <vector>
 
+
+// Custom includes
+#include "num2string.h"
+
 // Net Version
 #include "tfd_net_v03.h"
-
+#include "overlay_bounding_box.h"
 
 // ROS includes
 #include <ros/ros.h>
+
+#include <std_msgs/String.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
@@ -20,11 +26,16 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 
-#include "zed_obj_det/object_det.h"
-#include "zed_obj_det/object_det_list.h"
+#include "object_detector/object_det.h"
+#include "object_detector/object_det_list.h"
 
 #include <dlib/dnn.h>
 #include <dlib/image_transforms.h>
+
+// OpenCV Includes
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 
 
 extern const uint32_t array_depth;
@@ -79,23 +90,21 @@ class object_detector
 public:
 
 
-    object_detector(ros::NodeHandle& nh, 
-        const std::string& image_topic_, 
+    object_detector(ros::NodeHandle& nh,
+        const std::string& image_topic_,
         const std::string& depth_topic_,
         const std::string& cam_info_topic_
     ) : image_topic(image_topic_), depth_topic(depth_topic_), cam_info_topic(cam_info_topic_)
     {
         // create the subscribers to read the camera parameters from ROS
-        image_sub = obj_det_node.subscribe<sensor_msgs::Image>(image_topic, 1, &get_image_cb, this);
+        image_sub = obj_det_node.subscribe<sensor_msgs::Image>(image_topic, 1, get_image_cb, this);
         depth_sub = obj_det_node.subscribe<sensor_msgs::Image>(depth_topic, 1, &get_depth_cb, this);
-        cam_info_sub = obj_det_node.subscribe<sensor_msgs::CameraInfo>(cam_info_topic, 1, &get_cam_info_cb, this);        
+        cam_info_sub = obj_det_node.subscribe<sensor_msgs::CameraInfo>(cam_info_topic, 1, &get_cam_info_cb, this);
     }
-                 
 
-    ~object_detector() = default;    
-    
-        
-    // ----------------------------------------------------------------------------   
+    ~object_detector() = default;
+
+    // ----------------------------------------------------------------------------
     inline void init(std::string net_file)
     {
 
@@ -149,15 +158,15 @@ public:
         {
             // display the error at most once per 10 seconds
             ROS_ERROR_THROTTLE(10, "cv_bridge exception %s at line number %d on function %s in file %s", e.what(), __LINE__, __FUNCTION__, __FILE__);
-        }        
+        }
     }
-    
+
     void get_depth_cb(const sensor_msgs::ImageConstPtr& dm)
     {
         try
         {
             auto tmp_dm = cv_bridge::toCvCopy(dm, sensor_msgs::image_encodings::BGR8);
-            
+
             // it is very important to lock the below assignment operation.
             // remember that we are accessing it from another thread too.
             std::lock_guard<std::mutex> lock(mtx);
@@ -167,65 +176,62 @@ public:
         {
             // display the error at most once per 10 seconds
             ROS_ERROR_THROTTLE(10, "cv_bridge exception %s at line number %d on function %s in file %s", e.what(), __LINE__, __FUNCTION__, __FILE__);
-        }         
+        }
     }
-    
+
     void get_cam_info_cb(const sensor_msgs::CameraInfoConstPtr& cam_msg)
     {
         cam_info = std::make_shared<sensor_msgs::CameraInfo>(*cam_msg);
 
         // since the calibration don't change we stop the subscriber once we receive the parameters
         if (cam_info != nullptr)
-            get_cam_info_cb.shutdown();        
+            cam_info_sub.shutdown();
     }
-    
-    
+
     // ----------------------------------------------------------------------------
     void run()
     {
         uint64_t idx;
         std::string box_string = "";
-        
+
         uint64_t x_min, x_max;
         uint64_t y_min, y_max;
-        
+
         uint64_t det_x, det_y;
-        
+
         double az, el, range;
-        
+
         long nr;
         long nc;
-        
-        ::zed_obj_det::object_det_list detect_list;
-        
+
+        ::object_detector::object_det_list detect_list;
+
         while (ros::ok())
         {
             // get the image and depthmap from the camera
             mtx.lock();
             cv::Mat img = image;
-            cv::Mat dm  = depthmap;
+            cv::Mat dm  = depth_map;
             mtx.unlock();
-            
+
             detect_list.clear();
-            
+
             if (!img.empty() && !dm.empty())
             {
                 box_string = "";
-                
+
                 cv::imshow("color image", img);
-                
-                
+
                 // copy the image over
-                
-                
+
                 // run the detection
                 //std::vector<dlib::mmod_rect> d = net(d_img);
                 //prune_detects(d, 0.3);
-                
+
                 // simulate a detection of each type
                 std::vector<dlib::mmod_rect> d;
-                d.push_back(dlib::mmod_rect(dlib::rectangle r(20,20,100,100), 0.0, "box"));
-                d.push_back(dlib::mmod_rect(dlib::rectangle r(100,100,200,200), 0.0, "backpack"));
+                d.push_back(dlib::mmod_rect(dlib::rectangle(20,20,100,100), 0.0, "box"));
+                d.push_back(dlib::mmod_rect(dlib::rectangle(100,100,200,200), 0.0, "backpack"));
 
                 for (idx = 0; idx < d.size(); ++idx)
                 {
@@ -245,28 +251,29 @@ public:
                     cv::Range cols(x_min, x_max);
 
                     cv::Mat bp_image = dm(rows, cols);
-                    range = nan_mean(bp_image);
-                    
+                    range = nan_mean<float>(bp_image);
+
                     det_x = (uint64_t)(x_min + (x_max-x_min)/2.0);
                     det_y = (uint64_t)(y_min + (y_max-y_min)/2.0);
-                    az = self.h_res*(det_x - (uint64_t)(img_w/2.0));
-                    el = self.v_res*((uint64_t)(img_h/2.0) - det_y);
-                    
-                    ::zed_obj_det::object_det obj_det;
+                    double h_res = 1.0, v_res = 1.0;
+                    az = h_res*(det_x - (uint64_t)(img_w>>1));
+                    el = v_res*((uint64_t)(img_h>>1) - det_y);
+
+                    ::object_detector::object_det obj_det;
                     obj_det.label = d[idx].label;
                     obj_det.range = range;
                     obj_det.az = az;
                     obj_det.el = el;
                     detect_list.det.push_back(obj_det);
-                    
+
                 }
-                
+
                 box_string = box_string.substr(0, box_string.length()-2);
-                
+
                 boxes_pub.publish(box_string);
                 // razel_pub.publish(detect_list);
                 image_det_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "bgr8", img).toImageMsg());
-                
+
             }
             else
             {

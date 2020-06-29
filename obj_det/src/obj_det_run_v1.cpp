@@ -66,14 +66,11 @@ void run_net_callback(const sensor_msgs::ImageConstPtr& img)
     try
     {
         cv_ptr = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::RGB8);
-      
+
         sensor_msgs::image_encodings::TYPE_32FC1
 
         //copy_image(std::array<dlib::matrix<T>, array_depth> &dest, cv_ptr->image.ptr<unsigned char>(0))
 
-      
-      
-      
     }
     catch (cv_bridge::Exception& e)
     {
@@ -123,16 +120,16 @@ int main(int argc, char** argv)
     static std::string image_topic;
     static std::string depth_topic;
     static std::string cam_info_topic;
-    
+
     // ROS publisher topics
     // static const std::string root_topic = "/obj_det/";
     // static const std::string image_det_topic = root_topic + "image";
     // static const std::string boxes_topic = root_topic + "boxes";
     // static const std::string razel_topic = root_topic + "target_razel";
-    
+
     std::string cam_type;
     std::string net_file;
-  
+
     // ----------------------------------------------------------------------------------------
     if (argc == 1)
     {
@@ -143,8 +140,8 @@ int main(int argc, char** argv)
 
 
     // ----------------------------------------------------------------------------------------
-    // configure the basic ROS stuff 
-    
+    // configure the basic ROS stuff
+
     //std::string pose_topic = "obj_det";
 
     // the message to be published
@@ -158,14 +155,14 @@ int main(int argc, char** argv)
 
 
     // get the required parameters /enemy_locations/max_observations
-    dwm_node.param<std::string>("/obj_det/cam_type", cam_type, "/zed/");
-    dwm_node.param<std::string>("/obj_det/net_file", net_file, "../nets/");
+    obj_det_node.param<std::string>("/obj_det/cam_type", cam_type, "/zed/");
+    obj_det_node.param<std::string>("/obj_det/net_file", net_file, "../nets/");
     //dwm_node.param("obj_det/max_observations", max_obs, 20);
 
     image_topic = cam_type + "zed_node/rgb/image_rect_color";
     depth_topic = cam_type + "zed_node/depth/depth_registered";
     cam_info_topic = cam_type + "zed_node/rgb/camera_info";
-    
+
     /*
     // setup the subscriber to the odomotry ROS topic to get the platform [x, y, z] location
     ros::Subscriber image_sub = obj_det_node.subscribe(image_topic, 1, run_net_callback);
@@ -187,10 +184,10 @@ int main(int argc, char** argv)
 
         // create the object detector class
         const auto object_det = std::make_shared<object_detector>(obj_det_node, image_topic, depth_topic, cam_info_topic);
-        
+
         // initialize the object detector network
         object_det.init(net_file);
-        
+
         // run the detections
         object_det.run();
 
