@@ -136,6 +136,15 @@ file(GLOB SOURCES "src/*.c*"
     "${DLIB_CONTRIB}/src/*.cpp"
     )
 
+# Look for the OpenCV installation
+find_package(OpenCV REQUIRED)
+if (OpenCV_FOUND)
+    set(project_includes ${project_includes} ${OpenCV_INCLUDE_DIRS})
+else()
+    message("OpenCV not found, so we won't build the project.")
+endif()
+
+
 message(" ")
 message("--------------------------------------------------------")
 message("Source Files: ")
@@ -167,7 +176,7 @@ message(" ")
 if(WIN32)
     include_directories(${project_includes})
     add_executable(${exe_name} ${SOURCES})
-    target_link_libraries(${exe_name} dlib::dlib)
+    target_link_libraries(${exe_name} dlib::dlib ${OpenCV_LIBS})
 
     message("MSVC Version: " ${MSVC_VERSION})
 
@@ -183,7 +192,7 @@ if(USE_ROS)
     include_directories(${project_includes})
 
     add_executable(${exe_name} ${SOURCES})
-    target_link_libraries(${exe_name} dlib::dlib ${LINK_LIBRARIES})
+    target_link_libraries(${exe_name} dlib::dlib ${OpenCV_LIBS} ${LINK_LIBRARIES})
     add_dependencies(${exe_name} ${catkin_EXPORTED_TARGETS}) # ${PROJECT_NAME}_gencfg)
     target_compile_options(${exe_name} PRIVATE ${active_preprocessor_switches})
 
@@ -216,7 +225,7 @@ if(USE_ROS)
 else()
     include_directories(${project_includes})
     add_executable(${exe_name} ${SOURCES})
-    target_link_libraries(${exe_name} dlib::dlib)
+    target_link_libraries(${exe_name} dlib::dlib ${OpenCV_LIBS})
 
 endif()
 
