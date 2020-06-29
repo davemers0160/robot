@@ -132,14 +132,17 @@ public:
             //class_names.push_back(it);
         }
 */
+        
         class_names.push_back("box");
         class_names.push_back("backpack");
 
-        dlib::rand rnd(time(NULL));
+        //dlib::rand rnd(time(NULL));
+        cv::RNG rng(time(NULL));
         class_color.clear();
         for (uint64_t idx = 0; idx < class_names.size(); ++idx)
         {
-            class_color.push_back(dlib::rgb_pixel(rnd.get_random_8bit_number(), rnd.get_random_8bit_number(), rnd.get_random_8bit_number()));
+            //class_color.push_back(dlib::rgb_pixel(rnd.get_random_8bit_number(), rnd.get_random_8bit_number(), rnd.get_random_8bit_number()));
+            class_color.push_back(cv::Scalar(rng.uniform(0, 256), rng.uniform(0, 256), rng.uniform(0, 256)));
         }
 
     }   // end of init
@@ -248,7 +251,7 @@ public:
                 for (idx = 0; idx < d.size(); ++idx)
                 {
                     auto class_index = std::find(class_names.begin(), class_names.end(), d[idx].label);
-                    //overlay_bounding_box(img, d[idx], class_color[std::distance(class_names.begin(), class_index)]);
+                    overlay_bounding_box(img, dlib2cv_rect(d[idx].rect), class_color[std::distance(class_names.begin(), class_index)]);
 
                     x_min = d[idx].rect.left();
                     x_max = d[idx].rect.right();
@@ -328,7 +331,7 @@ private:
 
     anet_type net;
     std::vector<std::string> class_names;
-    std::vector<dlib::rgb_pixel> class_color;
+    std::vector<cv::Scalar> class_color;
 
     std::mutex mtx;
 
