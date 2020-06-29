@@ -51,10 +51,12 @@ double nan_mean(cv::Mat& img)
 }   // end of nan_mean
 
 // ----------------------------------------------------------------------------
+/*
+template <typename T>
 void copy_image(std::array<dlib::matrix<T>, array_depth> &dest, unsigned char *src)
 {
     long r, c;
-    
+
     for (r = 0; r < nr; ++r)
     {
         for (c = 0; c < nc*3; c+=3)
@@ -64,9 +66,10 @@ void copy_image(std::array<dlib::matrix<T>, array_depth> &dest, unsigned char *s
             dest[1](r, c) = src[index + 1];
             dest[2](r, c) = src[index + 2];
         }
-    }    
-}   // end of copy_image
+    }
 
+}   // end of copy_image
+*/
 
 
 // ----------------------------------------------------------------------------
@@ -95,51 +98,51 @@ public:
     // ----------------------------------------------------------------------------   
     inline void init(std::string net_file)
     {
-       
+
         // initialize the network
         dlib::deserialize(net_file) >> net;
-        
+
         // get the details about the loss layer -> the number and names of the classes
         dlib::mmod_options options = dlib::layer<0>(net).loss_details().get_options();
-    
+
         std::set<std::string> tmp_names;
         std::cout << std::endl << "------------------------------------------------------------------" << std::endl;
-        for (idx = 0; idx < options.detector_windows.size(); ++idx)
+        for (uint64_t idx = 0; idx < options.detector_windows.size(); ++idx)
         {
             std::cout << "detector window (w x h): " << options.detector_windows[idx].label << " - " << options.detector_windows[idx].width << " x " << options.detector_windows[idx].height << std::endl;
 
-            tmp_names.insert(options.detector_windows[idx].label);        
+            tmp_names.insert(options.detector_windows[idx].label);
         }
         std::cout << "------------------------------------------------------------------" << std::endl;
 
         // pull out the class names
         class_names.clear();
-        for (const auto &it : tmp_names) 
+        for (const auto &it : tmp_names)
         {
             class_names.push_back(it);
         }
-            
+
         dlib::rand rnd(time(NULL));
         class_color.clear();
-        for (idx = 0; idx < *num_classes; ++idx)
+        for (uint64_t idx = 0; idx < class_names.size(); ++idx)
         {
             class_color.push_back(dlib::rgb_pixel(rnd.get_random_8bit_number(), rnd.get_random_8bit_number(), rnd.get_random_8bit_number()));
         }
-        
+
     }   // end of init
-    
+
     // ----------------------------------------------------------------------------
     void get_image_cb(const sensor_msgs::ImageConstPtr& img)
     {
         try
         {
             auto tmp_img = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::BGR8);
-            
+
             // it is very important to lock the below assignment operation.
             // remember that we are accessing it from another thread too.
             std::lock_guard<std::mutex> lock(mtx);
             image = tmp_img->image;
-            
+
             //++frame_number;
         }
         catch (cv_bridge::Exception& e)
@@ -223,26 +226,25 @@ public:
                 std::vector<dlib::mmod_rect> d;
                 d.push_back(dlib::mmod_rect(dlib::rectangle r(20,20,100,100), 0.0, "box"));
                 d.push_back(dlib::mmod_rect(dlib::rectangle r(100,100,200,200), 0.0, "backpack"));
-                
-                
+
                 for (idx = 0; idx < d.size(); ++idx)
                 {
                     auto class_index = std::find(class_names.begin(), class_names.end(), d[idx].label);
                     overlay_bounding_box(img, d[idx], class_color[std::distance(class_names.begin(), class_index)]);
-                    
+
                     x_min = d[idx].rect.left();
                     x_max = d[idx].rect.right();
                     y_min = d[idx].rect. top();
                     y_max = d[idx].rect.bottom();
-                    
+
                     // fill in the box string
                     box_string = box_string + "{Class=" + d[idx].label + "; xmin=" + num2str(x_min,"%d") + ", ymin=" + num2str(y_min,"%d") + ", xmax=" + num2str(x_max,"%d") + ", ymax=" + num2str(y_max,"%d") + "},"
-                    
+
                     // crop the depthmap around the bounding box and get the range
                     cv::Range rows(y_min, y_max);
                     cv::Range cols(x_min, x_max);
-                    
-                    cv::Mat bp_image = dm(rows, cols);                    
+
+                    cv::Mat bp_image = dm(rows, cols);
                     range = nan_mean(bp_image);
                     
                     det_x = (uint64_t)(x_min + (x_max-x_min)/2.0);
@@ -277,32 +279,30 @@ public:
         }
     }
 
-    
-    
 private:
 
     ros::NodeHandle obj_det_node;
     std::shared_ptr<sensor_msgs::CameraInfo> cam_info;
-    
+
     // ROS subscriber topics
-    static std::string image_topic;
-    static std::string depth_topic;
-    static std::string cam_info_topic;
+    std::string image_topic;
+    std::string depth_topic;
+    std::string cam_info_topic;
     ros::Subscriber image_sub;          // = obj_det_node.subscribe(image_topic, 1, run_net_callback);
     ros::Subscriber depth_sub;          // = obj_det_node.subscribe(depth_topic, 1, run_net_callback);
     ros::Subscriber cam_info_sub;       // = obj_det_node.subscribe(cam_info_topic, 1, run_net_callback);
 
 
     // ROS publisher topics
-    static const std::string root_topic = "/obj_det/";
-    static const std::string image_det_topic = root_topic + "image";
-    static const std::string boxes_topic = root_topic + "boxes";
-    static const std::string razel_topic = root_topic + "target_razel";
+    const std::string root_topic = "/obj_det/";
+    const std::string image_det_topic = root_topic + "image";
+    const std::string boxes_topic = root_topic + "boxes";
+    const std::string razel_topic = root_topic + "target_razel";
 
     // setup the publisher to send out the target location messages
     image_det_pub = obj_det_node.advertise<sensor_msgs::Image>(image_det_topic, 1);
     boxes_pub = obj_det_node.advertise<std_msgs::String>(boxes_topic, 1);
-    razel_pub = obj_det_node.advertise<::obj_det_wrapper::object_det_list>(razel_topic, 1);
+    razel_pub = obj_det_node.advertise<::object_detector::object_det_list>(razel_topic, 1);
 
     cv::Mat image, depth_map;
 
@@ -311,9 +311,9 @@ private:
     std::vector<dlib::rgb_pixel> class_color;
 
     std::mutex mtx;
-    
+
     ros::Rate loop_rate(1);
-    
+
 };
 
 
