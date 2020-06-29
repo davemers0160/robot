@@ -20,6 +20,9 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 
+#include "zed_obj_det/object_det.h"
+#include "zed_obj_det/object_det_list.h"
+
 #include <dlib/dnn.h>
 #include <dlib/image_transforms.h>
 
@@ -190,7 +193,7 @@ public:
         long nr;
         long nc;
         
-        ::obj_det_wrapper::object_det_list detect_list;
+        ::zed_obj_det::object_det_list detect_list;
         
         while (ros::ok())
         {
@@ -247,7 +250,7 @@ public:
                     az = self.h_res*(det_x - (uint64_t)(img_w/2.0));
                     el = self.v_res*((uint64_t)(img_h/2.0) - det_y);
                     
-                    ::obj_det_wrapper::object_det obj_det;
+                    ::zed_obj_det::object_det obj_det;
                     obj_det.label = d[idx].label;
                     obj_det.range = range;
                     obj_det.az = az;
