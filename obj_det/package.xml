@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>zed_obj_det</name>
+  <name>obj_det</name>
   <version>1.0.0</version>
   <description>
   zed_obj_det is a ROS project to define the messages for getting the object detection messages.
