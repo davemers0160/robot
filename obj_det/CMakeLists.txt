@@ -36,28 +36,33 @@ message("Platform: " ${PLATFORM})
 
 if(${PLATFORM} STREQUAL "Laptop")
     set(COMMON_ROOT "D:/Common")
+    set(DLIB_CONTRIB "D:/Projects/dlib-contrib")
     option(USE_AVX_INSTRUCTIONS  "Compile your program with AVX instructions"  ON)
-    option(DLIB_USE_CUDA "" OFF)
+    option(DLIB_USE_CUDA "" ON)
     include(D:/dlib-19.19/dlib/cmake)
 elseif(${PLATFORM} STREQUAL "MainGear")
     set(_ECLIPSE_VERSION "3.8")
     set(COMMON_ROOT "~/Projects/Common")
+    set(DLIB_CONTRIB "~/Projects/dlib-contrib")
     option(USE_AVX_INSTRUCTIONS  "Compile your program with AVX instructions"  ON)
-    option(DLIB_USE_CUDA "" OFF)
+    option(DLIB_USE_CUDA "" ON)
     include(~/dlib-19.19/dlib/cmake)
 elseif(${PLATFORM} STREQUAL "DLIB_DOCKER")
     set(COMMON_ROOT "~/Projects/Common")
+    set(DLIB_CONTRIB "~/Projects/dlib-contrib")
     option(USE_AVX_INSTRUCTIONS  "Compile your program with AVX instructions"  ON)
-    option(DLIB_USE_CUDA "" OFF)
+    option(DLIB_USE_CUDA "" ON)
     include(~/dlib-19.19/dlib/cmake)
 elseif(${PLATFORM} STREQUAL "JAX")
     set(COMMON_ROOT "~/Projects/Common")
-    option(DLIB_USE_CUDA "" OFF)
+    set(DLIB_CONTRIB "~/Projects/dlib-contrib")
+    option(DLIB_USE_CUDA "" ON)
     include(~/dlib-19.19/dlib/cmake)
 else()
     set(COMMON_ROOT "~/Projects/Common")
+    set(DLIB_CONTRIB "~/Projects/dlib-contrib")
     option(USE_AVX_INSTRUCTIONS  "Compile your program with AVX instructions"  ON)
-    option(DLIB_USE_CUDA "" OFF)
+    option(DLIB_USE_CUDA "" ON)
     include(~/dlib-19.19/dlib/cmake)
 endif()
 
@@ -66,6 +71,7 @@ endif()
 
 set(project_includes "include" 
     "${COMMON_ROOT}/include"
+    "${DLIB_CONTRIB}/include" 
     )
 
 if (${USE_ROS})
@@ -127,6 +133,7 @@ endif()
 # look for any *.c and *.cpp files
 file(GLOB SOURCES "src/*.c*"
     "${COMMON_ROOT}/src/*.cpp"
+    "${DLIB_CONTRIB}/src/*.cpp"
     )
 
 message(" ")
