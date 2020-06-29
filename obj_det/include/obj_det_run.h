@@ -111,7 +111,7 @@ public:
     // ----------------------------------------------------------------------------
     inline void init(std::string net_file)
     {
-
+/*
         // initialize the network
         dlib::deserialize(net_file) >> net;
 
@@ -132,8 +132,11 @@ public:
         class_names.clear();
         for (const auto &it : tmp_names)
         {
-            class_names.push_back(it);
+            //class_names.push_back(it);
         }
+*/
+        class_names.push_back("box");
+        class_names.push_back("backpack");
 
         dlib::rand rnd(time(NULL));
         class_color.clear();
@@ -169,7 +172,7 @@ public:
     {
         try
         {
-            auto tmp_dm = cv_bridge::toCvCopy(dm, sensor_msgs::image_encodings::BGR8);
+            auto tmp_dm = cv_bridge::toCvCopy(dm, sensor_msgs::image_encodings::TYPE_32FC1);
 
             // it is very important to lock the below assignment operation.
             // remember that we are accessing it from another thread too.
