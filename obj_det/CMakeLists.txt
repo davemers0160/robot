@@ -18,7 +18,7 @@
 
 cmake_minimum_required(VERSION 2.8.12)
 
-PROJECT(object_detector)
+PROJECT(object_detect)
 set(exe_name "obj_det_ex")
 
 # if CMAKE_BUILD_TYPE is not specified, take 'Release' as default

@@ -26,8 +26,8 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 
-#include "object_detector/object_det.h"
-#include "object_detector/object_det_list.h"
+#include "object_detect/object_det.h"
+#include "object_detect/object_det_list.h"
 
 #include <dlib/dnn.h>
 #include <dlib/image_transforms.h>
@@ -204,7 +204,7 @@ public:
         long nr;
         long nc;
 
-        ::object_detector::object_det_list detect_list;
+        ::object_detect::object_det_list detect_list;
 
         while (ros::ok())
         {
@@ -259,7 +259,7 @@ public:
                     az = h_res*(det_x - (uint64_t)(img_w>>1));
                     el = v_res*((uint64_t)(img_h>>1) - det_y);
 
-                    ::object_detector::object_det obj_det;
+                    ::object_detect::object_det obj_det;
                     obj_det.label = d[idx].label;
                     obj_det.range = range;
                     obj_det.az = az;
@@ -309,7 +309,7 @@ private:
     // setup the publisher to send out the target location messages
     ros::Publisher image_det_pub = obj_det_node.advertise<sensor_msgs::Image>(image_det_topic, 1);
     ros::Publisher boxes_pub = obj_det_node.advertise<std_msgs::String>(boxes_topic, 1);
-    ros::Publisher razel_pub = obj_det_node.advertise<::object_detector::object_det_list>(razel_topic, 1);
+    ros::Publisher razel_pub = obj_det_node.advertise<::object_detect::object_det_list>(razel_topic, 1);
 
     cv::Mat image, depth_map;
 
