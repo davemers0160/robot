@@ -300,9 +300,9 @@ private:
     const std::string razel_topic = root_topic + "target_razel";
 
     // setup the publisher to send out the target location messages
-    image_det_pub = obj_det_node.advertise<sensor_msgs::Image>(image_det_topic, 1);
-    boxes_pub = obj_det_node.advertise<std_msgs::String>(boxes_topic, 1);
-    razel_pub = obj_det_node.advertise<::object_detector::object_det_list>(razel_topic, 1);
+    ros::Publisher image_det_pub = obj_det_node.advertise<sensor_msgs::Image>(image_det_topic, 1);
+    ros::Publisher boxes_pub = obj_det_node.advertise<std_msgs::String>(boxes_topic, 1);
+    ros::Publisher razel_pub = obj_det_node.advertise<::object_detector::object_det_list>(razel_topic, 1);
 
     cv::Mat image, depth_map;
 
