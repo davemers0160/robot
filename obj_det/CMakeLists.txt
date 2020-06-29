@@ -92,7 +92,8 @@ if(UNIX)
 
         add_message_files(
             FILES
-            point_array.msg
+            object_det.msg
+            object_det_list.msg
         )
 
         generate_messages(DEPENDENCIES
