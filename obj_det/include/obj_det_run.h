@@ -3,6 +3,7 @@
 
 
 #include <cstdint>
+#include <cmath>
 #include <string>
 #include <mutex>
 #include <vector>
@@ -51,7 +52,7 @@ double nan_mean(cv::Mat& img)
 
     for (it = img.begin<T>(); it != img.end<T>(); ++it)
     {
-        if (!isnan(*it))
+        if (!std::isnan(*it))
         {
             mn += (double)*it;
             ++count;
@@ -90,16 +91,19 @@ class object_detector
 public:
 
 
-    object_detector(ros::NodeHandle& nh,
+    object_detector(ros::NodeHandle& obj_det_node_,
         const std::string& image_topic_,
         const std::string& depth_topic_,
         const std::string& cam_info_topic_
-    ) : image_topic(image_topic_), depth_topic(depth_topic_), cam_info_topic(cam_info_topic_)
+    ) : obj_det_node(obj_det_node_), image_topic(image_topic_), depth_topic(depth_topic_), cam_info_topic(cam_info_topic_)
     {
+
         // create the subscribers to read the camera parameters from ROS
-        image_sub = obj_det_node.subscribe<sensor_msgs::Image>(image_topic, 1, get_image_cb, this);
-        depth_sub = obj_det_node.subscribe<sensor_msgs::Image>(depth_topic, 1, &get_depth_cb, this);
-        cam_info_sub = obj_det_node.subscribe<sensor_msgs::CameraInfo>(cam_info_topic, 1, &get_cam_info_cb, this);
+        image_sub = obj_det_node.subscribe<sensor_msgs::Image>(image_topic, 1, &object_detector::get_image_cb, this);
+        depth_sub = obj_det_node.subscribe<sensor_msgs::Image>(depth_topic, 1, &object_detector::get_depth_cb, this);
+        cam_info_sub = obj_det_node.subscribe<sensor_msgs::CameraInfo>(cam_info_topic, 1, &object_detector::get_cam_info_cb, this);
+
+//        loop_rate(1);
     }
 
     ~object_detector() = default;
@@ -205,6 +209,7 @@ public:
         long nc;
 
         ::object_detect::object_det_list detect_list;
+        ros::Rate loop_rate(1);
 
         while (ros::ok())
         {
@@ -214,7 +219,7 @@ public:
             cv::Mat dm  = depth_map;
             mtx.unlock();
 
-            detect_list.clear();
+            detect_list.det.clear();
 
             if (!img.empty() && !dm.empty())
             {
@@ -236,7 +241,7 @@ public:
                 for (idx = 0; idx < d.size(); ++idx)
                 {
                     auto class_index = std::find(class_names.begin(), class_names.end(), d[idx].label);
-                    overlay_bounding_box(img, d[idx], class_color[std::distance(class_names.begin(), class_index)]);
+                    //overlay_bounding_box(img, d[idx], class_color[std::distance(class_names.begin(), class_index)]);
 
                     x_min = d[idx].rect.left();
                     x_max = d[idx].rect.right();
@@ -244,7 +249,7 @@ public:
                     y_max = d[idx].rect.bottom();
 
                     // fill in the box string
-                    box_string = box_string + "{Class=" + d[idx].label + "; xmin=" + num2str(x_min,"%d") + ", ymin=" + num2str(y_min,"%d") + ", xmax=" + num2str(x_max,"%d") + ", ymax=" + num2str(y_max,"%d") + "},"
+                    box_string = box_string + "{Class=" + d[idx].label + "; xmin=" + num2str(x_min,"%d") + ", ymin=" + num2str(y_min,"%d") + ", xmax=" + num2str(x_max,"%d") + ", ymax=" + num2str(y_max,"%d") + "},";
 
                     // crop the depthmap around the bounding box and get the range
                     cv::Range rows(y_min, y_max);
@@ -256,8 +261,8 @@ public:
                     det_x = (uint64_t)(x_min + (x_max-x_min)/2.0);
                     det_y = (uint64_t)(y_min + (y_max-y_min)/2.0);
                     double h_res = 1.0, v_res = 1.0;
-                    az = h_res*(det_x - (uint64_t)(img_w>>1));
-                    el = v_res*((uint64_t)(img_h>>1) - det_y);
+                    az = h_res*(det_x - (uint64_t)(img.cols>>1));
+                    el = v_res*((uint64_t)(img.rows>>1) - det_y);
 
                     ::object_detect::object_det obj_det;
                     obj_det.label = d[idx].label;
@@ -318,8 +323,6 @@ private:
     std::vector<dlib::rgb_pixel> class_color;
 
     std::mutex mtx;
-
-    ros::Rate loop_rate(1);
 
 };
 

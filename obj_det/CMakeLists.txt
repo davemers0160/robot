@@ -89,6 +89,7 @@ if(UNIX)
             rosconsole
             std_msgs
             sensor_msgs
+            cv_bridge
 #            nav_msgs
 #            geometry_msgs
 #            dynamic_reconfigure
@@ -115,6 +116,7 @@ if(UNIX)
             rosconsole
             std_msgs
             sensor_msgs
+            cv_bridge
 #            nav_msgs
 #            geometry_msgs
 #            dynamic_reconfigure

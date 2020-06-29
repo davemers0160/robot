@@ -19,7 +19,6 @@
 #include <stdexcept>
 
 
-
 // Net Version
 //#include "yj_net_v10.h"
 #include "tfd_net_v03.h"
@@ -183,7 +182,8 @@ int main(int argc, char** argv)
     try {
 
         // create the object detector class
-        const auto obj_det = std::make_shared<object_detector>(obj_det_node, image_topic, depth_topic, cam_info_topic);
+        //const auto obj_det = std::make_shared<object_detector>(obj_det_node, image_topic, depth_topic, cam_info_topic);
+        object_detector obj_det(obj_det_node, image_topic, depth_topic, cam_info_topic);
 
         // initialize the object detector network
         obj_det.init(net_file);
@@ -193,7 +193,7 @@ int main(int argc, char** argv)
 
         std::cout << "End of Program." << std::endl;
         //std::cin.ignore();
-        
+
     }
     catch (std::exception& e)
     {
