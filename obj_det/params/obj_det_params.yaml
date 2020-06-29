@@ -1,0 +1,9 @@
+# params/dmw_params.yaml
+# Common parameters to the dwm1001 code
+---
+
+obj_det: {
+    cam_type:                    "/zed/",       # the root name of the camera to connect to
+    net_file:                    "../nets/",    # the location of the network weights file
+    min_range:                   1.0,           # the minimum allowed distance between observations to be used in the location calculation
+}
