@@ -251,7 +251,7 @@ public:
                 for (idx = 0; idx < d.size(); ++idx)
                 {
                     auto class_index = std::find(class_names.begin(), class_names.end(), d[idx].label);
-                    overlay_bounding_box(img, dlib2cv_rect(d[idx].rect), class_color[std::distance(class_names.begin(), class_index)]);
+                    overlay_bounding_box(img, dlib2cv_rect(d[idx].rect), d[idx].label, class_color[std::distance(class_names.begin(), class_index)]);
 
                     x_min = d[idx].rect.left();
                     x_max = d[idx].rect.right();
