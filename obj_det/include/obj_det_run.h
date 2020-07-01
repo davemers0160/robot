@@ -217,9 +217,15 @@ public:
 
         double az, el, range;
 
-        long nr;
-        long nc;
+        long nr, nc, r, c;
+        
+        std::array<dlib::matrix<uint8_t>, array_depth> a_img;
 
+        for (idx = 0; idx < array_depth; ++idx)
+        {
+            a_img[idx].set_size(img_h, img_w);
+        }
+        
         ::object_detect::object_det_list detect_list;
         ros::Rate loop_rate(4);
 
@@ -237,10 +243,31 @@ public:
             {
                 box_string = "";
 
-                // copy the image over
+                // copy the image to a dlib array matrix for input into the dnn
+                unsigned char *img_ptr = img.ptr<unsigned char>(0);
+
+                r = 0;
+                c = 0;
+                
+                for (idx = 0; idx < img_w*img_h*3; idx+=3)
+                {
+
+                    a_img[0](r, c) = *(img_ptr + idx + 2);  //*test_img.ptr<unsigned char>(idx);
+                    a_img[1](r, c) = *(img_ptr + idx + 1);  //*test_img.ptr<unsigned char>(idx+1);
+                    a_img[2](r, c) = *(img_ptr + idx);      //*test_img.ptr<unsigned char>(idx+2);
+
+                    ++c;
+
+                    if (c >= img_w)
+                    {
+                        c = 0;
+                        ++r;
+                    }
+
+                }                
 
                 // run the detection
-                //std::vector<dlib::mmod_rect> d = net(d_img);
+                //std::vector<dlib::mmod_rect> d = net(a_img);
                 //prune_detects(d, 0.3);
 
                 // simulate a detection of each type
