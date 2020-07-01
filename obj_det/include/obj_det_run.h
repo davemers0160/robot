@@ -145,6 +145,9 @@ public:
             class_color.push_back(cv::Scalar(rng.uniform(0, 256), rng.uniform(0, 256), rng.uniform(0, 256)));
         }
 
+        // class_color.push_back(cv::Scalar(0, 255, 0));
+        // class_color.push_back(cv::Scalar(0, 0, 255));
+        
     }   // end of init
 
     // ----------------------------------------------------------------------------
