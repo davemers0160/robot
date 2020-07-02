@@ -20,8 +20,8 @@
 
 
 // Net Version
-//#include "yj_net_v10.h"
-#include "tfd_net_v03.h"
+#include "obj_det_net_v10.h"
+//#include "tfd_net_v03.h"
 
 
 // Custom includes
@@ -57,42 +57,6 @@
 
 
 // ----------------------------------------------------------------------------
-/*
-void run_net_callback(const sensor_msgs::ImageConstPtr& img)
-{
-
-    cv_bridge::CvImagePtr cv_ptr;
-    try
-    {
-        cv_ptr = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::RGB8);
-
-        sensor_msgs::image_encodings::TYPE_32FC1
-
-        //copy_image(std::array<dlib::matrix<T>, array_depth> &dest, cv_ptr->image.ptr<unsigned char>(0))
-
-    }
-    catch (cv_bridge::Exception& e)
-    {
-        ROS_ERROR("cv_bridge exception: %s", e.what());
-        return;
-    }
-
-    // Draw an example circle on the video stream
-    // if (cv_ptr->image.rows > 60 && cv_ptr->image.cols > 60)
-      // cv::circle(cv_ptr->image, cv::Point(50, 50), 10, CV_RGB(255,0,0));
-
-    //Update GUI Window
-    // cv::imshow(OPENCV_WINDOW, cv_ptr->image);
-    // cv::waitKey(3);
-
-    //Output modified video stream
-    // image_pub_.publish(cv_ptr->toImageMsg());
-
-    //ROS_INFO("Seq: [%d]", msg->header.seq);
-    //ROS_INFO("Robot Position-> x: [%f], y: [%f], z: [%f]", msg->position.x, msg->position.y, msg->position.z);
-    //ROS_INFO("Orientation-> x: [%f], y: [%f], z: [%f], w: [%f]", msg->orientation.x, msg->orientation.y, msg->orientation.z, msg->orientation.w);
-}
-*/
 
 // ----------------------------------------------------------------------------
 void print_usage(void)
@@ -115,7 +79,7 @@ int main(int argc, char** argv)
     auto elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
     std::string sdate, stime;
 
-    // ROS subscriber topics
+    // ROS subscriber topic names
     static std::string image_topic;
     static std::string depth_topic;
     static std::string cam_info_topic;
@@ -155,7 +119,7 @@ int main(int argc, char** argv)
 
     // get the required parameters /enemy_locations/max_observations
     obj_det_node.param<std::string>("/obj_det/cam_type", cam_type, "/zed/");
-    obj_det_node.param<std::string>("/obj_det/net_file", net_file, "../nets/");
+    obj_det_node.param<std::string>("/obj_det/net_file", net_file, "../nets/dc_3_v10_20_20_100_Laptop_final_net.dat");
     //dwm_node.param("obj_det/max_observations", max_obs, 20);
 
     image_topic = cam_type + "zed_node/rgb/image_rect_color";

@@ -108,7 +108,7 @@ public:
     // ----------------------------------------------------------------------------
     inline void init(std::string net_file)
     {
-/*
+
         // initialize the network
         dlib::deserialize(net_file) >> net;
 
@@ -129,24 +129,24 @@ public:
         class_names.clear();
         for (const auto &it : tmp_names)
         {
-            //class_names.push_back(it);
+            class_names.push_back(it);
         }
-*/
+
         
-        class_names.push_back("box");
-        class_names.push_back("backpack");
+        //class_names.push_back("box");
+        //class_names.push_back("backpack");
 
         //dlib::rand rnd(time(NULL));
         cv::RNG rng(time(NULL));
         class_color.clear();
-        for (uint64_t idx = 0; idx < class_names.size(); ++idx)
-        {
-            //class_color.push_back(dlib::rgb_pixel(rnd.get_random_8bit_number(), rnd.get_random_8bit_number(), rnd.get_random_8bit_number()));
-            class_color.push_back(cv::Scalar(rng.uniform(0, 256), rng.uniform(0, 256), rng.uniform(0, 256)));
-        }
+        // for (uint64_t idx = 0; idx < class_names.size(); ++idx)
+        // {
+            class_color.push_back(dlib::rgb_pixel(rnd.get_random_8bit_number(), rnd.get_random_8bit_number(), rnd.get_random_8bit_number()));
+            // class_color.push_back(cv::Scalar(rng.uniform(0, 256), rng.uniform(0, 256), rng.uniform(0, 256)));
+        // }
 
-        // class_color.push_back(cv::Scalar(0, 255, 0));
-        // class_color.push_back(cv::Scalar(0, 0, 255));
+        class_color.push_back(cv::Scalar(0, 255, 0));
+        class_color.push_back(cv::Scalar(0, 0, 255));
         
     }   // end of init
 

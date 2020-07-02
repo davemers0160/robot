@@ -3,7 +3,6 @@
 ---
 
 obj_det: {
-    cam_type:                    "/zed/",       # the root name of the camera to connect to
-    net_file:                    "../nets/",    # the location of the network weights file
-    min_range:                   1.0,           # the minimum allowed distance between observations to be used in the location calculation
+    cam_type:                    "/zed/",                                               # the root name of the camera to connect to
+    net_file:                    "../nets/dc_3_v10_20_20_100_Laptop_final_net.dat",     # the location of the network weights file
 }
