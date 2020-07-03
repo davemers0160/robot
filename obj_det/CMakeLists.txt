@@ -94,6 +94,7 @@ if(UNIX)
 #            geometry_msgs
 #            dynamic_reconfigure
 #            roslint
+            message_filters
             message_generation
         )
 
@@ -121,6 +122,7 @@ if(UNIX)
 #            geometry_msgs
 #            dynamic_reconfigure
 #            stereo_msgs
+            message_filters
             message_runtime
         )
 
