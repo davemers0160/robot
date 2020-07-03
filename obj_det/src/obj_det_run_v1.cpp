@@ -67,11 +67,11 @@
 
 //sensor_msgs::CameraInfo cam_info;
 
-extern bool valid_cam_info;
-extern bool valid_images;
+//extern bool valid_cam_info;
+//extern bool valid_images;
 
-extern cv::Mat image;
-extern cv::Mat depthmap;
+//extern cv::Mat image;
+//extern cv::Mat depthmap;
 
 // ----------------------------------------------------------------------------
 /*
@@ -134,9 +134,9 @@ int main(int argc, char** argv)
 
     std::string cam_type;
     std::string net_file;
-    
-    valid_cam_info = false;
-    valid_images = false;
+
+    //valid_cam_info = false;
+    //valid_images = false;
 
     std::string box_string = "";
 
@@ -246,7 +246,7 @@ int main(int argc, char** argv)
     // the rate at which the message is published in Hz
     ros::Rate loop_rate(1);
     ::object_detect::object_det_list detect_list;
-    
+
     msg_listener ml;
 
     try {
@@ -266,10 +266,10 @@ int main(int argc, char** argv)
         typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> image_sync_policy;
         message_filters::Synchronizer<image_sync_policy> sync(image_sync_policy(1), image_sub, depth_sub);
         //message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image> sync(image_sub, depth_sub, 1);
-        sync.registerCallback(boost::bind(ml.get_images_callback, _1, _2));
+        sync.registerCallback(boost::bind(&msg_listener::get_images_callback, ml, _1, _2));
 
         // get the image info
-        std::cout << std::endl << "Waiting for Camera Info...";
+        //std::cout << std::endl << "Waiting for Camera Info...";
         boost::shared_ptr<sensor_msgs::CameraInfo const> cam_info_ptr = ros::topic::waitForMessage<sensor_msgs::CameraInfo>(cam_info_topic, obj_det_node, ros::Duration(5));
         sensor_msgs::CameraInfo cam_info;
 

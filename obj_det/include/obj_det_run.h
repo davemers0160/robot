@@ -450,6 +450,7 @@ public:
 
     void get_images_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::ImageConstPtr& dm)
     {
+        std::cout << ".";
         try
         {
             auto tmp_img = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::BGR8);
