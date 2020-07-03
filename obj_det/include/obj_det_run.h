@@ -216,7 +216,7 @@ public:
         uint64_t x_min, x_max;
         uint64_t y_min, y_max;
 
-        dlib::point c;
+        dlib::point center;
 
         double az, el, range;
 
@@ -298,10 +298,10 @@ public:
                     cv::Mat bp_image = dm(rows, cols);
                     range = nan_mean<float>(bp_image);
 
-                    c = dlib::center(d[idx].rect);
+                    center = dlib::center(d[idx].rect);
 
-                    az = h_res*(c.x() - (int64_t)(img.cols>>1));
-                    el = v_res*((int64_t)(img.rows>>1) - c.y());
+                    az = h_res*(center.x() - (int64_t)(img.cols>>1));
+                    el = v_res*((int64_t)(img.rows>>1) - center.y());
 
                     ::object_detect::object_det obj_det;
                     obj_det.label = d[idx].label;
