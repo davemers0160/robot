@@ -230,8 +230,11 @@ int main(int argc, char** argv)
 
         message_filters::Subscriber<sensor_msgs::Image> image_sub(obj_det_node, image_topic, 1);
         message_filters::Subscriber<sensor_msgs::Image> depth_sub(obj_det_node, depth_topic, 1);
-
-        message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image> sync(image_sub, depth_sub, 1);
+        
+        // create the synchronization policy
+        typedef sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> image_sync_policy;       
+        message_filters::Synchronizer<image_sync_policy> sync(image_sync_policy(1), image_sub, depth_sub);
+        //message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image> sync(image_sub, depth_sub, 1);
         sync.registerCallback(boost::bind(&get_images_callback, _1, _2));
 
         // get the image info
