@@ -41,7 +41,12 @@
 #include <opencv2/imgproc.hpp>
 
 
+// -------------------------------GLOBALS--------------------------------------
 extern const uint32_t array_depth;
+
+extern cv::Mat image;
+extern cv::Mat depthmap;
+
 extern bool valid_cam_info;
 extern bool valid_images;
 

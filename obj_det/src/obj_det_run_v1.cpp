@@ -67,11 +67,11 @@
 
 //sensor_msgs::CameraInfo cam_info;
 
-bool valid_cam_info = false;
-bool valid_images = false;
+extern bool valid_cam_info = false;
+extern bool valid_images = false;
 
-cv::Mat image;
-cv::Mat depthmap;
+extern cv::Mat image;
+extern cv::Mat depthmap;
 
 // ----------------------------------------------------------------------------
 void print_usage(void)
