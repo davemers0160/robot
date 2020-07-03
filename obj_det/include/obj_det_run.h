@@ -85,6 +85,39 @@ void copy_image(std::array<dlib::matrix<T>, array_depth> &dest, unsigned char *s
 }   // end of copy_image
 */
 
+// ----------------------------------------------------------------------------
+void get_images_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::ImageConstPtr& dm)
+{
+    
+    
+    
+}   // end of get_images_callback
+
+
+// ----------------------------------------------------------------------------
+void cam_info_callback(const sensor_msgs::CameraInfoConstPtr& cam_msg)
+{
+    cam_info = *cam_msg;
+    
+        // since the calibration don't change we stop the subscriber once we receive the parameters
+        if (cam_info != nullptr)
+        {
+            //img_w = cam_info->width;
+            //img_h = cam_info->height;
+            //h_res = 90.0/(double)img_w;
+            //v_res = 60.0/(double)img_h;
+
+            //std::cout << std::endl << "cam info:" << std::endl;
+            //std::cout << "Image Size (h x w): " << img_h << " x " << img_w << std::endl;
+            //std::cout << "Angular Resolution (AZ, EL): " << h_res << ", " << v_res << std::endl;
+            
+            valid_cam_info = true;
+
+            cam_info_sub.shutdown();
+        }    
+    
+    
+}   // end of cam_info_callback
 
 // ----------------------------------------------------------------------------
 class object_detector
@@ -100,9 +133,13 @@ public:
     ) : obj_det_node(obj_det_node_), image_topic(image_topic_), depth_topic(depth_topic_), cam_info_topic(cam_info_topic_)
     {
         // create the subscribers to read the camera parameters from ROS
-        image_sub = obj_det_node.subscribe<sensor_msgs::Image>(image_topic, 1, &object_detector::get_image_cb, this);
-        depth_sub = obj_det_node.subscribe<sensor_msgs::Image>(depth_topic, 1, &object_detector::get_depth_cb, this);
+        //image_sub = obj_det_node.subscribe<sensor_msgs::Image>(image_topic, 1, &object_detector::get_image_cb, this);
+        //depth_sub = obj_det_node.subscribe<sensor_msgs::Image>(depth_topic, 1, &object_detector::get_depth_cb, this);
         cam_info_sub = obj_det_node.subscribe<sensor_msgs::CameraInfo>(cam_info_topic, 1, &object_detector::get_cam_info_cb, this);
+        
+        message_filters::Subscriber<sensor_msgs::Image> image_sub(obj_det_node, image_topic, 1);
+        message_filters::Subscriber<sensor_msgs::Image> depth_sub(obj_det_node, depth_topic, 1);
+
     }
 
     ~object_detector() = default;
