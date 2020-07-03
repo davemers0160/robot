@@ -94,6 +94,7 @@ void copy_image(std::array<dlib::matrix<T>, array_depth> &dest, unsigned char *s
 */
 
 // ----------------------------------------------------------------------------
+/*
 void get_images_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::ImageConstPtr& dm)
 {
         try
@@ -117,7 +118,7 @@ void get_images_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msg
 
     valid_images = true;
 }   // end of get_images_callback
-
+*/
 
 // ----------------------------------------------------------------------------
 /*

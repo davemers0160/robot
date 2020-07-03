@@ -67,11 +67,36 @@
 
 //sensor_msgs::CameraInfo cam_info;
 
-extern bool valid_cam_info = false;
-extern bool valid_images = false;
+extern bool valid_cam_info;
+extern bool valid_images;
 
 extern cv::Mat image;
 extern cv::Mat depthmap;
+
+// ----------------------------------------------------------------------------
+void get_images_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::ImageConstPtr& dm)
+{
+        try
+        {
+            auto tmp_img = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::BGR8);
+            auto tmp_dm = cv_bridge::toCvCopy(dm, sensor_msgs::image_encodings::TYPE_32FC1);
+
+            // it is very important to lock the below assignment operation.
+            // remember that we are accessing it from another thread too.
+            //std::lock_guard<std::mutex> lock(mtx);
+            image = tmp_img->image;
+            depthmap = tmp_dm->image;
+
+            valid_images = true;
+        }
+        catch (cv_bridge::Exception& e)
+        {
+            // display the error at most once per 10 seconds
+            ROS_ERROR_THROTTLE(10, "cv_bridge exception %s at line number %d on function %s in file %s", e.what(), __LINE__, __FUNCTION__, __FILE__);
+        }
+
+    valid_images = true;
+}   // end of get_images_callback
 
 // ----------------------------------------------------------------------------
 void print_usage(void)
@@ -108,6 +133,9 @@ int main(int argc, char** argv)
     std::string cam_type;
     std::string net_file;
     
+    valid_cam_info = false;
+    valid_images = false;
+
     std::string box_string = "";
 
     anet_type net;
