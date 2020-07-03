@@ -303,7 +303,7 @@ int main(int argc, char** argv)
             {
 
                 // copy the image to a dlib array matrix for input into the dnn
-                unsigned char *img_ptr = img.ptr<unsigned char>(0);
+                unsigned char *img_ptr = image.ptr<unsigned char>(0);
 
                 r = 0;
                 c = 0;
@@ -351,13 +351,13 @@ int main(int argc, char** argv)
                     cv::Range rows(y_min, y_max);
                     cv::Range cols(x_min, x_max);
 
-                    cv::Mat bp_image = dm(rows, cols);
-                    range = nan_mean<float>(bp_image);
+                    cv::Mat sub_dm = depthmap(rows, cols);
+                    range = nan_mean<float>(sub_dm);
 
                     center = dlib::center(d[idx].rect);
 
-                    az = h_res*(center.x() - (int64_t)(img.cols>>1));
-                    el = v_res*((int64_t)(img.rows>>1) - center.y());
+                    az = h_res*(center.x() - (int64_t)(img_w>>1));
+                    el = v_res*((int64_t)(img_h>>1) - center.y());
 
                     ::object_detect::object_det obj_det;
                     obj_det.label = d[idx].label;
