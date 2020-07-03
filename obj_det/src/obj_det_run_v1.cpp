@@ -122,7 +122,7 @@ int main(int argc, char** argv)
     double az, el, range;
 
     long nr, nc, r, c;
-    
+
     double h_res = 0.1;
     double v_res = 0.1;
 
@@ -172,9 +172,9 @@ int main(int argc, char** argv)
     razel_pub = obj_det_node.advertise<::obj_det_wrapper::object_det_list>(razel_topic, 1);
 
     */
-    
+
     // ----------------------------------------------------------------------------------------
-    
+
     // initialize the network
     dlib::deserialize(net_file) >> net;
 
@@ -198,7 +198,6 @@ int main(int argc, char** argv)
         class_names.push_back(it);
     }
 
-    
     //class_names.push_back("box");
     //class_names.push_back("backpack");
 
@@ -230,15 +229,15 @@ int main(int argc, char** argv)
 
         message_filters::Subscriber<sensor_msgs::Image> image_sub(obj_det_node, image_topic, 1);
         message_filters::Subscriber<sensor_msgs::Image> depth_sub(obj_det_node, depth_topic, 1);
-        
+
         // create the synchronization policy
-        typedef sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> image_sync_policy;       
+        typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> image_sync_policy;
         message_filters::Synchronizer<image_sync_policy> sync(image_sync_policy(1), image_sub, depth_sub);
         //message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image> sync(image_sub, depth_sub, 1);
         sync.registerCallback(boost::bind(&get_images_callback, _1, _2));
 
         // get the image info
-        std::cout << "Waiting for Camera Info...";
+        std::cout << std::endl << "Waiting for Camera Info...";
         boost::shared_ptr<sensor_msgs::CameraInfo const> cam_info_ptr = ros::topic::waitForMessage<sensor_msgs::CameraInfo>(cam_info_topic, obj_det_node, ros::Duration(5));
         sensor_msgs::CameraInfo cam_info;
 
@@ -260,28 +259,27 @@ int main(int argc, char** argv)
         v_res = 60.0/(double)img_h;
 
         std::cout << "------------------------------------------------------------------" << std::endl;
-        std::cout << std::endl << "Camera Info:" << std::endl;
+        std::cout << "Camera Info:" << std::endl;
         std::cout << "Image Size (h x w): " << img_h << " x " << img_w << std::endl;
         std::cout << "Angular Resolution (AZ, EL): " << h_res << ", " << v_res << std::endl;
-        std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
 
-/*        
+
         while (ros::ok())
         {
             detect_list.det.clear();
-            
+
             box_string = "";
-           
+
             if(valid_images)
             {
-                
 
                 // copy the image to a dlib array matrix for input into the dnn
                 unsigned char *img_ptr = img.ptr<unsigned char>(0);
 
                 r = 0;
                 c = 0;
-                
+
                 // for (idx = 0; idx < img_w*img_h*3; idx+=3)
                 // {
 
@@ -297,7 +295,7 @@ int main(int argc, char** argv)
                         // ++r;
                     // }
 
-                // }                
+                // }
 
                 ////run the detection
                 // std::vector<dlib::mmod_rect> d = net(a_img);
@@ -346,19 +344,15 @@ int main(int argc, char** argv)
 
                 boxes_pub.publish(box_string);
                 razel_pub.publish(detect_list);
-                image_det_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "bgr8", img).toImageMsg());                
-                
-                
+                image_det_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "bgr8", img).toImageMsg());
+
                 valid_images = false;
             }
-            
-            
+
             ros::spinOnce();
             loop_rate.sleep();
-            
-        }
-*/
 
+        }
 
         // create the object detector class
         //const auto obj_det = std::make_shared<object_detector>(obj_det_node, image_topic, depth_topic, cam_info_topic);

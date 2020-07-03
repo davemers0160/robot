@@ -104,17 +104,17 @@ void get_images_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msg
             // it is very important to lock the below assignment operation.
             // remember that we are accessing it from another thread too.
             //std::lock_guard<std::mutex> lock(mtx);
-            image = tmp_img->image;
-            depthmap = tmp_dm->image;
-            
-            valid_images = true;
+            //image = tmp_img->image;
+            //depthmap = tmp_dm->image;
+
+            //valid_images = true;
         }
         catch (cv_bridge::Exception& e)
         {
             // display the error at most once per 10 seconds
             ROS_ERROR_THROTTLE(10, "cv_bridge exception %s at line number %d on function %s in file %s", e.what(), __LINE__, __FUNCTION__, __FILE__);
-        }    
-    
+        }
+
     valid_images = true;
 }   // end of get_images_callback
 
