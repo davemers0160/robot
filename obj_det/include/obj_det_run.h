@@ -18,22 +18,25 @@
 #include "overlay_bounding_box.h"
 #include "prune_detects.h"
 
+// dlib includes
+#include <dlib/dnn.h>
+#include <dlib/image_transforms.h>
+
 // ROS includes
 #include <ros/ros.h>
-
-#include <std_msgs/String.h>
-#include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
+#include <std_msgs/String.h>
+
 #include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
+
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
 
 #include "object_detect/object_det.h"
 #include "object_detect/object_det_list.h"
-
-#include <dlib/dnn.h>
-#include <dlib/image_transforms.h>
 
 // OpenCV Includes
 #include <opencv2/core.hpp>
@@ -447,7 +450,8 @@ public:
     msg_listener() = default;
     
     ~msg_listener() = default;
-
+    
+    // ----------------------------------------------------------------------------
     void get_images_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::ImageConstPtr& dm)
     {
         std::cout << ".";
@@ -468,10 +472,29 @@ public:
         }
 
     }   // end of get_images_callback
+    
+    // ----------------------------------------------------------------------------
+    void init(ros::NodeHandle& obj_det_node, std::string& image_topic, std::string& depth_topic)
+    {
+        // setup the subscribers
+        //message_filters::Subscriber<sensor_msgs::Image> image_sub(obj_det_node, image_topic, 1);
+        //message_filters::Subscriber<sensor_msgs::Image> depth_sub(obj_det_node, depth_topic, 1);
+        image_sub = message_filters::Subscriber<sensor_msgs::Image>(obj_det_node, image_topic, 1);
+        depth_sub = message_filters::Subscriber<sensor_msgs::Image>(obj_det_node, depth_topic, 1);
+        
+        // create the synchronization policy
+        message_filters::Synchronizer<image_sync_policy> sync(image_sync_policy(1), image_sub, depth_sub);
+        sync.registerCallback(boost::bind(&msg_listener::get_images_callback, this, _1, _2));
+        
+    }   // end of init
 
 private:
-
-
+    ros::NodeHandle obj_det_node;
+    message_filters::Subscriber<sensor_msgs::Image> image_sub;
+    message_filters::Subscriber<sensor_msgs::Image> depth_sub;
+    typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> image_sync_policy;
+    
+    
 };  // end of msg_listener class
 
 
