@@ -13,7 +13,8 @@
 #include "num2string.h"
 
 // Net Version
-#include "tfd_net_v03.h"
+#include "obj_det_net_v10.h"
+//#include "tfd_net_v03.h"
 #include "overlay_bounding_box.h"
 
 // ROS includes
@@ -141,7 +142,6 @@ public:
         class_color.clear();
         // for (uint64_t idx = 0; idx < class_names.size(); ++idx)
         // {
-            class_color.push_back(dlib::rgb_pixel(rnd.get_random_8bit_number(), rnd.get_random_8bit_number(), rnd.get_random_8bit_number()));
             // class_color.push_back(cv::Scalar(rng.uniform(0, 256), rng.uniform(0, 256), rng.uniform(0, 256)));
         // }
 
@@ -270,13 +270,13 @@ public:
                 }                
 
                 // run the detection
-                //std::vector<dlib::mmod_rect> d = net(a_img);
-                //prune_detects(d, 0.3);
+                std::vector<dlib::mmod_rect> d = net(a_img);
+                prune_detects(d, 0.3);
 
                 // simulate a detection of each type
-                std::vector<dlib::mmod_rect> d;
-                d.push_back(dlib::mmod_rect(dlib::rectangle(20,20,100,100), 0.0, "box"));
-                d.push_back(dlib::mmod_rect(dlib::rectangle(100,100,200,200), 0.0, "backpack"));
+                //std::vector<dlib::mmod_rect> d;
+                //d.push_back(dlib::mmod_rect(dlib::rectangle(20,20,100,100), 0.0, "box"));
+                //d.push_back(dlib::mmod_rect(dlib::rectangle(100,100,200,200), 0.0, "backpack"));
 
                 for (idx = 0; idx < d.size(); ++idx)
                 {
