@@ -337,7 +337,7 @@ int main(int argc, char** argv)
                 for (idx = 0; idx < d.size(); ++idx)
                 {
                     auto class_index = std::find(class_names.begin(), class_names.end(), d[idx].label);
-                    overlay_bounding_box(img, dlib2cv_rect(d[idx].rect), d[idx].label, class_color[std::distance(class_names.begin(), class_index)]);
+                    overlay_bounding_box(image, dlib2cv_rect(d[idx].rect), d[idx].label, class_color[std::distance(class_names.begin(), class_index)]);
 
                     x_min = d[idx].rect.left();
                     x_max = d[idx].rect.right();
@@ -372,7 +372,7 @@ int main(int argc, char** argv)
 
                 boxes_pub.publish(box_string);
                 razel_pub.publish(detect_list);
-                image_det_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "bgr8", img).toImageMsg());
+                image_det_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "bgr8", image).toImageMsg());
 
                 valid_images = false;
             }
