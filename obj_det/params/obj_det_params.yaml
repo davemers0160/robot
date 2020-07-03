@@ -4,5 +4,5 @@
 
 obj_det: {
     cam_type:                    "/zed/",                                               # the root name of the camera to connect to
-    net_file:                    "../nets/dc_3_v10_20_20_100_Laptop_final_net.dat",     # the location of the network weights file
+    net_file:                    "/home/ros/catkin_ws/src/robot/obj_det/nets/dc_3_v10_20_20_100_Laptop_final_net.dat",     # the location of the network weights file
 }

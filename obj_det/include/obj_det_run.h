@@ -16,6 +16,7 @@
 #include "obj_det_net_v10.h"
 //#include "tfd_net_v03.h"
 #include "overlay_bounding_box.h"
+#include "prune_detects.h"
 
 // ROS includes
 #include <ros/ros.h>
