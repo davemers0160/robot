@@ -17,12 +17,14 @@
 #include <string>
 #include <utility>
 #include <stdexcept>
-
+#include <mutex>
+#include <vector>
 
 // Net Version
 #include "obj_det_net_v10.h"
 //#include "tfd_net_v03.h"
-
+#include "overlay_bounding_box.h"
+#include "prune_detects.h"
 
 // Custom includes
 #include "obj_det_run.h"
@@ -32,16 +34,29 @@
 #include "file_ops.h"
 #include "sleep_ms.h"
 
+// dlib includes
+#include <dlib/dnn.h>
+#include <dlib/image_transforms.h>
 
 // ROS includes
 #include <ros/ros.h>
-#include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
-#include <sensor_msgs/image_encodings.h>
+#include <std_msgs/String.h>
 
-// object detector library header
-//#include "obj_det_lib.h"
-//extern const uint32_t array_depth = 1;
+#include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/CameraInfo.h>
+
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
+
+//#include <image_transport/image_transport.h>
+
+// custum message headers
+#include "object_detect/object_det.h"
+#include "object_detect/object_det_list.h"
+
 
 // OpenCV Includes
 #include <opencv2/core.hpp>
@@ -50,11 +65,6 @@
 
 // -------------------------------GLOBALS--------------------------------------
 
-// ROS publishers
-// ros::Publisher image_det_pub;
-// ros::Publisher boxes_pub;
-// ros::Publisher razel_pub;
-
 //sensor_msgs::CameraInfo cam_info;
 
 bool valid_cam_info = false;
@@ -62,8 +72,6 @@ bool valid_images = false;
 
 cv::Mat image;
 cv::Mat depthmap;
-
-// ----------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------
 void print_usage(void)
@@ -144,7 +152,7 @@ int main(int argc, char** argv)
 
     // get the required parameters /enemy_locations/max_observations
     obj_det_node.param<std::string>("/obj_det/cam_type", cam_type, "/zed/");
-    obj_det_node.param<std::string>("/obj_det/net_file", net_file, "../nets/dc_3_v10_20_20_100_Laptop_final_net.dat");
+    obj_det_node.param<std::string>("/obj_det/net_file", net_file, "../src/robot/obj_det/nets/dc_3_v10_20_20_100_Laptop_final_net.dat");
     //dwm_node.param("obj_det/max_observations", max_obs, 20);
 
     image_topic = cam_type + "zed_node/rgb/image_rect_color";
