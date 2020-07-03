@@ -74,6 +74,7 @@ extern cv::Mat image;
 extern cv::Mat depthmap;
 
 // ----------------------------------------------------------------------------
+/*
 void get_images_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::ImageConstPtr& dm)
 {
         try
@@ -97,6 +98,7 @@ void get_images_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msg
 
     valid_images = true;
 }   // end of get_images_callback
+*/
 
 // ----------------------------------------------------------------------------
 void print_usage(void)
@@ -244,6 +246,8 @@ int main(int argc, char** argv)
     // the rate at which the message is published in Hz
     ros::Rate loop_rate(1);
     ::object_detect::object_det_list detect_list;
+    
+    msg_listener ml;
 
     try {
 
@@ -262,7 +266,7 @@ int main(int argc, char** argv)
         typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> image_sync_policy;
         message_filters::Synchronizer<image_sync_policy> sync(image_sync_policy(1), image_sub, depth_sub);
         //message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image> sync(image_sub, depth_sub, 1);
-        sync.registerCallback(boost::bind(&get_images_callback, _1, _2));
+        sync.registerCallback(boost::bind(&ml.get_images_callback, _1, _2));
 
         // get the image info
         std::cout << std::endl << "Waiting for Camera Info...";
@@ -292,18 +296,21 @@ int main(int argc, char** argv)
         std::cout << "Angular Resolution (AZ, EL): " << h_res << ", " << v_res << std::endl;
         std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
 
-
+        ml.valid_images = false;
+        
         while (ros::ok())
         {
+            ros::spinOnce();
+            
             detect_list.det.clear();
 
             box_string = "";
 
-            if(valid_images)
+            if(ml.valid_images)
             {
 
                 // copy the image to a dlib array matrix for input into the dnn
-                unsigned char *img_ptr = image.ptr<unsigned char>(0);
+                unsigned char *img_ptr = ml.image.ptr<unsigned char>(0);
 
                 r = 0;
                 c = 0;
@@ -345,13 +352,14 @@ int main(int argc, char** argv)
                     y_max = d[idx].rect.bottom();
 
                     // fill in the box string
-                    box_string = box_string + "{Class=" + d[idx].label + "; xmin=" + num2str(x_min,"%d") + ", ymin=" + num2str(y_min,"%d") + ", xmax=" + num2str(x_max,"%d") + ", ymax=" + num2str(y_max,"%d") + "},";
+                    box_string = box_string + "{Class=" + d[idx].label + "; xmin=" + num2str(x_min,"%d") + ", ymin=" + num2str(y_min,"%d") + /
+                                 ", xmax=" + num2str(x_max,"%d") + ", ymax=" + num2str(y_max,"%d") + "},";
 
                     // crop the depthmap around the bounding box and get the range
                     cv::Range rows(y_min, y_max);
                     cv::Range cols(x_min, x_max);
 
-                    cv::Mat sub_dm = depthmap(rows, cols);
+                    cv::Mat sub_dm = ml.depthmap(rows, cols);
                     range = nan_mean<float>(sub_dm);
 
                     center = dlib::center(d[idx].rect);
@@ -372,12 +380,12 @@ int main(int argc, char** argv)
 
                 boxes_pub.publish(box_string);
                 razel_pub.publish(detect_list);
-                image_det_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "bgr8", image).toImageMsg());
+                image_det_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "bgr8", ml.image).toImageMsg());
 
-                valid_images = false;
+                ml.valid_images = false;
             }
 
-            ros::spinOnce();
+
             loop_rate.sleep();
 
         }
