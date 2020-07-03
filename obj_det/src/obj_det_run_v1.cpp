@@ -206,7 +206,6 @@ int main(int argc, char** argv)
     class_color.push_back(cv::Scalar(0, 0, 255));
     // ----------------------------------------------------------------------------------------
 
-               
     // the rate at which the message is published in Hz
     ros::Rate loop_rate(1);
     ::object_detect::object_det_list detect_list;
@@ -220,7 +219,7 @@ int main(int argc, char** argv)
 
         // setup the subscribers
         //ros::Subscriber cam_info_sub = obj_det_node.subscribe<sensor_msgs::CameraInfo>(cam_info_topic, 1, &object_detector::get_cam_info_cb, this);
-       
+
         message_filters::Subscriber<sensor_msgs::Image> image_sub(obj_det_node, image_topic, 1);
         message_filters::Subscriber<sensor_msgs::Image> depth_sub(obj_det_node, depth_topic, 1);
 
@@ -229,33 +228,31 @@ int main(int argc, char** argv)
 
         // get the image info
         std::cout << "Waiting for Camera Info...";
-        boost::shared_ptr<sensor_msgs::CameraInfo const> cam_info_ptr = ros::topic::waitForMessage<sensor_msgs::CameraInfo>(cam_info_topic, obj_det_node, ros::Duration::Duration(5));
+        boost::shared_ptr<sensor_msgs::CameraInfo const> cam_info_ptr = ros::topic::waitForMessage<sensor_msgs::CameraInfo>(cam_info_topic, obj_det_node, ros::Duration(5));
         sensor_msgs::CameraInfo cam_info;
 
         if(cam_info_ptr != NULL)
         {
-            cam_info = *cam_info_ptr
+            cam_info = *cam_info_ptr;
         }
-        
+
         //while(!valid_cam_info)
         //{
         //    std::cout << ".";
             //ros::spinOnce();
         //}
         std::cout << std::endl;
-        
-        
-        img_w = cam_info->width;
-        img_h = cam_info->height;
+
+        img_w = cam_info.width;
+        img_h = cam_info.height;
         h_res = 90.0/(double)img_w;
         v_res = 60.0/(double)img_h;
 
         std::cout << "------------------------------------------------------------------" << std::endl;
         std::cout << std::endl << "Camera Info:" << std::endl;
         std::cout << "Image Size (h x w): " << img_h << " x " << img_w << std::endl;
-        std::cout << "Angular Resolution (AZ, EL): " << h_res << ", " << v_res << std::endl;        
+        std::cout << "Angular Resolution (AZ, EL): " << h_res << ", " << v_res << std::endl;
         std::cout << "------------------------------------------------------------------" << std::endl;
-    
 
 /*        
         while (ros::ok())
