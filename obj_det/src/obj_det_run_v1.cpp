@@ -266,7 +266,7 @@ int main(int argc, char** argv)
         typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> image_sync_policy;
         message_filters::Synchronizer<image_sync_policy> sync(image_sync_policy(1), image_sub, depth_sub);
         //message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image> sync(image_sub, depth_sub, 1);
-        sync.registerCallback(boost::bind(&ml.get_images_callback, _1, _2));
+        sync.registerCallback(boost::bind(ml.get_images_callback, _1, _2));
 
         // get the image info
         std::cout << std::endl << "Waiting for Camera Info...";
@@ -352,7 +352,7 @@ int main(int argc, char** argv)
                     y_max = d[idx].rect.bottom();
 
                     // fill in the box string
-                    box_string = box_string + "{Class=" + d[idx].label + "; xmin=" + num2str(x_min,"%d") + ", ymin=" + num2str(y_min,"%d") + /
+                    box_string = box_string + "{Class=" + d[idx].label + "; xmin=" + num2str(x_min,"%d") + ", ymin=" + num2str(y_min,"%d") + \
                                  ", xmax=" + num2str(x_max,"%d") + ", ymax=" + num2str(y_max,"%d") + "},";
 
                     // crop the depthmap around the bounding box and get the range
