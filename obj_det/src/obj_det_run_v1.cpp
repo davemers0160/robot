@@ -102,6 +102,8 @@ int main(int argc, char** argv)
     
     std::string box_string = "";
 
+    anet_type net;
+
     uint64_t x_min, x_max;
     uint64_t y_min, y_max;
     uint64_t img_h = 720;
@@ -227,7 +229,7 @@ int main(int argc, char** argv)
 
         // get the image info
         std::cout << "Waiting for Camera Info...";
-        boost::shared_ptr<sensor_msgs::CameraInfo const> cam_info_ptr = ros::topic::waitForMessage<sensor_msgs::CameraInfo>(cam_info_topic, obj_det_node, 5);
+        boost::shared_ptr<sensor_msgs::CameraInfo const> cam_info_ptr = ros::topic::waitForMessage<sensor_msgs::CameraInfo>(cam_info_topic, obj_det_node, ros::Duration::Duration(5));
         sensor_msgs::CameraInfo cam_info;
 
         if(cam_info_ptr != NULL)

@@ -42,6 +42,9 @@
 
 
 extern const uint32_t array_depth;
+extern bool valid_cam_info;
+extern bool valid_images;
+
 
 // ----------------------------------------------------------------------------
 template <typename T>
@@ -90,11 +93,12 @@ void get_images_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msg
 {
     
     
-    
+    valid_images = true;
 }   // end of get_images_callback
 
 
 // ----------------------------------------------------------------------------
+/*
 void cam_info_callback(const sensor_msgs::CameraInfoConstPtr& cam_msg)
 {
     cam_info = *cam_msg;
@@ -118,7 +122,7 @@ void cam_info_callback(const sensor_msgs::CameraInfoConstPtr& cam_msg)
     
     
 }   // end of cam_info_callback
-
+*/
 // ----------------------------------------------------------------------------
 class object_detector
 {
