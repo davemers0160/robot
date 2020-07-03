@@ -452,7 +452,7 @@ public:
     ~msg_listener() = default;
     
     // ----------------------------------------------------------------------------
-    void get_images_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::ImageConstPtr& dm)
+    void images_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::ImageConstPtr& dm)
     {
         std::cout << ".";
         try
@@ -486,9 +486,11 @@ public:
         depth_sub.subscribe(obj_det_node, depth_topic, 1);
         
         // create the synchronization policy
-        message_filters::Synchronizer<image_sync_policy> sync(image_sync_policy(1), image_sub, depth_sub);
-        sync.registerCallback(boost::bind(&msg_listener::get_images_callback, this, _1, _2));
-        
+        //message_filters::Synchronizer<image_sync_policy> sync(image_sync_policy(1), image_sub, depth_sub);
+        //sync.registerCallback(boost::bind(&msg_listener::images_callback, this, _1, _2));
+        sync_.reset(new Sync(image_sync_policy(1), image_sub, depth_sub));
+        sync_->registerCallback(boost::bind(&msg_listener::images_callback, this, _1, _2));
+    
     }   // end of init
 
 private:
