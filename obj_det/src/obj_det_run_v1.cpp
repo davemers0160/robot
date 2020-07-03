@@ -256,17 +256,19 @@ int main(int argc, char** argv)
         ros::Publisher boxes_pub = obj_det_node.advertise<std_msgs::String>(boxes_topic, 1);
         ros::Publisher razel_pub = obj_det_node.advertise<::object_detect::object_det_list>(razel_topic, 1);
 
+        ml.init(obj_det_node, image_topic, depth_topic);
+
         // setup the subscribers
         //ros::Subscriber cam_info_sub = obj_det_node.subscribe<sensor_msgs::CameraInfo>(cam_info_topic, 1, &object_detector::get_cam_info_cb, this);
 
-        message_filters::Subscriber<sensor_msgs::Image> image_sub(obj_det_node, image_topic, 1);
-        message_filters::Subscriber<sensor_msgs::Image> depth_sub(obj_det_node, depth_topic, 1);
+        //message_filters::Subscriber<sensor_msgs::Image> image_sub(obj_det_node, image_topic, 1);
+        //message_filters::Subscriber<sensor_msgs::Image> depth_sub(obj_det_node, depth_topic, 1);
 
         // create the synchronization policy
-        typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> image_sync_policy;
-        message_filters::Synchronizer<image_sync_policy> sync(image_sync_policy(1), image_sub, depth_sub);
+        //typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> image_sync_policy;
+        //message_filters::Synchronizer<image_sync_policy> sync(image_sync_policy(1), image_sub, depth_sub);
         //message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image> sync(image_sub, depth_sub, 1);
-        sync.registerCallback(boost::bind(&msg_listener::get_images_callback, ml, _1, _2));
+        //sync.registerCallback(boost::bind(&msg_listener::get_images_callback, ml, _1, _2));
 
         // get the image info
         //std::cout << std::endl << "Waiting for Camera Info...";
@@ -297,11 +299,18 @@ int main(int argc, char** argv)
         std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
 
         ml.valid_images = false;
-        
+
+        std::array<dlib::matrix<uint8_t>, array_depth> a_img;
+
+        for (idx = 0; idx < array_depth; ++idx)
+        {
+            a_img[idx].set_size(img_h, img_w);
+        }
+
         while (ros::ok())
         {
             ros::spinOnce();
-            
+
             detect_list.det.clear();
 
             box_string = "";
@@ -315,31 +324,31 @@ int main(int argc, char** argv)
                 r = 0;
                 c = 0;
 
-                // for (idx = 0; idx < img_w*img_h*3; idx+=3)
-                // {
+                for (idx = 0; idx < img_w*img_h*3; idx+=3)
+                {
 
-                    // a_img[0](r, c) = *(img_ptr + idx + 2);  //*test_img.ptr<unsigned char>(idx);
-                    // a_img[1](r, c) = *(img_ptr + idx + 1);  //*test_img.ptr<unsigned char>(idx+1);
-                    // a_img[2](r, c) = *(img_ptr + idx);      //*test_img.ptr<unsigned char>(idx+2);
+                    a_img[0](r, c) = *(img_ptr + idx + 2);  //*test_img.ptr<unsigned char>(idx);
+                    a_img[1](r, c) = *(img_ptr + idx + 1);  //*test_img.ptr<unsigned char>(idx+1);
+                    a_img[2](r, c) = *(img_ptr + idx);      //*test_img.ptr<unsigned char>(idx+2);
 
-                    // ++c;
+                    ++c;
 
-                    // if (c >= img_w)
-                    // {
-                        // c = 0;
-                        // ++r;
-                    // }
+                    if (c >= img_w)
+                    {
+                        c = 0;
+                        ++r;
+                    }
 
-                // }
+                }
 
-                ////run the detection
-                // std::vector<dlib::mmod_rect> d = net(a_img);
-                // prune_detects(d, 0.3);
+                //run the detection
+                std::vector<dlib::mmod_rect> d = net(a_img);
+                prune_detects(d, 0.3);
 
                 // simulate a detection of each type
-                std::vector<dlib::mmod_rect> d;
-                d.push_back(dlib::mmod_rect(dlib::rectangle(20,20,100,100), 0.0, "box"));
-                d.push_back(dlib::mmod_rect(dlib::rectangle(100,100,200,200), 0.0, "backpack"));
+                //std::vector<dlib::mmod_rect> d;
+                //d.push_back(dlib::mmod_rect(dlib::rectangle(20,20,100,100), 0.0, "box"));
+                //d.push_back(dlib::mmod_rect(dlib::rectangle(100,100,200,200), 0.0, "backpack"));
 
                 for (idx = 0; idx < d.size(); ++idx)
                 {

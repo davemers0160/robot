@@ -446,15 +446,15 @@ public:
     
     cv::Mat image;
     cv::Mat depthmap;
-    
+
     msg_listener() = default;
-    
+
     ~msg_listener() = default;
-    
+
     // ----------------------------------------------------------------------------
     void images_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::ImageConstPtr& dm)
     {
-        std::cout << ".";
+
         try
         {
             auto tmp_img = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::BGR8);
@@ -472,13 +472,13 @@ public:
         }
 
     }   // end of get_images_callback
-    
+
     // ----------------------------------------------------------------------------
     void init(ros::NodeHandle& obj_det_node_, std::string& image_topic, std::string& depth_topic)
     {
-    
+
         obj_det_node = obj_det_node_;
-        
+
         // setup the subscribers
         //message_filters::Subscriber<sensor_msgs::Image> image_sub(obj_det_node, image_topic, 1);
         //message_filters::Subscriber<sensor_msgs::Image> depth_sub(obj_det_node, depth_topic, 1);
@@ -490,18 +490,18 @@ public:
         //sync.registerCallback(boost::bind(&msg_listener::images_callback, this, _1, _2));
         sync_.reset(new Sync(image_sync_policy(1), image_sub, depth_sub));
         sync_->registerCallback(boost::bind(&msg_listener::images_callback, this, _1, _2));
-    
+
     }   // end of init
 
 private:
     ros::NodeHandle obj_det_node;
     message_filters::Subscriber<sensor_msgs::Image> image_sub;
     message_filters::Subscriber<sensor_msgs::Image> depth_sub;
-    
+
     typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> image_sync_policy;
     typedef message_filters::Synchronizer<image_sync_policy> Sync;
     boost::shared_ptr<Sync> sync_;
-    
+
 };  // end of msg_listener class
 
 
