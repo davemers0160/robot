@@ -318,6 +318,13 @@ int main(int argc, char** argv)
             if(ml.valid_images)
             {
 
+                // check to make sure that the images are the correct sizes and have data
+                if(ml.image.empty() || ml.depthmap.empty() || ml.image.rows != img_h || ml.image.cols != img_w)
+                {
+                    std::cout << "error processing image..." << std::endl;
+                    continue;
+                }
+                
                 // copy the image to a dlib array matrix for input into the dnn
                 unsigned char *img_ptr = ml.image.ptr<unsigned char>(0);
 
