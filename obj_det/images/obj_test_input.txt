@@ -1,0 +1,10 @@
+# Full data listing
+# Data Directory:
+D:/Projects/object_detection_data/dc/test/full/, ../images/, ../images/
+
+# file location, {x,y,w,h,label}, {x,y,w,h,label}, ...
+test2-1.png,{21,373,71,67,box},{247,297,89,49,box},{465,260,51,34,box},{560,262,65,41,box}
+test2-2.png,{599,325,142,108,box},{711,267,70,43,box},{537,264,74,47,box},{399,293,51,27,box}
+test2-3.png,{1047,337,188,124,box},{766,259,65,42,box},{477,258,43,37,box},{400,289,45,32,box},{643,277,48,26,backpack},{238,329,100,50,backpack}
+test2-4.png,{1046,352,177,107,box},{766,261,69,39,box},{478,260,45,34,box},{373,278,30,25,box},{525,266,57,54,backpack},{639,242,45,44,backpack},{209,271,61,54,backpack}
+test2-5.png,{571,257,56,49,box},{564,233,65,25,box},{1055,347,177,112,box},{464,296,76,32,backpack},{673,258,52,56,backpack},{563,209,66,25,backpack}
