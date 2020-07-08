@@ -1,6 +1,6 @@
 # Full data listing
 # Data Directory:
-D:/Projects/object_detection_data/dc/test/full/, ../images/, ../images/
+D:/Projects/object_detection_data/dc/test/full/, ../../../../catkin_ws/src/robot/obj_det/images/, ../images/
 
 # file location, {x,y,w,h,label}, {x,y,w,h,label}, ...
 test2-1.png,{21,373,71,67,box},{247,297,89,49,box},{465,260,51,34,box},{560,262,65,41,box}

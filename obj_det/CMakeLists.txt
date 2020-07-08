@@ -26,6 +26,8 @@ IF(NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE Release)
 ENDIF(NOT CMAKE_BUILD_TYPE)
 
+option(USE_AVX_INSTRUCTIONS  "Compile the program with AVX instructions"  ON)
+
 # use this option to turn compilation with ROS off for Windows and non-ROS linux testing
 option(USE_ROS "Compile the program with ROS" ON)
 
@@ -37,20 +39,17 @@ message("Platform: " ${PLATFORM})
 if(${PLATFORM} STREQUAL "Laptop")
     set(COMMON_ROOT "D:/Common")
     set(DLIB_CONTRIB "D:/Projects/dlib-contrib")
-    option(USE_AVX_INSTRUCTIONS  "Compile your program with AVX instructions"  ON)
     option(DLIB_USE_CUDA "" ON)
     include(D:/dlib-19.19/dlib/cmake)
 elseif(${PLATFORM} STREQUAL "MainGear")
     set(_ECLIPSE_VERSION "3.8")
     set(COMMON_ROOT "~/Projects/Common")
     set(DLIB_CONTRIB "~/Projects/dlib-contrib")
-    option(USE_AVX_INSTRUCTIONS  "Compile your program with AVX instructions"  ON)
     option(DLIB_USE_CUDA "" ON)
     include(~/dlib-19.19/dlib/cmake)
 elseif(${PLATFORM} STREQUAL "DLIB_DOCKER")
     set(COMMON_ROOT "~/Projects/Common")
     set(DLIB_CONTRIB "~/Projects/dlib-contrib")
-    option(USE_AVX_INSTRUCTIONS  "Compile your program with AVX instructions"  ON)
     option(DLIB_USE_CUDA "" ON)
     include(~/dlib-19.19/dlib/cmake)
 elseif(${PLATFORM} STREQUAL "JAX")
@@ -61,17 +60,19 @@ elseif(${PLATFORM} STREQUAL "JAX")
 else()
     set(COMMON_ROOT "~/Projects/Common")
     set(DLIB_CONTRIB "~/Projects/dlib-contrib")
-    option(USE_AVX_INSTRUCTIONS  "Compile your program with AVX instructions"  ON)
     option(DLIB_USE_CUDA "" ON)
     include(~/dlib-19.19/dlib/cmake)
 endif()
 
-#include(${COMMON_ROOT}/cmake_utils/use_cpp_11.cmake)
-#include(${COMMON_ROOT}/cmake_utils/use_sse_avx.cmake)
+set(OBJ_DET_ROOT "~/Projects/dlib_object_detection")
+set(OBJ_DET_DIRS "${OBJ_DET_ROOT}/obj_det_lib/include")
+set(OBJ_DET_LIBS "${OBJ_DET_ROOT}/obj_det_lib/build/libobj_det.so")
+
 
 set(project_includes "include" 
     "${COMMON_ROOT}/include"
-    "${DLIB_CONTRIB}/include" 
+    "${DLIB_CONTRIB}/include"
+    #"${OBJ_DET_DIRS}"
     )
 
 if (${USE_ROS})
@@ -196,11 +197,20 @@ if(USE_ROS)
     include_directories(${project_includes})
 
     add_executable(${exe_name} ${SOURCES})
-    target_link_libraries(${exe_name} dlib::dlib ${OpenCV_LIBS} ${LINK_LIBRARIES})
+    
+    target_link_libraries(${exe_name} 
+        dlib::dlib 
+        ${OpenCV_LIBS} 
+        ${LINK_LIBRARIES}
+        #${OBJ_DET_LIBS}
+        )
+        
     add_dependencies(${exe_name} ${catkin_EXPORTED_TARGETS}) # ${PROJECT_NAME}_gencfg)
+    
     target_compile_options(${exe_name} PRIVATE ${active_preprocessor_switches})
 
     message("")
+    
 #    message("catkin_EXPORTED_TARGETS: ${catkin_EXPORTED_TARGETS}")
 #    roslint_cpp()
 
@@ -228,8 +238,14 @@ if(USE_ROS)
 
 else()
     include_directories(${project_includes})
+    
     add_executable(${exe_name} ${SOURCES})
-    target_link_libraries(${exe_name} dlib::dlib ${OpenCV_LIBS})
+    
+    target_link_libraries(${exe_name} 
+        dlib::dlib 
+        ${OpenCV_LIBS}
+        #${OBJ_DET_LIBS}
+        )
 
 endif()
 

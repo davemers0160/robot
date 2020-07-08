@@ -20,6 +20,10 @@
 #include <mutex>
 #include <vector>
 
+
+// object detector library header
+//#include "obj_det_lib.h"
+
 // Net Version
 #include "obj_det_net_v10.h"
 //#include "tfd_net_v03.h"
@@ -37,6 +41,9 @@
 // dlib includes
 #include <dlib/dnn.h>
 #include <dlib/image_transforms.h>
+
+// dlib-contrib includes
+#include <array_image_operations.h>
 
 // ROS includes
 #include <ros/ros.h>
@@ -62,6 +69,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/core/cuda.hpp>
 
 // -------------------------------GLOBALS--------------------------------------
 
@@ -100,13 +108,6 @@ void get_images_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msg
 }   // end of get_images_callback
 */
 
-// ----------------------------------------------------------------------------
-void print_usage(void)
-{
-    std::cout << "Enter the following as arguments into the program:" << std::endl;
-    std::cout << "<input file name> " << std::endl;
-    std::cout << endl;
-}
 
 // ----------------------------------------------------------------------------
 int main(int argc, char** argv)
@@ -142,10 +143,10 @@ int main(int argc, char** argv)
 
     anet_type net;
 
-    uint64_t x_min, x_max;
-    uint64_t y_min, y_max;
-    uint64_t img_h = 720;
-    uint64_t img_w = 1280;
+    unsigned long x_min, x_max;
+    unsigned long y_min, y_max;
+    unsigned long img_h = 720;
+    unsigned long img_w = 1280;
 
     dlib::point center;
 
@@ -156,19 +157,9 @@ int main(int argc, char** argv)
     double h_res = 0.1;
     double v_res = 0.1;
 
-    // ----------------------------------------------------------------------------------------
-    if (argc == 1)
-    {
-        print_usage();
-        std::cin.ignore();
-        return 0;
-    }
-
 
     // ----------------------------------------------------------------------------------------
     // configure the basic ROS stuff
-
-    //std::string pose_topic = "obj_det";
 
     // the message to be published
     //::dwm_wrapper::point_array point_array_msg;
@@ -246,7 +237,7 @@ int main(int argc, char** argv)
     // ----------------------------------------------------------------------------------------
 
     // the rate at which the message is published in Hz
-    ros::Rate loop_rate(1);
+    ros::Rate loop_rate(5);
     ::object_detect::object_det_list detect_list;
 
     msg_listener ml;
@@ -304,14 +295,14 @@ int main(int argc, char** argv)
 
         std::array<dlib::matrix<uint8_t>, array_depth> a_img;
 
-        for (idx = 0; idx < array_depth; ++idx)
-        {
-            a_img[idx].set_size(img_h, img_w);
-        }
+        //for (idx = 0; idx < array_depth; ++idx)
+        //{
+        //    a_img[idx].set_size(img_h, img_w);
+        //}
 
         while (ros::ok())
         {
-            ros::spinOnce();
+
 
             detect_list.det.clear();
 
@@ -328,36 +319,32 @@ int main(int argc, char** argv)
                 }
                 
                 // copy the image to a dlib array matrix for input into the dnn
-                unsigned char *img_ptr = ml.image.ptr<unsigned char>(0);
+                //unsigned char *img_ptr = ml.image.ptr<unsigned char>(0);
 
-                r = 0;
-                c = 0;
+                std::vector<cv::Mat> rgb(3);
+                
+                cv::Mat img = ml.image.clone();
+                cv::split(img, rgb);
+                //dlib::cv_image<dlib::rgb_pixel> cv_img(ml.image);
+                //split_channels(a_img, dlib::mat(ml.image.ptr<unsigned char>(0), img_h, img_w, 3), 0);
 
-                for (idx = 0; idx < img_w*img_h*3; idx+=3)
-                {
 
-                    a_img[0](r, c) = *(img_ptr + idx + 2);  //*test_img.ptr<unsigned char>(idx);
-                    a_img[1](r, c) = *(img_ptr + idx + 1);  //*test_img.ptr<unsigned char>(idx+1);
-                    a_img[2](r, c) = *(img_ptr + idx);      //*test_img.ptr<unsigned char>(idx+2);
-
-                    ++c;
-
-                    if (c >= img_w)
-                    {
-                        c = 0;
-                        ++r;
-                    }
-
-                }
+                dlib::assign_image(a_img[0], dlib::mat(rgb[2].ptr<unsigned char>(0), rgb[2].rows, rgb[0].cols));
+                dlib::assign_image(a_img[1], dlib::mat(rgb[1].ptr<unsigned char>(0), rgb[1].rows, rgb[1].cols));
+                dlib::assign_image(a_img[2], dlib::mat(rgb[0].ptr<unsigned char>(0), rgb[0].rows, rgb[2].cols));
 
                 //run the detection
-                //std::vector<dlib::mmod_rect> d = net(a_img);
+                start_time = chrono::system_clock::now();
+                std::vector<dlib::mmod_rect> d = net(a_img);
+                stop_time = chrono::system_clock::now();
+                elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
 
+                std::cout << "Run Time (s): " << elapsed_time.count() << std::endl;
 
                 // simulate a detection of each type
-                std::vector<dlib::mmod_rect> d;
-                d.push_back(dlib::mmod_rect(dlib::rectangle(20,20,100,100), 0.0, "box"));
-                d.push_back(dlib::mmod_rect(dlib::rectangle(100,100,200,200), 0.0, "backpack"));
+                //std::vector<dlib::mmod_rect> d;
+                //d.push_back(dlib::mmod_rect(dlib::rectangle(20,20,100,100), 0.0, "box"));
+                //d.push_back(dlib::mmod_rect(dlib::rectangle(100,100,200,200), 0.0, "backpack"));
                 
                 prune_detects(d, 0.3);
                 
@@ -366,12 +353,13 @@ int main(int argc, char** argv)
                     auto class_index = std::find(class_names.begin(), class_names.end(), d[idx].label);
                     overlay_bounding_box(ml.image, dlib2cv_rect(d[idx].rect), d[idx].label, class_color[std::distance(class_names.begin(), class_index)]);
 
-                    x_min = d[idx].rect.left();
-                    x_max = d[idx].rect.right();
-                    y_min = d[idx].rect.top();
-                    y_max = d[idx].rect.bottom();
+                    // get the rect coordinates and make sure that they are within the image bounds
+                    x_min = std::max((unsigned long)d[idx].rect.left(), 0UL);
+                    x_max = std::min((unsigned long)d[idx].rect.right(), img_w);
+                    y_min = std::max((unsigned long)d[idx].rect.top(), 0UL);
+                    y_max = std::min((unsigned long)d[idx].rect.bottom(), img_h);
 
-                    // fill in the box string
+                    // fill in the box string message
                     box_string = box_string + "{Class=" + d[idx].label + "; xmin=" + num2str(x_min,"%d") + ", ymin=" + num2str(y_min,"%d") + \
                                  ", xmax=" + num2str(x_max,"%d") + ", ymax=" + num2str(y_max,"%d") + "},";
 
@@ -396,43 +384,42 @@ int main(int argc, char** argv)
 
                 }
 
-                box_string = box_string.substr(0, box_string.length()-1);
-
-                boxes_pub.publish(box_string);
-                razel_pub.publish(detect_list);
+                // if the list is empty then there were no detects and we don't publish anything
+                if(detect_list.det.size() > 0)
+                {
+                    box_string = box_string.substr(0, box_string.length()-1);
+                    boxes_pub.publish(box_string);
+                    
+                    razel_pub.publish(detect_list);
+                }
+                
+                // always publish the image topic
                 image_det_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "bgr8", ml.image).toImageMsg());
-
+                
                 ml.valid_images = false;
             }
 
-
+            ros::spinOnce();
+            
             loop_rate.sleep();
 
         }
 
-        // create the object detector class
-        //const auto obj_det = std::make_shared<object_detector>(obj_det_node, image_topic, depth_topic, cam_info_topic);
-        //object_detector obj_det(obj_det_node, image_topic, depth_topic, cam_info_topic);
-
-        // initialize the object detector network
-        //obj_det.init(net_file);
-
-        // run the detections
-        //obj_det.run();
-
         std::cout << "End of Program." << std::endl;
-        //std::cin.ignore();
 
     }
     catch(ros::Exception& e)
-//    catch (std::exception& e)
     {
-        std::cout << e.what() << std::endl;
+        ROS_ERROR("ROS exception %s at line number %d on function %s in file %s", e.what(), __LINE__, __FUNCTION__, __FILE__);
+        //std::cout << e.what() << std::endl;
 
-        std::cout << "Press Enter to close..." << std::endl;
-        std::cin.ignore();
+        //std::cout << "Press Enter to close..." << std::endl;
+        //std::cin.ignore();
     }
-
+    catch(cv::Exception &cve)
+    {
+        ROS_ERROR("OpenCV exception %s at line number %d on function %s in file %s", cve.what(), __LINE__, __FUNCTION__, __FILE__);    
+    }
 
     return 0;
 
