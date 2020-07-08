@@ -329,9 +329,9 @@ int main(int argc, char** argv)
                 //split_channels(a_img, dlib::mat(ml.image.ptr<unsigned char>(0), img_h, img_w, 3), 0);
 
 
-                dlib::assign_image(a_img[0], dlib::mat(rgb[2].ptr<unsigned char>(0), rgb[2].rows, rgb[0].cols));
+                dlib::assign_image(a_img[0], dlib::mat(rgb[0].ptr<unsigned char>(0), rgb[0].rows, rgb[0].cols));
                 dlib::assign_image(a_img[1], dlib::mat(rgb[1].ptr<unsigned char>(0), rgb[1].rows, rgb[1].cols));
-                dlib::assign_image(a_img[2], dlib::mat(rgb[0].ptr<unsigned char>(0), rgb[0].rows, rgb[2].cols));
+                dlib::assign_image(a_img[2], dlib::mat(rgb[2].ptr<unsigned char>(0), rgb[2].rows, rgb[2].cols));
 
                 //run the detection
                 start_time = chrono::system_clock::now();
@@ -394,7 +394,7 @@ int main(int argc, char** argv)
                 }
                 
                 // always publish the image topic
-                image_det_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "bgr8", ml.image).toImageMsg());
+                image_det_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "rgb8", ml.image).toImageMsg());
                 
                 ml.valid_images = false;
             }

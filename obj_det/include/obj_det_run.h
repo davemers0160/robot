@@ -464,18 +464,13 @@ public:
                 size_t step = img->step;
                 
                 cv::Mat tmp_img = cv::Mat(img->height, img->width, CV_8UC4, (void *)(&img->data[0]));
-                cv:cvtColor(tmp_img, image, cv::COLOR_RGBA2RGB);
+                cv:cvtColor(tmp_img, image, cv::COLOR_BGRA2RGB);
 
                 depthmap = cv::Mat(dm->height, dm->width, CV_32FC1, (void *)(&dm->data[0]));
                 //ROS_INFO("tmp_img-> h: [%d], w: [%d]", tmp_img.rows, tmp_img.cols);
                 //ROS_INFO("image-> h: [%d], w: [%d]", image.rows, image.cols);
                 //ROS_INFO("depthmap-> h: [%d], w: [%d]", depthmap.rows, depthmap.cols);
                 
-                //auto tmp_img = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::BGR8);
-                //auto tmp_dm = cv_bridge::toCvCopy(dm, sensor_msgs::image_encodings::TYPE_32FC1);
-
-                //image = tmp_img->image;
-                //depthmap = tmp_dm->image;
                 if(image.rows == 0 || image.cols == 0 || depthmap.rows == 0 || depthmap.cols == 0)
                 {
                     valid_images = false;           
