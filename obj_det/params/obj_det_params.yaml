@@ -1,8 +1,14 @@
-# params/dmw_params.yaml
-# Common parameters to the dwm1001 code
+# params/obj_det_params.yaml
+# Common ROS parameters to the object detection code
 ---
 
 obj_det: {
-    cam_type:                    "/zed/",                                               # the root name of the camera to connect to
-    net_file:                    "/home/ros/catkin_ws/src/robot/obj_det/nets/dc_3_v10_20_20_100_Laptop_final_net.dat",     # the location of the network weights file
+    # the camera specific topics to subscribe to
+    img_topic:          "/zed/zed_node/left/image_rect_color",
+    depth_topic:        "/zed/zed_node/depth/depth_registered",
+    cam_info_topic:     "/zed/zed_node/rgb/camera_info",
+    
+    # the location of the network weights file
+    net_file:           "/home/ros/catkin_ws/src/robot/obj_det/nets/dc_3_v10_20_20_100_Laptop_final_net.dat",
 }
+

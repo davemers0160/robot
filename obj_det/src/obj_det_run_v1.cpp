@@ -181,13 +181,15 @@ int main(int argc, char** argv)
 
 
     // get the required parameters /enemy_locations/max_observations
-    obj_det_node.param<std::string>("/obj_det/cam_type", cam_type, "/zed/");
+    obj_det_node.param<std::string>("/obj_det/img_topic", image_topic, "/zed/zed_node/left/image_rect_color");
+    obj_det_node.param<std::string>("/obj_det/depth_topic", depth_topic, "/zed/zed_node/depth/depth_registered");
+    obj_det_node.param<std::string>("/obj_det/cam_info_topic", cam_info_topic, "/zed/zed_node/rgb/camera_info");    
     obj_det_node.param<std::string>("/obj_det/net_file", net_file, "../src/robot/obj_det/nets/dc_3_v10_20_20_100_Laptop_final_net.dat");
-    //dwm_node.param("obj_det/max_observations", max_obs, 20);
+    //obj_det_node.param("obj_det/max_observations", max_obs, 20);
 
-    image_topic = cam_type + "zed_node/rgb/image_rect_color";
-    depth_topic = cam_type + "zed_node/depth/depth_registered";
-    cam_info_topic = cam_type + "zed_node/rgb/camera_info";
+    //image_topic = cam_type + "zed_node/rgb/image_rect_color";
+    //depth_topic = cam_type + "zed_node/depth/depth_registered";
+    //cam_info_topic = cam_type + "zed_node/rgb/camera_info";
 
     /*
     // setup the subscriber to the odomotry ROS topic to get the platform [x, y, z] location
@@ -349,14 +351,16 @@ int main(int argc, char** argv)
                 }
 
                 //run the detection
-                std::vector<dlib::mmod_rect> d = net(a_img);
-                prune_detects(d, 0.3);
+                //std::vector<dlib::mmod_rect> d = net(a_img);
+
 
                 // simulate a detection of each type
-                //std::vector<dlib::mmod_rect> d;
-                //d.push_back(dlib::mmod_rect(dlib::rectangle(20,20,100,100), 0.0, "box"));
-                //d.push_back(dlib::mmod_rect(dlib::rectangle(100,100,200,200), 0.0, "backpack"));
-
+                std::vector<dlib::mmod_rect> d;
+                d.push_back(dlib::mmod_rect(dlib::rectangle(20,20,100,100), 0.0, "box"));
+                d.push_back(dlib::mmod_rect(dlib::rectangle(100,100,200,200), 0.0, "backpack"));
+                
+                prune_detects(d, 0.3);
+                
                 for (idx = 0; idx < d.size(); ++idx)
                 {
                     auto class_index = std::find(class_names.begin(), class_names.end(), d[idx].label);
