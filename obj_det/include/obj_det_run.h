@@ -459,11 +459,12 @@ public:
         {
             height = img->height;
             width = img->width;
-            step = img->step;
+            size_t step = img->step;
             
-            cv::Mat tmp_img = cv::Mat(height, width, CV_8UC4, &(img->data[0]), step);
-            cv:cvtColor(tmp_img, image, COLOR_RGBA2RGB);
-            depthmap = cv::Mat(height, width, CV_32FC1, &(dm->data[0]), width*sizeof(float));
+            cv::Mat tmp_img = cv::Mat(height, width, CV_8UC4, (void *)(&img->data[0]));
+            cv:cvtColor(tmp_img, image, cv::COLOR_RGBA2RGB);
+
+            depthmap = cv::Mat(height, width, CV_32FC1, (void *)(&dm->data[0]));
             
             //auto tmp_img = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::BGR8);
             //auto tmp_dm = cv_bridge::toCvCopy(dm, sensor_msgs::image_encodings::TYPE_32FC1);
@@ -503,7 +504,7 @@ public:
     }   // end of init
 
 private:
-    uint32_t height, width, step;
+    uint32_t height, width;
     ros::NodeHandle obj_det_node;
     message_filters::Subscriber<sensor_msgs::Image> image_sub;
     message_filters::Subscriber<sensor_msgs::Image> depth_sub;
