@@ -4,11 +4,11 @@
 
 obj_det: {
     # the camera specific topics to subscribe to
-    img_topic:          "/zed/zed_node/left/image_rect_color",
-    depth_topic:        "/zed/zed_node/depth/depth_registered",
-    cam_info_topic:     "/zed/zed_node/rgb/camera_info",
+    img_topic:          "/zed2/zed_node/left/image_rect_color",
+    depth_topic:        "/zed2/zed_node/depth/depth_registered",
+    cam_info_topic:     "/zed2/zed_node/left/camera_info",
     
     # the location of the network weights file
-    net_file:           "/home/ros/catkin_ws/src/robot/obj_det/nets/dc_3_v10_20_20_100_Laptop_final_net.dat",
+    net_file:           "/home/jax/catkin_ws/src/robot/obj_det/nets/dc_3_v10_20_20_100_Laptop_final_net.dat",
 }
 

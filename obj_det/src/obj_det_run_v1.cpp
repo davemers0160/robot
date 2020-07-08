@@ -424,13 +424,15 @@ int main(int argc, char** argv)
         //std::cin.ignore();
 
     }
-    catch (std::exception& e)
+    catch(ros::Exception& e)
+//    catch (std::exception& e)
     {
         std::cout << e.what() << std::endl;
 
         std::cout << "Press Enter to close..." << std::endl;
         std::cin.ignore();
     }
+
 
     return 0;
 
