@@ -10,5 +10,12 @@ obj_det: {
     
     # the location of the network weights file
     net_file:           "/home/jax/catkin_ws/src/robot/obj_det/nets/dc_3_v10_20_20_100_Laptop_final_net.dat",
+    
+    # image cropping parameters
+    crop_x:             270,
+    crop_y:             0,
+    crop_w:             720,
+    crop_h:             720,
+    
 }
 

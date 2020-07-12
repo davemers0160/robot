@@ -147,6 +147,8 @@ int main(int argc, char** argv)
     unsigned long y_min, y_max;
     unsigned long img_h = 720;
     unsigned long img_w = 1280;
+    
+    unsigned long crop_x, crop_y, crop_w, crop_h;
 
     dlib::point center;
 
@@ -161,43 +163,29 @@ int main(int argc, char** argv)
     // ----------------------------------------------------------------------------------------
     // configure the basic ROS stuff
 
-    // the message to be published
-    //::dwm_wrapper::point_array point_array_msg;
-
     // initialize the ros node
     ros::init(argc, argv, "obj_det");
 
     // NodeHandle is the main access point to communications with the ROS system
     ros::NodeHandle obj_det_node;
 
-
     // get the required parameters /enemy_locations/max_observations
     obj_det_node.param<std::string>("/obj_det/img_topic", image_topic, "/zed/zed_node/left/image_rect_color");
     obj_det_node.param<std::string>("/obj_det/depth_topic", depth_topic, "/zed/zed_node/depth/depth_registered");
-    obj_det_node.param<std::string>("/obj_det/cam_info_topic", cam_info_topic, "/zed/zed_node/rgb/camera_info");    
+    obj_det_node.param<std::string>("/obj_det/cam_info_topic", cam_info_topic, "/zed/zed_node/rgb/camera_info");
+    
+    // get the network weights file
     obj_det_node.param<std::string>("/obj_det/net_file", net_file, "../src/robot/obj_det/nets/dc_3_v10_20_20_100_Laptop_final_net.dat");
-    //obj_det_node.param("obj_det/max_observations", max_obs, 20);
-
-    //image_topic = cam_type + "zed_node/rgb/image_rect_color";
-    //depth_topic = cam_type + "zed_node/depth/depth_registered";
-    //cam_info_topic = cam_type + "zed_node/rgb/camera_info";
-
-    /*
-    // setup the subscriber to the odomotry ROS topic to get the platform [x, y, z] location
-    ros::Subscriber image_sub = obj_det_node.subscribe(image_topic, 1, run_net_callback);
-    ros::Subscriber depth_sub = obj_det_node.subscribe(depth_topic, 1, run_net_callback);
-    ros::Subscriber cam_info_sub = obj_det_node.subscribe(cam_info_topic, 1, run_net_callback);
-
-
-    // setup the publisher to send out the target location messages
-    image_det_pub = obj_det_node.advertise<sensor_msgs::Image>(image_det_topic, 1);
-    boxes_pub = obj_det_node.advertise<std::string>(boxes_topic, 1);
-    razel_pub = obj_det_node.advertise<::obj_det_wrapper::object_det_list>(razel_topic, 1);
-
-    */
-
+    
+    // get the cropping parameters
+    obj_det_node.param<unsigned long>("/obj_det/crop_x", crop_x, 270);
+    obj_det_node.param<unsigned long>("/obj_det/crop_y", crop_y, 0);
+    obj_det_node.param<unsigned long>("/obj_det/crop_w", crop_w, 720);
+    obj_det_node.param<unsigned long>("/obj_det/crop_h", crop_h, 720);
+    
+    dlib::rectangle crop_rect(crop_x, crop_y, crop_x + crop_w + 1, crop_y + crop_h - 1);
+    
     // ----------------------------------------------------------------------------------------
-
     // initialize the network
     dlib::deserialize(net_file) >> net;
 
@@ -295,11 +283,6 @@ int main(int argc, char** argv)
 
         std::array<dlib::matrix<uint8_t>, array_depth> a_img;
 
-        //for (idx = 0; idx < array_depth; ++idx)
-        //{
-        //    a_img[idx].set_size(img_h, img_w);
-        //}
-
         while (ros::ok())
         {
 
@@ -325,13 +308,11 @@ int main(int argc, char** argv)
                 
                 cv::Mat img = ml.image.clone();
                 cv::split(img, rgb);
-                //dlib::cv_image<dlib::rgb_pixel> cv_img(ml.image);
-                //split_channels(a_img, dlib::mat(ml.image.ptr<unsigned char>(0), img_h, img_w, 3), 0);
 
-
-                dlib::assign_image(a_img[0], dlib::mat(rgb[0].ptr<unsigned char>(0), rgb[0].rows, rgb[0].cols));
-                dlib::assign_image(a_img[1], dlib::mat(rgb[1].ptr<unsigned char>(0), rgb[1].rows, rgb[1].cols));
-                dlib::assign_image(a_img[2], dlib::mat(rgb[2].ptr<unsigned char>(0), rgb[2].rows, rgb[2].cols));
+                // crop and copy the RGB images
+                dlib::assign_image(a_img[0], dlib::subm(dlib::mat(rgb[0].ptr<unsigned char>(0), rgb[0].rows, rgb[0].cols), crop_rect) );
+                dlib::assign_image(a_img[1], dlib::subm(dlib::mat(rgb[1].ptr<unsigned char>(0), rgb[1].rows, rgb[1].cols), crop_rect) );
+                dlib::assign_image(a_img[2], dlib::subm(dlib::mat(rgb[2].ptr<unsigned char>(0), rgb[2].rows, rgb[2].cols), crop_rect) );
 
                 //run the detection
                 start_time = chrono::system_clock::now();
