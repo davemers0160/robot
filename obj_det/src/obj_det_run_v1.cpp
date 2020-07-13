@@ -144,8 +144,9 @@ int main(int argc, char** argv)
 
     anet_type net;
 
-    unsigned long x_min, x_max;
-    unsigned long y_min, y_max;
+    int x_min, x_max, min_dim;
+    int y_min, y_max;
+    
     unsigned long img_h = 720;
     unsigned long img_w = 1280;
     
@@ -340,10 +341,10 @@ int main(int argc, char** argv)
                     overlay_bounding_box(cv_img, dlib2cv_rect(d[idx].rect), d[idx].label, class_color[std::distance(class_names.begin(), class_index)]);
 
                     // get the rect coordinates and make sure that they are within the image bounds
-                    x_min = std::max((unsigned long)d[idx].rect.left(), 0UL);
-                    x_max = std::min((unsigned long)d[idx].rect.right(), img_w);
-                    y_min = std::max((unsigned long)d[idx].rect.top(), 0UL);
-                    y_max = std::min((unsigned long)d[idx].rect.bottom(), img_h);
+                    x_min = std::max((int)d[idx].rect.left(), min_dim);
+                    x_max = std::min((int)d[idx].rect.right(), (int)img_w);
+                    y_min = std::max((int)d[idx].rect.top(), min_dim);
+                    y_max = std::min((int)d[idx].rect.bottom(), (int)img_h);
 
                     // fill in the box string message
                     box_string = box_string + "{Class=" + d[idx].label + "; xmin=" + num2str(x_min,"%d") + ", ymin=" + num2str(y_min,"%d") + \
@@ -353,6 +354,7 @@ int main(int argc, char** argv)
                     cv::Range rows(y_min, y_max);
                     cv::Range cols(x_min, x_max);
 
+                    cv::Mat tmp_dm = ml.depthmap(rows, cols);
                     cv::Mat sub_dm;
                     ranged_threshold<float>(ml.depthmap(rows, cols), sub_dm, 0.0, 25.0);
                     range = nan_mean<float>(sub_dm);
