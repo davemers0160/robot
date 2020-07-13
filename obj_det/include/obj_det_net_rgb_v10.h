@@ -1,15 +1,11 @@
 #ifndef NET_DEFINITION_H
 #define NET_DEFINITION_H
 
-
 // dlib includes
 #include "dlib/dnn.h"
 #include "dlib/dnn/core.h"
 
-#include "input_array_image_pryamid.h"
-
-extern const uint32_t array_depth = 1;
-//extern const uint32_t secondary = 1;
+const uint32_t pyramid_size = 4;
 
 // --------------------------------- Conv Filter Setup ------------------------------------
 template <long num_filters, typename SUBNET> using con1 = dlib::con<num_filters, 1, 1, 1, 1, SUBNET>;
@@ -108,40 +104,35 @@ input[4] -> downsampler -> rcon3 -> rcon3 -> rcon3 -> con6
 
 // ----------------------------------------------------------------------------------------
 
+
 // Finally, we define the entire network.   The special input_rgb_image_pyramid
 // layer causes the network to operate over a spatial pyramid, making the detector
 // scale invariant.  
 
-using net_type = dlib::loss_mmod<con9<1,
+using net_type = dlib::loss_mmod<con7<1,
 
-    dlib::relu<dlib::bn_con<con9<32,
-    dlib::relu<dlib::bn_con<con9<32,
-    dlib::relu<dlib::bn_con<con9<32,
+    res_blk3<128,128,64, cbp3_blk<128,
+    con2d<64, res_blk3<64,64,32, cbp3_blk<64,
+    con2d<32, res_blk5<32,32,16, cbp5_blk<32,
 
-    dlib::relu<dlib::bn_con<con5d<32, 
-    dlib::relu<dlib::bn_con<con5d<32, 
-    
-    dlib::tag10<dlib::input_array_image_pyramid<dlib::pyramid_down<6>, array_depth>>
-    >>> >>> >>> >>> >>> >>;
+    mp2<dlib::input_rgb_image_pyramid<dlib::pyramid_down<pyramid_size>>>
+    >>> >>> >> >>;
 
-using anet_type = dlib::loss_mmod<con9<1,
+using anet_type = dlib::loss_mmod<con7<1,
 
-    dlib::relu<dlib::affine<con5<32,
-    dlib::relu<dlib::affine<con5<32,
-    dlib::relu<dlib::affine<con5<32,
+    ares_blk3<128, 128, 64, acbp3_blk<128,
+    con2d<64, ares_blk3<64, 64, 32, acbp3_blk<64,
+    con2d<32, ares_blk5<32, 32, 16, acbp5_blk<32,
 
-    dlib::relu<dlib::affine<con5d<32, 
-    dlib::relu<dlib::affine<con5d<32, 
-
-    dlib::tag10<dlib::input_array_image_pyramid<dlib::pyramid_down<6>, array_depth>>
-    >>> >>> >>> >>> >>> >>;
+    mp2<dlib::input_rgb_image_pyramid<dlib::pyramid_down<pyramid_size>>>
+    >>> >>> >> >>;
 
 // ----------------------------------------------------------------------------------------
 // Configuration function
 // ----------------------------------------------------------------------------------------
 
 template <typename net_type>
-net_type config_net(dlib::mmod_options options, std::vector<uint32_t> params)
+net_type config_net(dlib::mmod_options options, std::vector<float> avg_color, std::vector<uint32_t> params)
 {
 
     net_type net = net_type(options, dlib::num_con_outputs(params[0]),
@@ -149,10 +140,21 @@ net_type config_net(dlib::mmod_options options, std::vector<uint32_t> params)
         dlib::num_con_outputs(params[2]),
         dlib::num_con_outputs(params[3]),
         dlib::num_con_outputs(params[4]),
-        dlib::num_con_outputs(params[5])
+        dlib::num_con_outputs(params[5]),
+        dlib::num_con_outputs(params[6]), 
+        dlib::num_con_outputs(params[7]),
+        dlib::num_con_outputs(params[8]),
+        dlib::num_con_outputs(params[9]),
+        dlib::num_con_outputs(params[10]),
+        dlib::num_con_outputs(params[11]),
+        dlib::num_con_outputs(params[12]),
+        dlib::num_con_outputs(params[13]),
+        dlib::num_con_outputs(params[14]),
+        dlib::input_rgb_image_pyramid<dlib::pyramid_down<pyramid_size>>(avg_color[0], avg_color[1], avg_color[2])
     );
 
     net.subnet().layer_details().set_num_filters(options.detector_windows.size());
+    //dlib::layer<net_type::num_layers - 1>(net).input_rgb_image_pyramid(avg_color[0], avg_color[1], avg_color[2]);
 
     return net;
 

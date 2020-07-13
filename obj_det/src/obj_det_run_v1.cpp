@@ -25,7 +25,7 @@
 //#include "obj_det_lib.h"
 
 // Net Version
-#include "obj_det_net_v10.h"
+#include "obj_det_net_rgb_v10.h"
 //#include "tfd_net_v03.h"
 #include "overlay_bounding_box.h"
 #include "prune_detects.h"
@@ -281,7 +281,8 @@ int main(int argc, char** argv)
 
         ml.valid_images = false;
 
-        std::array<dlib::matrix<uint8_t>, array_depth> a_img;
+        //std::array<dlib::matrix<uint8_t>, array_depth> a_img;
+        dlib::matrix<dlib::rgb_pixel> rgb_img;
 
         while (ros::ok())
         {
@@ -304,19 +305,20 @@ int main(int argc, char** argv)
                 // copy the image to a dlib array matrix for input into the dnn
                 //unsigned char *img_ptr = ml.image.ptr<unsigned char>(0);
 
-                std::vector<cv::Mat> rgb(3);
+                //std::vector<cv::Mat> rgb(3);
                 
-                cv::Mat img = ml.image.clone();
-                cv::split(img, rgb);
+                cv::Mat cv_img = ml.image.clone();
+                //cv::split(cv_img, rgb);
 
                 // crop and copy the RGB images
-                dlib::assign_image(a_img[0], dlib::subm(dlib::mat(rgb[0].ptr<unsigned char>(0), rgb[0].rows, rgb[0].cols), crop_rect) );
-                dlib::assign_image(a_img[1], dlib::subm(dlib::mat(rgb[1].ptr<unsigned char>(0), rgb[1].rows, rgb[1].cols), crop_rect) );
-                dlib::assign_image(a_img[2], dlib::subm(dlib::mat(rgb[2].ptr<unsigned char>(0), rgb[2].rows, rgb[2].cols), crop_rect) );
+                //dlib::assign_image(a_img[0], dlib::subm(dlib::mat(rgb[0].ptr<unsigned char>(0), rgb[0].rows, rgb[0].cols), crop_rect) );
+                //dlib::assign_image(a_img[1], dlib::subm(dlib::mat(rgb[1].ptr<unsigned char>(0), rgb[1].rows, rgb[1].cols), crop_rect) );
+                //dlib::assign_image(a_img[2], dlib::subm(dlib::mat(rgb[2].ptr<unsigned char>(0), rgb[2].rows, rgb[2].cols), crop_rect) );
+                dlib::assign_image(rgb_img, dlib::subm(dlib::mat(cv_img.ptr<unsigned char>(0), cv_img.rows, cv_img.cols), crop_rect) );
 
                 //run the detection
                 start_time = chrono::system_clock::now();
-                std::vector<dlib::mmod_rect> d = net(a_img);
+                std::vector<dlib::mmod_rect> d = net(rgb_img);
                 stop_time = chrono::system_clock::now();
                 elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
 
