@@ -308,13 +308,15 @@ int main(int argc, char** argv)
                 //std::vector<cv::Mat> rgb(3);
                 
                 cv::Mat cv_img = ml.image.clone();
+                
                 //cv::split(cv_img, rgb);
 
                 // crop and copy the RGB images
                 //dlib::assign_image(a_img[0], dlib::subm(dlib::mat(rgb[0].ptr<unsigned char>(0), rgb[0].rows, rgb[0].cols), crop_rect) );
                 //dlib::assign_image(a_img[1], dlib::subm(dlib::mat(rgb[1].ptr<unsigned char>(0), rgb[1].rows, rgb[1].cols), crop_rect) );
                 //dlib::assign_image(a_img[2], dlib::subm(dlib::mat(rgb[2].ptr<unsigned char>(0), rgb[2].rows, rgb[2].cols), crop_rect) );
-                dlib::assign_image(rgb_img, dlib::subm(dlib::mat(cv_img.ptr<unsigned char>(0), cv_img.rows, cv_img.cols), crop_rect) );
+                //dlib::assign_image(rgb_img, dlib::subm(dlib::mat(cv_img.ptr<unsigned char>(0), cv_img.rows, cv_img.cols), crop_rect) );
+                dlib::assign_image(rgb_img, dlib::cv_image<dlib::rgb_pixel>(cv_img));
 
                 //run the detection
                 start_time = chrono::system_clock::now();
@@ -334,7 +336,7 @@ int main(int argc, char** argv)
                 for (idx = 0; idx < d.size(); ++idx)
                 {
                     auto class_index = std::find(class_names.begin(), class_names.end(), d[idx].label);
-                    overlay_bounding_box(ml.image, dlib2cv_rect(d[idx].rect), d[idx].label, class_color[std::distance(class_names.begin(), class_index)]);
+                    overlay_bounding_box(cv_img, dlib2cv_rect(d[idx].rect), d[idx].label, class_color[std::distance(class_names.begin(), class_index)]);
 
                     // get the rect coordinates and make sure that they are within the image bounds
                     x_min = std::max((unsigned long)d[idx].rect.left(), 0UL);
@@ -377,7 +379,7 @@ int main(int argc, char** argv)
                 }
                 
                 // always publish the image topic
-                image_det_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "rgb8", ml.image).toImageMsg());
+                image_det_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "rgb8", cv_img).toImageMsg());
                 
                 ml.valid_images = false;
             }
