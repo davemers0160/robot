@@ -37,6 +37,7 @@
 #include "num2string.h"
 #include "file_ops.h"
 #include "sleep_ms.h"
+#include "ocv_threshold_functions.h"
 
 // dlib includes
 #include <dlib/dnn.h>
@@ -352,7 +353,8 @@ int main(int argc, char** argv)
                     cv::Range rows(y_min, y_max);
                     cv::Range cols(x_min, x_max);
 
-                    cv::Mat sub_dm = ml.depthmap(rows, cols);
+                    cv::Mat sub_dm;
+                    ranged_threshold<float>(ml.depthmap(rows, cols), sub_dm, 0.0, 25.0);
                     range = nan_mean<float>(sub_dm);
 
                     center = dlib::center(d[idx].rect);
