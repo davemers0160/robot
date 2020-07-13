@@ -148,7 +148,7 @@ int main(int argc, char** argv)
     unsigned long img_h = 720;
     unsigned long img_w = 1280;
     
-    unsigned long crop_x, crop_y, crop_w, crop_h;
+    int crop_x, crop_y, crop_w, crop_h;
 
     dlib::point center;
 
@@ -175,13 +175,13 @@ int main(int argc, char** argv)
     obj_det_node.param<std::string>("/obj_det/cam_info_topic", cam_info_topic, "/zed/zed_node/rgb/camera_info");
     
     // get the network weights file
-    obj_det_node.param<std::string>("/obj_det/net_file", net_file, "../src/robot/obj_det/nets/dc_3_v10_20_20_100_Laptop_final_net.dat");
+    obj_det_node.param<std::string>("/obj_det/net_file", net_file, "../src/robot/obj_det/nets/dc3_rgb_v10_40_40_100_HPC_final_net.dat");
     
     // get the cropping parameters
-    obj_det_node.param<unsigned long>("/obj_det/crop_x", crop_x, 270);
-    obj_det_node.param<unsigned long>("/obj_det/crop_y", crop_y, 0);
-    obj_det_node.param<unsigned long>("/obj_det/crop_w", crop_w, 720);
-    obj_det_node.param<unsigned long>("/obj_det/crop_h", crop_h, 720);
+    obj_det_node.param<int>("/obj_det/crop_x", crop_x, 270);
+    obj_det_node.param<int>("/obj_det/crop_y", crop_y, 0);
+    obj_det_node.param<int>("/obj_det/crop_w", crop_w, 720);
+    obj_det_node.param<int>("/obj_det/crop_h", crop_h, 720);
     
     dlib::rectangle crop_rect(crop_x, crop_y, crop_x + crop_w + 1, crop_y + crop_h - 1);
     

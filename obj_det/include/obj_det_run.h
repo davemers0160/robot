@@ -13,7 +13,7 @@
 #include "num2string.h"
 
 // Net Version
-#include "obj_det_net_v10.h"
+#include "obj_det_net_rgb_v10.h"
 //#include "tfd_net_v03.h"
 #include "overlay_bounding_box.h"
 #include "prune_detects.h"
@@ -202,6 +202,7 @@ public:
     }
 
     // ----------------------------------------------------------------------------
+/*
     void run()
     {
         uint64_t idx;
@@ -323,7 +324,7 @@ public:
             loop_rate.sleep();
         }
     }
-
+*/
 private:
 
     ros::NodeHandle obj_det_node;
