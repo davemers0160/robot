@@ -356,7 +356,7 @@ int main(int argc, char** argv)
 
                     cv::Mat tmp_dm = ml.depthmap(rows, cols);
                     cv::Mat sub_dm;
-                    ranged_threshold<float>(ml.depthmap(rows, cols), sub_dm, 0.0f, 25.0f);
+                    ranged_threshold<float>(tmp_dm, sub_dm, 0.0f, 25.0f);
                     range = nan_mean<float>(sub_dm);
 
                     center = dlib::center(d[idx].rect);
