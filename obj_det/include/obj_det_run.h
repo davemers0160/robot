@@ -370,7 +370,8 @@ class msg_listener
 
 public:
     bool valid_images;
-    
+    std::mutex mtx;
+
     cv::Mat image;
     cv::Mat depthmap;
 
@@ -386,6 +387,8 @@ public:
         {
             if(valid_images == false)
             {
+                std::lock_guard<std::mutex> lock(mtx);
+                
                 height = img->height;
                 width = img->width;
                 size_t step = img->step;

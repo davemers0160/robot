@@ -133,6 +133,7 @@ int main(int argc, char** argv)
     static const std::string image_det_topic = root_topic + "image";
     static const std::string boxes_topic = root_topic + "boxes";
     static const std::string razel_topic = root_topic + "target_razel";
+    static const std::string dnn_input_topic = root_topic + "dnn_input";
 
     std::string cam_type;
     std::string net_file;
@@ -160,6 +161,8 @@ int main(int argc, char** argv)
 
     double h_res = 0.1;
     double v_res = 0.1;
+    
+    double rate = 10.0;
 
 
     // ----------------------------------------------------------------------------------------
@@ -170,6 +173,8 @@ int main(int argc, char** argv)
 
     // NodeHandle is the main access point to communications with the ROS system
     ros::NodeHandle obj_det_node;
+    
+    obj_det_node.param<double>("/obj_det/loop_rate", rate, 5);       
 
     // get the required parameters /enemy_locations/max_observations
     obj_det_node.param<std::string>("/obj_det/img_topic", image_topic, "/zed/zed_node/left/image_rect_color");
@@ -227,7 +232,7 @@ int main(int argc, char** argv)
     // ----------------------------------------------------------------------------------------
 
     // the rate at which the message is published in Hz
-    ros::Rate loop_rate(5);
+    ros::Rate loop_rate(rate);
     ::object_detect::object_det_list detect_list;
 
     msg_listener ml;
@@ -238,6 +243,7 @@ int main(int argc, char** argv)
         ros::Publisher image_det_pub = obj_det_node.advertise<sensor_msgs::Image>(image_det_topic, 1);
         ros::Publisher boxes_pub = obj_det_node.advertise<std_msgs::String>(boxes_topic, 1);
         ros::Publisher razel_pub = obj_det_node.advertise<::object_detect::object_det_list>(razel_topic, 1);
+        ros::Publisher dnn_input_pub = obj_det_node.advertise<sensor_msgs::Image>(dnn_input_topic, 1);
 
         ml.init(obj_det_node, image_topic, depth_topic);
 
@@ -297,6 +303,7 @@ int main(int argc, char** argv)
             if(ml.valid_images)
             {
 
+                ml.mtx.lock();
                 // check to make sure that the images are the correct sizes and have data
                 if(ml.image.empty() || ml.depthmap.empty() || ml.image.rows != img_h || ml.image.cols != img_w)
                 {
@@ -309,7 +316,7 @@ int main(int argc, char** argv)
 
                 //std::vector<cv::Mat> rgb(3);
                 
-                cv::Mat cv_img = ml.image.clone();
+                //cv::Mat cv_img = ml.image.clone();
                 
                 //cv::split(cv_img, rgb);
 
@@ -317,11 +324,14 @@ int main(int argc, char** argv)
                 //dlib::assign_image(a_img[0], dlib::subm(dlib::mat(rgb[0].ptr<unsigned char>(0), rgb[0].rows, rgb[0].cols), crop_rect) );
                 //dlib::assign_image(a_img[1], dlib::subm(dlib::mat(rgb[1].ptr<unsigned char>(0), rgb[1].rows, rgb[1].cols), crop_rect) );
                 //dlib::assign_image(a_img[2], dlib::subm(dlib::mat(rgb[2].ptr<unsigned char>(0), rgb[2].rows, rgb[2].cols), crop_rect) );
-                //dlib::assign_image(rgb_img, dlib::subm(dlib::mat(cv_img.ptr<unsigned char>(0), cv_img.rows, cv_img.cols), crop_rect) );
-                dlib::assign_image(rgb_img, dlib::cv_image<dlib::rgb_pixel>(cv_img));
+                //dlib::assign_image(rgb_img, dlib::subm(dlib::cv_image<dlib::rgb_pixel>(cv_img), crop_rect) );
+                dlib::assign_image(rgb_img, dlib::cv_image<dlib::rgb_pixel>(ml.image));
 
+                rgb_img = dlib::subm(rgb_img, crop_rect);
+                
                 //run the detection
                 start_time = chrono::system_clock::now();
+                //dlib::equalize_histogram(rgb_img);
                 std::vector<dlib::mmod_rect> d = net(rgb_img);
                 stop_time = chrono::system_clock::now();
                 elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
@@ -335,10 +345,13 @@ int main(int argc, char** argv)
                 
                 prune_detects(d, 0.3);
                 
+                overlay_bounding_box(ml.image, dlib2cv_rect(crop_rect), "crop", cv::Scalar(0, 255, 255), false);
+                                    
                 for (idx = 0; idx < d.size(); ++idx)
                 {
                     auto class_index = std::find(class_names.begin(), class_names.end(), d[idx].label);
-                    overlay_bounding_box(cv_img, dlib2cv_rect(d[idx].rect), d[idx].label, class_color[std::distance(class_names.begin(), class_index)]);
+                    d[idx].rect = dlib::translate_rect(d[idx].rect, crop_x, crop_y);
+                    overlay_bounding_box(ml.image, dlib2cv_rect(d[idx].rect), d[idx].label, class_color[std::distance(class_names.begin(), class_index)]);
 
                     // get the rect coordinates and make sure that they are within the image bounds
                     x_min = std::max((int)d[idx].rect.left(), min_dim);
@@ -382,9 +395,12 @@ int main(int argc, char** argv)
                     razel_pub.publish(detect_list);
                 }
                 
-                // always publish the image topic
-                image_det_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "rgb8", cv_img).toImageMsg());
                 
+                // always publish the image topic
+                image_det_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "rgb8", ml.image).toImageMsg());
+                dnn_input_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "rgb8", dlib::toMat(rgb_img)).toImageMsg());
+                
+                ml.mtx.unlock();
                 ml.valid_images = false;
             }
 
