@@ -12,13 +12,17 @@ obj_det: {
     cam_info_topic:     "/zed2/zed_node/left/camera_info",
     
     # the location of the network weights file
-    net_file:           "/home/jax/catkin_ws/src/robot/obj_det/nets/dc3_rgb_v10_40_40_100_HPC_final_net.dat",
+    net_file:           "/home/jax/catkin_ws/src/robot/obj_det/nets/dc3_rgb_v04_40_40_150_55_HPC_final_net.dat",
     
     # image cropping parameters
-    crop_x:             270,
-    crop_y:             200,
-    crop_w:             720,
-    crop_h:             420,
-    
+    #crop_x:             270,
+    #crop_y:             200,
+    #crop_w:             720,
+    #crop_h:             420,
+
+    crop_x:             140,
+    crop_y:             270,
+    crop_w:             1000,
+    crop_h:             420,    
 }
 

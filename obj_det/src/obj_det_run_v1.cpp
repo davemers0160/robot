@@ -25,8 +25,8 @@
 //#include "obj_det_lib.h"
 
 // Net Version
-#include "obj_det_net_rgb_v10.h"
-//#include "tfd_net_v03.h"
+//#include "obj_det_net_rgb_v10.h"
+#include "obj_det_net_rgb_v04.h"
 #include "overlay_bounding_box.h"
 #include "prune_detects.h"
 
@@ -137,10 +137,7 @@ int main(int argc, char** argv)
 
     std::string cam_type;
     std::string net_file;
-
-    //valid_cam_info = false;
-    //valid_images = false;
-
+    
     std::string box_string = "";
 
     anet_type net;
@@ -182,7 +179,7 @@ int main(int argc, char** argv)
     obj_det_node.param<std::string>("/obj_det/cam_info_topic", cam_info_topic, "/zed/zed_node/rgb/camera_info");
     
     // get the network weights file
-    obj_det_node.param<std::string>("/obj_det/net_file", net_file, "../src/robot/obj_det/nets/dc3_rgb_v10_40_40_100_HPC_final_net.dat");
+    obj_det_node.param<std::string>("/obj_det/net_file", net_file, "/home/jax/catkin_ws/src/robot/obj_det/nets/dc3_rgb_v04_40_40_150_55_HPC_final_net.dat");
     
     // get the cropping parameters
     obj_det_node.param<int>("/obj_det/crop_x", crop_x, 270);
