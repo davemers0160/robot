@@ -25,8 +25,8 @@
 //#include "obj_det_lib.h"
 
 // Net Version
-//#include "obj_det_net_rgb_v10.h"
-#include "obj_det_net_rgb_v04.h"
+#include "obj_det_net_rgb_v10.h"
+//#include "obj_det_net_rgb_v04.h"
 #include "overlay_bounding_box.h"
 #include "prune_detects.h"
 
