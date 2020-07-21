@@ -4,7 +4,7 @@
 
 obj_det: {
     # loop rate
-    loop_rate:          5,
+    loop_rate:          10,
 
     # the camera specific topics to subscribe to
     img_topic:          "/zed2/zed_node/left/image_rect_color",
@@ -20,9 +20,9 @@ obj_det: {
     #crop_w:             720,
     #crop_h:             420,
 
-    crop_x:             140,
-    crop_y:             270,
-    crop_w:             1000,
-    crop_h:             420,    
+    crop_x:             128,
+    crop_y:             196,
+    crop_w:             1024,
+    crop_h:             512,    
 }
 
