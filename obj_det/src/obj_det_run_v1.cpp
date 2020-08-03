@@ -187,7 +187,7 @@ int main(int argc, char** argv)
     obj_det_node.param<int>("/obj_det/crop_w", crop_w, 720);
     obj_det_node.param<int>("/obj_det/crop_h", crop_h, 720);
     
-    dlib::rectangle crop_rect(crop_x, crop_y, crop_x + crop_w + 1, crop_y + crop_h - 1);
+    dlib::rectangle crop_rect(crop_x, crop_y, crop_x + crop_w - 1, crop_y + crop_h - 1);
     
     // ----------------------------------------------------------------------------------------
     // initialize the network
