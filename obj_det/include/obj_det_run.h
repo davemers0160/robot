@@ -11,6 +11,7 @@
 
 // Custom includes
 #include "num2string.h"
+#include "dlib_pixel_operations.h"
 
 // Net Version
 #include "obj_det_net_rgb_v10.h"
@@ -19,7 +20,7 @@
 #include "prune_detects.h"
 
 // dlib includes
-#include <dlib/dnn.h>
+#include <dlib/matrix.h>
 #include <dlib/image_transforms.h>
 
 // ROS includes

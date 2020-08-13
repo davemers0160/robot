@@ -20,16 +20,6 @@
 #include <mutex>
 #include <vector>
 
-
-// object detector library header
-//#include "obj_det_lib.h"
-
-// Net Version
-#include "obj_det_net_rgb_v10.h"
-//#include "obj_det_net_rgb_v04.h"
-#include "overlay_bounding_box.h"
-#include "prune_detects.h"
-
 // Custom includes
 #include "obj_det_run.h"
 #include "get_platform.h"
@@ -39,12 +29,19 @@
 #include "sleep_ms.h"
 #include "ocv_threshold_functions.h"
 
+// Net Version
+#include "obj_det_net_rgb_v10.h"
+//#include "obj_det_net_rgb_v04.h"
+#include "overlay_bounding_box.h"
+#include "prune_detects.h"
+
 // dlib includes
 #include <dlib/dnn.h>
 #include <dlib/image_transforms.h>
 
 // dlib-contrib includes
-#include <array_image_operations.h>
+//#include <array_image_operations.h>
+//#include <dlib_pixel_operations.h>
 
 // ROS includes
 #include <ros/ros.h>
