@@ -93,6 +93,7 @@ int main(int argc, char** argv)
     // ROS publisher topics
     static const std::string root_topic = "/obj_det/";
     static const std::string image_det_topic = root_topic + "image";
+    static const std::string image_det_topic_raw = root_topic + "image_raw";
     static const std::string boxes_topic = root_topic + "boxes";
     static const std::string razel_topic = root_topic + "target_razel";
     static const std::string dnn_input_topic = root_topic + "dnn_input";
@@ -202,9 +203,10 @@ int main(int argc, char** argv)
 
         // setup the publisher to send out the target location messages
         ros::Publisher image_det_pub = obj_det_node.advertise<sensor_msgs::Image>(image_det_topic, 1);
+        ros::Publisher image_det_raw_pub = obj_det_node.advertise<sensor_msgs::Image>(image_det_topic_raw, 1);
         ros::Publisher boxes_pub = obj_det_node.advertise<std_msgs::String>(boxes_topic, 1);
         ros::Publisher razel_pub = obj_det_node.advertise<::object_detect::object_det_list>(razel_topic, 1);
-        ros::Publisher razel_pub_raw = obj_det_node.advertise<::object_detect::object_det_list>(razel_topic_raw, 1);
+        ros::Publisher razel_raw_pub = obj_det_node.advertise<::object_detect::object_det_list>(razel_topic_raw, 1);
         ros::Publisher dnn_input_pub = obj_det_node.advertise<sensor_msgs::Image>(dnn_input_topic, 1);
 
         ml.init(obj_det_node, image_topic, depth_topic);
@@ -252,6 +254,8 @@ int main(int argc, char** argv)
         dlib::matrix<dlib::rgb_pixel> rgb_img;
         dlib::matrix<uint32_t, 1, 4> cm;
         
+        cv::Mat raw_img;
+        
         std::cout << "Running..." << std::endl << std::endl;
         
         while (ros::ok())
@@ -275,6 +279,7 @@ int main(int argc, char** argv)
                 }
                     
                 // crop and copy the RGB images for input into the dnn
+                raw_img = ml.image.clone();
                 dlib::assign_image(rgb_img, dlib::cv_image<dlib::rgb_pixel>(ml.image));
                 rgb_img = dlib::subm(rgb_img, crop_rect);
                 
@@ -318,7 +323,7 @@ int main(int argc, char** argv)
                     }
                     
                     d[idx].rect = dlib::translate_rect(d[idx].rect, crop_x, crop_y);
-                    overlay_bounding_box(ml.image, dlib2cv_rect(d[idx].rect), d[idx].label, class_color[std::distance(class_names.begin(), class_index)]);
+                    overlay_bounding_box(raw_img, dlib2cv_rect(d[idx].rect), d[idx].label, class_color[std::distance(class_names.begin(), class_index)]);
 
                     // get the rect coordinates and make sure that they are within the image bounds
                     x_min = std::max((int)d[idx].rect.left(), min_dim);
@@ -352,7 +357,10 @@ int main(int argc, char** argv)
                     detect_list.det.push_back(obj_det);
                     
                     if(valid_detect)
-                        detect_list_filtered.det.push_back(obj_det);                    
+                    {
+                        detect_list_filtered.det.push_back(obj_det);
+                        overlay_bounding_box(ml.image, dlib2cv_rect(d[idx].rect), d[idx].label, class_color[std::distance(class_names.begin(), class_index)]);                       
+                    }                 
 
                 }
 
@@ -362,7 +370,7 @@ int main(int argc, char** argv)
                     box_string = box_string.substr(0, box_string.length()-1);
                     boxes_pub.publish(box_string);
                     
-                    razel_pub_raw.publish(detect_list);
+                    razel_raw_pub.publish(detect_list);
                 }
                 
                 if(detect_list_filtered.det.size() > 0)
@@ -371,6 +379,7 @@ int main(int argc, char** argv)
                 }
                 
                 // always publish the image topic
+                image_det_raw_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "rgb8", raw_img).toImageMsg());
                 image_det_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "rgb8", ml.image).toImageMsg());
                 dnn_input_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "rgb8", dlib::toMat(rgb_img)).toImageMsg());
                 
