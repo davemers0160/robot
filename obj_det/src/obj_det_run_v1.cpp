@@ -311,7 +311,7 @@ int main(int argc, char** argv)
                         cm = get_color_match(rgb_img, d[idx]);
                         long index = dlib::index_of_max(cm);
 
-                        if (index != 3)
+                        if (index != 1)
                         {
                             valid_detect = true;
                         }
