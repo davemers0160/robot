@@ -89,10 +89,10 @@ dlib::matrix<uint32_t, 1, 4> get_color_match(dlib::matrix<dlib::rgb_pixel>& img,
     dlib::hsi_pixel blue_ll(155, 0, 64);
     dlib::hsi_pixel blue_ul(185, 255, 255);
 
-    dlib::hsi_pixel black_ll(0, 0, 0);
-    dlib::hsi_pixel black_ul(255, 64, 48);
-    //dlib::rgb_pixel black_ll(0, 0, 0);
-    //dlib::rgb_pixel black_ul(64, 64, 64);
+    //dlib::hsi_pixel black_ll(0, 0, 0);
+    //dlib::hsi_pixel black_ul(255, 64, 48);
+    dlib::rgb_pixel black_ll(0, 0, 0);
+    dlib::rgb_pixel black_ul(48, 48, 48);
 
 
     dlib::hsi_pixel gray_ll(0, 0, 48);
@@ -137,21 +137,23 @@ dlib::matrix<uint32_t, 1, 4> get_color_match(dlib::matrix<dlib::rgb_pixel>& img,
             {
                 blue_mask(r, c) = 1;
             }
-            else if ((p >= black_ll) && (p <= black_ul))
+            else if ((q >= black_ll) && (q <= black_ul))
             {
                 black_mask(r, c) = 1;
             }
-            else if ((p >= gray_ll) && (p <= gray_ul))
-            {
-                gray_mask(r, c) = 1;
-            }
+            //else if ((p >= gray_ll) && (p <= gray_ul))
+            //{
+            //    gray_mask(r, c) = 1;
+            //}
 
         }
     }
 
     dlib::matrix<uint32_t, 1, 4> res;
-    res = (uint32_t)dlib::sum(red_mask), (uint32_t)dlib::sum(blue_mask), (uint32_t)dlib::sum(black_mask), (uint32_t)dlib::sum(gray_mask);
-
+    
+    uint32_t mask_sum = (uint32_t)dlib::sum(red_mask) + (uint32_t)dlib::sum(blue_mask) + (uint32_t)dlib::sum(black_mask);
+    //res = (uint32_t)dlib::sum(red_mask), (uint32_t)dlib::sum(blue_mask), (uint32_t)dlib::sum(black_mask), (uint32_t)dlib::sum(gray_mask);
+    res = mask_sum, (uint32_t)(rgb_crop.size() - mask_sum), 0, 0;
     return res;
 
 }   // end of get_color_match
