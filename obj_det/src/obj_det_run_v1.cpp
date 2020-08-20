@@ -20,16 +20,6 @@
 #include <mutex>
 #include <vector>
 
-
-// object detector library header
-//#include "obj_det_lib.h"
-
-// Net Version
-#include "obj_det_net_rgb_v10.h"
-//#include "obj_det_net_rgb_v04.h"
-#include "overlay_bounding_box.h"
-#include "prune_detects.h"
-
 // Custom includes
 #include "obj_det_run.h"
 #include "get_platform.h"
@@ -39,12 +29,19 @@
 #include "sleep_ms.h"
 #include "ocv_threshold_functions.h"
 
+// Net Version
+#include "obj_det_net_rgb_v10.h"
+//#include "obj_det_net_rgb_v04.h"
+#include "overlay_bounding_box.h"
+#include "prune_detects.h"
+
 // dlib includes
 #include <dlib/dnn.h>
 #include <dlib/image_transforms.h>
 
 // dlib-contrib includes
-#include <array_image_operations.h>
+//#include <array_image_operations.h>
+//#include <dlib_pixel_operations.h>
 
 // ROS includes
 #include <ros/ros.h>
@@ -75,41 +72,6 @@
 
 // -------------------------------GLOBALS--------------------------------------
 
-//sensor_msgs::CameraInfo cam_info;
-
-//extern bool valid_cam_info;
-//extern bool valid_images;
-
-//extern cv::Mat image;
-//extern cv::Mat depthmap;
-
-// ----------------------------------------------------------------------------
-/*
-void get_images_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::ImageConstPtr& dm)
-{
-        try
-        {
-            auto tmp_img = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::BGR8);
-            auto tmp_dm = cv_bridge::toCvCopy(dm, sensor_msgs::image_encodings::TYPE_32FC1);
-
-            // it is very important to lock the below assignment operation.
-            // remember that we are accessing it from another thread too.
-            //std::lock_guard<std::mutex> lock(mtx);
-            image = tmp_img->image;
-            depthmap = tmp_dm->image;
-
-            valid_images = true;
-        }
-        catch (cv_bridge::Exception& e)
-        {
-            // display the error at most once per 10 seconds
-            ROS_ERROR_THROTTLE(10, "cv_bridge exception %s at line number %d on function %s in file %s", e.what(), __LINE__, __FUNCTION__, __FILE__);
-        }
-
-    valid_images = true;
-}   // end of get_images_callback
-*/
-
 
 // ----------------------------------------------------------------------------
 int main(int argc, char** argv)
@@ -132,10 +94,12 @@ int main(int argc, char** argv)
     // ROS publisher topics
     static const std::string root_topic = "/obj_det/";
     static const std::string image_det_topic = root_topic + "image";
+    static const std::string image_det_topic_raw = root_topic + "image_raw";
     static const std::string boxes_topic = root_topic + "boxes";
     static const std::string razel_topic = root_topic + "target_razel";
     static const std::string dnn_input_topic = root_topic + "dnn_input";
-
+    static const std::string razel_topic_raw = root_topic + "target_razel_raw";
+    
     std::string cam_type;
     std::string net_file;
     
@@ -188,7 +152,7 @@ int main(int argc, char** argv)
     obj_det_node.param<int>("/obj_det/crop_w", crop_w, 720);
     obj_det_node.param<int>("/obj_det/crop_h", crop_h, 720);
     
-    dlib::rectangle crop_rect(crop_x, crop_y, crop_x + crop_w + 1, crop_y + crop_h - 1);
+    dlib::rectangle crop_rect(crop_x, crop_y, crop_x + crop_w - 1, crop_y + crop_h - 1);
     
     // ----------------------------------------------------------------------------------------
     // initialize the network
@@ -232,6 +196,7 @@ int main(int argc, char** argv)
     // the rate at which the message is published in Hz
     ros::Rate loop_rate(rate);
     ::object_detect::object_det_list detect_list;
+    ::object_detect::object_det_list detect_list_filtered;
 
     msg_listener ml;
 
@@ -239,8 +204,10 @@ int main(int argc, char** argv)
 
         // setup the publisher to send out the target location messages
         ros::Publisher image_det_pub = obj_det_node.advertise<sensor_msgs::Image>(image_det_topic, 1);
+        ros::Publisher image_det_raw_pub = obj_det_node.advertise<sensor_msgs::Image>(image_det_topic_raw, 1);
         ros::Publisher boxes_pub = obj_det_node.advertise<std_msgs::String>(boxes_topic, 1);
         ros::Publisher razel_pub = obj_det_node.advertise<::object_detect::object_det_list>(razel_topic, 1);
+        ros::Publisher razel_raw_pub = obj_det_node.advertise<::object_detect::object_det_list>(razel_topic_raw, 1);
         ros::Publisher dnn_input_pub = obj_det_node.advertise<sensor_msgs::Image>(dnn_input_topic, 1);
 
         ml.init(obj_det_node, image_topic, depth_topic);
@@ -267,11 +234,6 @@ int main(int argc, char** argv)
             cam_info = *cam_info_ptr;
         }
 
-        //while(!valid_cam_info)
-        //{
-        //    std::cout << ".";
-            //ros::spinOnce();
-        //}
         std::cout << std::endl;
 
         img_w = cam_info.width;
@@ -287,44 +249,39 @@ int main(int argc, char** argv)
 
         ml.valid_images = false;
 
+        bool valid_detect = false;
+        
         //std::array<dlib::matrix<uint8_t>, array_depth> a_img;
         dlib::matrix<dlib::rgb_pixel> rgb_img;
-
+        dlib::matrix<uint32_t, 1, 4> cm;
+        
+        cv::Mat raw_img;
+        
+        std::cout << "Running..." << std::endl << std::endl;
+        
         while (ros::ok())
         {
 
-
             detect_list.det.clear();
-
+            detect_list_filtered.det.clear();
+            
             box_string = "";
 
             if(ml.valid_images)
             {
 
                 ml.mtx.lock();
+                
                 // check to make sure that the images are the correct sizes and have data
                 if(ml.image.empty() || ml.depthmap.empty() || ml.image.rows != img_h || ml.image.cols != img_w)
                 {
                     std::cout << "error processing image..." << std::endl;
                     continue;
                 }
-                
-                // copy the image to a dlib array matrix for input into the dnn
-                //unsigned char *img_ptr = ml.image.ptr<unsigned char>(0);
-
-                //std::vector<cv::Mat> rgb(3);
-                
-                //cv::Mat cv_img = ml.image.clone();
-                
-                //cv::split(cv_img, rgb);
-
-                // crop and copy the RGB images
-                //dlib::assign_image(a_img[0], dlib::subm(dlib::mat(rgb[0].ptr<unsigned char>(0), rgb[0].rows, rgb[0].cols), crop_rect) );
-                //dlib::assign_image(a_img[1], dlib::subm(dlib::mat(rgb[1].ptr<unsigned char>(0), rgb[1].rows, rgb[1].cols), crop_rect) );
-                //dlib::assign_image(a_img[2], dlib::subm(dlib::mat(rgb[2].ptr<unsigned char>(0), rgb[2].rows, rgb[2].cols), crop_rect) );
-                //dlib::assign_image(rgb_img, dlib::subm(dlib::cv_image<dlib::rgb_pixel>(cv_img), crop_rect) );
+                    
+                // crop and copy the RGB images for input into the dnn
+                raw_img = ml.image.clone();
                 dlib::assign_image(rgb_img, dlib::cv_image<dlib::rgb_pixel>(ml.image));
-
                 rgb_img = dlib::subm(rgb_img, crop_rect);
                 
                 //run the detection
@@ -334,7 +291,7 @@ int main(int argc, char** argv)
                 stop_time = chrono::system_clock::now();
                 elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
 
-                std::cout << "Run Time (s): " << elapsed_time.count() << std::endl;
+                //std::cout << "Run Time (s): " << elapsed_time.count() << std::endl;
 
                 // simulate a detection of each type
                 //std::vector<dlib::mmod_rect> d;
@@ -348,8 +305,26 @@ int main(int argc, char** argv)
                 for (idx = 0; idx < d.size(); ++idx)
                 {
                     auto class_index = std::find(class_names.begin(), class_names.end(), d[idx].label);
+                    
+                    valid_detect = false;
+                    if (d[idx].label == "backpack")
+                    {
+                        cm = get_color_match(rgb_img, d[idx]);
+                        long index = dlib::index_of_max(cm);
+
+                        if (index != 1)
+                        {
+                            valid_detect = true;
+                        }
+
+                    }
+                    else
+                    {
+                        valid_detect = true;
+                    }
+                    
                     d[idx].rect = dlib::translate_rect(d[idx].rect, crop_x, crop_y);
-                    overlay_bounding_box(ml.image, dlib2cv_rect(d[idx].rect), d[idx].label, class_color[std::distance(class_names.begin(), class_index)]);
+                    overlay_bounding_box(raw_img, dlib2cv_rect(d[idx].rect), d[idx].label, class_color[std::distance(class_names.begin(), class_index)]);
 
                     // get the rect coordinates and make sure that they are within the image bounds
                     x_min = std::max((int)d[idx].rect.left(), min_dim);
@@ -374,13 +349,19 @@ int main(int argc, char** argv)
 
                     az = h_res*(center.x() - (int64_t)(img_w>>1));
                     el = v_res*((int64_t)(img_h>>1) - center.y());
-
+            
                     ::object_detect::object_det obj_det;
                     obj_det.label = d[idx].label;
                     obj_det.range = range;
                     obj_det.az = az;
                     obj_det.el = el;
                     detect_list.det.push_back(obj_det);
+                    
+                    if(valid_detect)
+                    {
+                        detect_list_filtered.det.push_back(obj_det);
+                        overlay_bounding_box(ml.image, dlib2cv_rect(d[idx].rect), d[idx].label, class_color[std::distance(class_names.begin(), class_index)]);                       
+                    }                 
 
                 }
 
@@ -393,11 +374,16 @@ int main(int argc, char** argv)
                     box_string = box_string.substr(0, box_string.length()-1);
                     boxes_pub.publish(box_string);
                     
-                    razel_pub.publish(detect_list);
+                    razel_raw_pub.publish(detect_list);
                 }
                 
+                if(detect_list_filtered.det.size() > 0)
+                {
+                    razel_pub.publish(detect_list_filtered);
+                }
                 
                 // always publish the image topic
+                image_det_raw_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "rgb8", raw_img).toImageMsg());
                 image_det_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "rgb8", ml.image).toImageMsg());
                 dnn_input_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "rgb8", dlib::toMat(rgb_img)).toImageMsg());
                 

@@ -4,6 +4,6 @@
 
 enemy_locations: {
     serial_port:                 "/dev/ttyACM0",    # the name of the serial port to connect to
-    max_observations:            20,                # the number of observations to use to calculate the enemy locations
+    max_observations:            10,                # the number of observations to use to calculate the enemy locations
     min_range:                   1.0,               # the minimum allowed distance between observations to be used in the location calculation
 }
