@@ -6,8 +6,9 @@ import message_filters
 from sensor_msgs.msg import Image, CameraInfo
 from std_msgs.msg import String, Float32MultiArray
 # requires that the zed_obj_det wrapper is compiled
-from zed_obj_det.msg import object_det
-from zed_obj_det.msg import object_det_list
+# switched to object_detect (obj_det) versions of the same messages for consistency reasons (rostopic info was convinced that the target_razel topic used the object_detect version
+from object_detect.msg import object_det
+from object_detect.msg import object_det_list
 
 from cv_bridge import CvBridge
 import cv2

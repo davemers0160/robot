@@ -50,6 +50,7 @@
 #include <ros/ros.h>
 #include <cv_bridge/cv_bridge.h>
 #include <std_msgs/String.h>
+#include <std_msgs/Header.h>
 
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/Image.h>
@@ -382,6 +383,9 @@ int main(int argc, char** argv)
                     detect_list.det.push_back(obj_det);
 
                 }
+
+		// header for dc_tracker
+		detect_list.header.stamp = ros::Time::now();
 
                 // if the list is empty then there were no detects and we don't publish anything
                 if(detect_list.det.size() > 0)
