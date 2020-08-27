@@ -18,8 +18,8 @@
 
 cmake_minimum_required(VERSION 2.8.12)
 
-PROJECT(zed_wrapper_project)
-set(exe_name "zed_wrapper")
+PROJECT(zed_obj_det_project)
+set(exe_name "zed_obj_det")
 
 # if CMAKE_BUILD_TYPE is not specified, take 'Release' as default
 IF(NOT CMAKE_BUILD_TYPE)
@@ -30,7 +30,7 @@ option(USE_AVX_INSTRUCTIONS  "Compile the program with AVX instructions"  ON)
 option(LINK_SHARED_ZED "Link with the ZED SDK shared executable" ON)
 
 # use this option to turn compilation with ROS off for Windows and non-ROS linux testing
-option(USE_ROS "Compile the program with ROS" OFF)
+option(USE_ROS "Compile the program with ROS" ON)
 
 # This looks for an environment variable called PLATFORM.  This can be used to point
 # cmake to various locations based on the individual machines that the code is complied on
@@ -43,25 +43,36 @@ message("Platform: " ${PLATFORM})
 
 if(${PLATFORM} STREQUAL "Laptop")
     set(COMMON_ROOT "D:/Common")
-
+    set(DLIB_CONTRIB "D:/Projects/dlib-contrib")
+    option(DLIB_USE_CUDA "" ON)
+    include(D:/dlib-19.19/dlib/cmake)
 elseif(${PLATFORM} STREQUAL "MainGear")
     set(_ECLIPSE_VERSION "3.8")
     set(COMMON_ROOT "~/Projects/Common")
-
+    set(DLIB_CONTRIB "~/Projects/dlib-contrib")
+    option(DLIB_USE_CUDA "" ON)
+    include(~/dlib-19.19/dlib/cmake)
 elseif(${PLATFORM} STREQUAL "DLIB_DOCKER")
     set(COMMON_ROOT "~/Projects/Common")
-
+    set(DLIB_CONTRIB "~/Projects/dlib-contrib")
+    option(DLIB_USE_CUDA "" ON)
+    include(~/dlib-19.19/dlib/cmake)
 elseif(${PLATFORM} STREQUAL "JAX")
     set(COMMON_ROOT "~/Projects/Common")
-
+    set(DLIB_CONTRIB "~/Projects/dlib-contrib")
+    option(DLIB_USE_CUDA "" ON)
+    include(~/dlib-19.19/dlib/cmake)
 else()
     set(COMMON_ROOT "~/Projects/Common")
-
+    set(DLIB_CONTRIB "~/Projects/dlib-contrib")
+    option(DLIB_USE_CUDA "" ON)
+    include(~/dlib-19.19/dlib/cmake)
 endif()
 
 
 set(project_includes "include" 
     "${COMMON_ROOT}/include"
+    "${DLIB_CONTRIB}/include"
     )
 
 if (${USE_ROS})
@@ -82,6 +93,7 @@ if(UNIX)
             cv_bridge
             message_filters
             message_generation
+            image_transport
         )
 
         add_message_files(
@@ -110,6 +122,7 @@ if(UNIX)
 #            stereo_msgs
             message_filters
             message_runtime
+            image_transport
         )
 
         set(project_includes ${project_includes} ${catkin_INCLUDE_DIRS})
@@ -168,13 +181,12 @@ endforeach()
 message("--------------------------------------------------------")
 message(" ")
 
-set(LINK_LIBRARIES ${LINK_LIBRARIES} ${ZED_LIBRARIES} ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY})
+set(LINK_LIBRARIES ${LINK_LIBRARIES} ${ZED_LIBRARIES} ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} dlib::dlib ${OpenCV_LIBS})
 
 if(WIN32)
     include_directories(${project_includes})
     add_executable(${exe_name} ${SOURCES})
-    target_link_libraries(${exe_name} 
-        ${OpenCV_LIBS}
+    target_link_libraries(${exe_name}
         ${LINK_LIBRARIES}
         )
 
@@ -196,9 +208,7 @@ if(USE_ROS)
     add_executable(${exe_name} ${SOURCES})
     
     target_link_libraries(${exe_name} 
-        ${OpenCV_LIBS} 
         ${LINK_LIBRARIES}
-        #${OBJ_DET_LIBS}
         )
         
     add_dependencies(${exe_name} ${catkin_EXPORTED_TARGETS}) # ${PROJECT_NAME}_gencfg)
@@ -238,7 +248,6 @@ else()
     add_executable(${exe_name} ${SOURCES})
     
     target_link_libraries(${exe_name} 
-        ${OpenCV_LIBS}
         ${LINK_LIBRARIES}
         )
 

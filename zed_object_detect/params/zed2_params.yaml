@@ -1,0 +1,19 @@
+# params/zed2_params.yaml
+# Common ROS parameters to the object detection code
+---
+
+zed_node: {
+    # loop rate
+    loop_rate:          5,
+    
+    # the location of the network weights file
+    net_file:           "/home/precision/dc_ws/src/robot/obj_det/nets/dc3_rgb_v10_40_40_100_HPC_final_net.dat",
+    
+    # image cropping parameters
+    crop_x:             270,
+    crop_y:             200,
+    crop_w:             720,
+    crop_h:             420,
+    
+}
+
