@@ -383,7 +383,8 @@ int main(int argc, char** argv)
 
                 // header for dc_tracker
                 detect_list.header.stamp = ros::Time::now();
-
+                detect_list_filtered.header.stamp = ros::Time::now();
+                
                 // if the list is empty then there were no detects and we don't publish anything
                 if(detect_list.det.size() > 0)
                 {
