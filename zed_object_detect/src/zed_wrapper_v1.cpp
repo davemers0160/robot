@@ -240,7 +240,7 @@ int main(int argc, char** argv)
         runtime_parameters.sensing_mode = sl::SENSING_MODE::STANDARD;
         
         // get the camera information
-        auto camera_info = zed.getCameraInformation();
+        sl::CameraInformation camera_info = zed.getCameraInformation();
         
         img_w = camera_info.camera_configuration.resolution.width;
         img_h = camera_info.camera_configuration.resolution.height;
