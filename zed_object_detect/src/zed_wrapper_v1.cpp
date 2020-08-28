@@ -73,7 +73,10 @@
 
 // -------------------------------GLOBALS--------------------------------------
 
-
+#if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
+// opencv 4 vs opencv 3 naming convention change
+#define CV_BGRA2RGB cv::COLOR_BGRA2RGB 
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -108,7 +111,7 @@ int main(int argc, char** argv)
     unsigned long img_h;
     unsigned long img_w;
     
-    std::string net_file = "/home/jax/catkin_ws/src/robot/obj_det/nets/dc3_rgb_v04_40_40_150_55_HPC_final_net.dat";
+    std::string net_file; 
     std::string box_string = "";
 
     anet_type net;
@@ -117,10 +120,10 @@ int main(int argc, char** argv)
     int y_min, y_max;
     int min_dim = 0;
     
-    int crop_x = 270;
-    int crop_y = 200;
-    int crop_w = 720;
-    int crop_h = 420;
+    int crop_x = 128;
+    int crop_y = 196;
+    int crop_w = 1024;
+    int crop_h = 512;
     
     dlib::point center;
 
@@ -178,7 +181,8 @@ int main(int argc, char** argv)
     
     ::object_detect::object_det_list detect_list;
     ::object_detect::object_det_list detect_list_filtered;
-    
+#else
+    net_file = "D:/Projects/robot/obj_det/nets/dc3_rgb_v10e_035_035_100_90_HPC_final_net.dat";
 #endif    
 
     dlib::rectangle crop_rect(crop_x, crop_y, crop_x + crop_w - 1, crop_y + crop_h - 1);
@@ -207,16 +211,8 @@ int main(int argc, char** argv)
         class_names.push_back(it);
     }
 
-    //class_names.push_back("box");
-    //class_names.push_back("backpack");
-
-    //dlib::rand rnd(time(NULL));
     cv::RNG rng(time(NULL));
     std::vector<cv::Scalar> class_color;
-    // for (uint64_t idx = 0; idx < class_names.size(); ++idx)
-    // {
-        // class_color.push_back(cv::Scalar(rng.uniform(0, 256), rng.uniform(0, 256), rng.uniform(0, 256)));
-    // }
 
     class_color.push_back(cv::Scalar(0, 255, 0));
     class_color.push_back(cv::Scalar(0, 0, 255));
@@ -229,12 +225,12 @@ int main(int argc, char** argv)
     init_parameters.depth_mode = sl::DEPTH_MODE::PERFORMANCE;       // Use PERFORMANCE depth mode
     init_parameters.coordinate_units = sl::UNIT::METER;             // Use meters for depth measurements
     
-
     try {
 
         // Open the camera
         state = zed.open(init_parameters);
-        if (state != sl::ERROR_CODE::SUCCESS) {
+        if (state != sl::ERROR_CODE::SUCCESS) 
+        {
             std::cout << "Error " << state << ", exit program." << std::endl;
             return EXIT_FAILURE;
         }
@@ -273,11 +269,14 @@ int main(int argc, char** argv)
         std::cout << "Running..." << std::endl << std::endl;
                 
         bool valid_detect;
-        
-#if defined(USE_ROS)
+        char key = ' ';
 
-        // start the main loop
+        // start the main loop       
+#if defined(USE_ROS)
         while (ros::ok())
+#else
+        while (key != 'q')
+#endif
         {
 
             // Grab an image
@@ -286,7 +285,6 @@ int main(int argc, char** argv)
             // A new image is available if grab() returns ERROR_CODE::SUCCESS
             if (state == sl::ERROR_CODE::SUCCESS) 
             {
-
                 // Get the left image
                 zed.retrieveImage(zed_image, sl::VIEW::LEFT);
             
@@ -351,8 +349,8 @@ int main(int argc, char** argv)
                     y_max = std::min((int)(center.y()+10), (int)img_h);
                     
                     // fill in the box string message
-                    box_string = box_string + "{Class=" + d[idx].label + "; xmin=" + num2str(x_min,"%d") + ", ymin=" + num2str(y_min,"%d") + \
-                                 ", xmax=" + num2str(x_max,"%d") + ", ymax=" + num2str(y_max,"%d") + "},";
+                    //box_string = box_string + "{Class=" + d[idx].label + "; xmin=" + num2str(x_min,"%d") + ", ymin=" + num2str(y_min,"%d") + \
+                    //             ", xmax=" + num2str(x_max,"%d") + ", ymax=" + num2str(y_max,"%d") + "},";
 
                     // crop the depthmap around the bounding box and get the range
                     cv::Range rows(y_min, y_max);
@@ -365,7 +363,7 @@ int main(int argc, char** argv)
 
                     az = h_res*(center.x() - (int64_t)(img_w>>1));
                     el = v_res*((int64_t)(img_h>>1) - center.y());
-            
+#if defined(USE_ROS)            
                     ::object_detect::object_det obj_det;
                     obj_det.label = d[idx].label;
                     obj_det.range = range;
@@ -378,9 +376,10 @@ int main(int argc, char** argv)
                         detect_list_filtered.det.push_back(obj_det);
                         overlay_bounding_box(cv_rgb, dlib2cv_rect(d[idx].rect), d[idx].label, class_color[std::distance(class_names.begin(), class_index)]);                       
                     }                 
-
+#endif
                 }
 
+#if defined(USE_ROS)
                 // header for dc_tracker
                 detect_list.header.stamp = ros::Time::now();
                 detect_list_filtered.header.stamp = ros::Time::now();
@@ -402,67 +401,51 @@ int main(int argc, char** argv)
                 // publish the topics
                 image_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "rgb8", cv_rgb).toImageMsg());
                 depth_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "32FC1", cv_dm).toImageMsg());
-                
-                // Handle key event
-                cv::waitKey(1);
-                                               
-            }
-            
-            ros::spinOnce();
-            
-            loop_rate.sleep();
-
-        }   // end of while(ros::ok())
 #else
-     
-        char key = ' ';
-        while(key != 'q')
-        {
-            // Grab an image
-            //state = zed.grab(runtime_parameters);
-            state = zed.grab();
-
-            // A new image is available if grab() returns ERROR_CODE::SUCCESS
-            if (state == sl::ERROR_CODE::SUCCESS) 
-            {
-
-                // Get the left image
-                zed.retrieveImage(zed_image, sl::VIEW::LEFT);
-            
-                // Retrieve depth map. Depth is aligned on the left image
-                zed.retrieveMeasure(zed_dm, sl::MEASURE::DEPTH);
-
                 // Display image and depth using cv:Mat which share sl:Mat data
                 cv::imshow("Image", cv_image);
-                cv::imshow("Depth", cv_dm*(1.0f/20.0f));
+                cv::imshow("Depth", cv_dm * (1.0f / 20.0f));
 
-                // Handle key event
-                key = cv::waitKey(10);
-               
-            }            
-        }
+                // wait for 1ms to display images
+                key = cv::waitKey(1);
+#endif                                               
+            }
+
+#if defined(USE_ROS)
+            ros::spinOnce();            
+            loop_rate.sleep();
+#endif
+
+        }   // end of while loop
 
         cv::destroyAllWindows();
 
-#endif
         // Close the camera
         zed.close();
         
         std::cout << "End of Program." << std::endl;
 
     }
-    // catch(ros::Exception& e)
-    // {
-        // ROS_ERROR("ROS exception %s at line number %d on function %s in file %s", e.what(), __LINE__, __FUNCTION__, __FILE__);
+#if defined(USE_ROS)
+     catch(ros::Exception& e)
+     {
+         ROS_ERROR("ROS exception %s at line number %d on function %s in file %s", e.what(), __LINE__, __FUNCTION__, __FILE__);
 
-        ////std::cout << "Press Enter to close..." << std::endl;
-        ////std::cin.ignore();
-    // }
+        //std::cout << "Press Enter to close..." << std::endl;
+        //std::cin.ignore();
+     }
     catch(cv::Exception &e)
     {
-        //ROS_ERROR("OpenCV exception %s at line number %d on function %s in file %s", e.what(), __LINE__, __FUNCTION__, __FILE__);
-        std::cout << e.what() << std::endl;
+        ROS_ERROR("OpenCV exception %s at line number %d on function %s in file %s", e.what(), __LINE__, __FUNCTION__, __FILE__);
+        
     }
+#else
+    catch (std::exception& e)
+    {
+        std::cout << "Error: " << e.what() << std::endl;
+    }
+
+#endif
 
     std::cout << "Press Enter to Close..." << std::endl;
 

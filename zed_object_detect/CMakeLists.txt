@@ -30,7 +30,11 @@ option(USE_AVX_INSTRUCTIONS  "Compile the program with AVX instructions"  ON)
 option(LINK_SHARED_ZED "Link with the ZED SDK shared executable" ON)
 
 # use this option to turn compilation with ROS off for Windows and non-ROS linux testing
-option(USE_ROS "Compile the program with ROS" ON)
+if(WIN32)
+    option(USE_ROS "Compile the program with ROS" OFF)
+else()
+    option(USE_ROS "Compile the program with ROS" ON)
+endif()
 
 # This looks for an environment variable called PLATFORM.  This can be used to point
 # cmake to various locations based on the individual machines that the code is complied on
