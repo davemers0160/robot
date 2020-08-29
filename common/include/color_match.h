@@ -11,39 +11,49 @@
 #include <dlib/image_transforms.h>
 
 // ----------------------------------------------------------------------------
+// In the HSI colorspace represents every color with three components: hue ( H ), saturation ( S ), intensity ( I ).
+// The Hue component describes the color itself in the form of an angle between [0,360] degrees. 
+// - Red:       0 degrees
+// - Yellow:   60 degrees
+// - Green:   120 degrees
+// - Cyan:    180 degrees
+// - Blue:    240 degrees
+// - Magenta: 300 degrees
+// in the dlib library the H component is scaled by 255/360
+// The Saturation component signals how much the color is polluted with white color. The range of the S component is [0,255]
+// The Intensity range is between [0,255] and 0 means black, 255 means white.
+
 dlib::matrix<uint32_t, 1, 2> get_color_match(dlib::matrix<dlib::rgb_pixel>& img, dlib::mmod_rect& det)
 {
     uint64_t r, c;
+    const int w = 20, h = 20;
 
-    dlib::hsi_pixel red_ll1(0, 0, 64);
-    dlib::hsi_pixel red_ul1(15, 255, 255);
-    dlib::hsi_pixel red_ll2(240, 0, 64);
-    dlib::hsi_pixel red_ul2(255, 255, 255);
+    // define the HSI boundaries for each color to test
+    dlib::hsi_pixel red_ll1(0, 0, 30);
+    dlib::hsi_pixel red_ul1(20, 255, 204);
+    dlib::hsi_pixel red_ll2(235, 0, 30);
+    dlib::hsi_pixel red_ul2(255, 255, 204);
 
-    dlib::hsi_pixel blue_ll(155, 0, 64);
-    dlib::hsi_pixel blue_ul(185, 255, 255);
+    dlib::hsi_pixel blue_ll(150, 0, 30);
+    dlib::hsi_pixel blue_ul(190, 255, 204);
+
+    dlib::hsi_pixel green_ll(65, 0, 30);
+    dlib::hsi_pixel green_ul(105, 255, 204);
 
     //dlib::hsi_pixel black_ll(0, 0, 0);
     //dlib::hsi_pixel black_ul(255, 64, 48);
     dlib::rgb_pixel black_ll(0, 0, 0);
     dlib::rgb_pixel black_ul(48, 48, 48);
 
-
-    dlib::hsi_pixel gray_ll(0, 0, 48);
-    dlib::hsi_pixel gray_ul(255, 255, 128);
-    //dlib::rgb_pixel gray_ll(65, 65, 65);
-    //dlib::rgb_pixel gray_ul(128, 128, 128);
-
-    const int w = 20, h = 20;
-
+    // create the masks
     dlib::matrix<uint16_t> red_mask = dlib::zeros_matrix<uint16_t>(h, w);
     dlib::matrix<uint16_t> blue_mask = dlib::zeros_matrix<uint16_t>(h, w);
     dlib::matrix<uint16_t> black_mask = dlib::zeros_matrix<uint16_t>(h, w);
+    dlib::matrix<uint16_t> green_mask = dlib::zeros_matrix<uint16_t>(h, w);
     dlib::matrix<uint16_t> gray_mask = dlib::zeros_matrix<uint16_t>(h, w);
 
     // crop out the detection
     dlib::point ctr = dlib::center(det.rect);
-
     dlib::matrix<dlib::rgb_pixel> rgb_crop = dlib::subm(img, dlib::centered_rect(ctr, w, h));
     dlib::matrix<dlib::hsi_pixel> hsi_crop;
     dlib::assign_image(hsi_crop, rgb_crop);
@@ -71,14 +81,14 @@ dlib::matrix<uint32_t, 1, 2> get_color_match(dlib::matrix<dlib::rgb_pixel>& img,
             {
                 blue_mask(r, c) = 1;
             }
+            else if ((p >= green_ll) && (p <= green_ul))
+            {
+                green_mask(r, c) = 1;
+            }
             else if ((q >= black_ll) && (q <= black_ul))
             {
                 black_mask(r, c) = 1;
             }
-            //else if ((p >= gray_ll) && (p <= gray_ul))
-            //{
-            //    gray_mask(r, c) = 1;
-            //}
 
         }
     }
@@ -86,12 +96,12 @@ dlib::matrix<uint32_t, 1, 2> get_color_match(dlib::matrix<dlib::rgb_pixel>& img,
     dlib::matrix<uint32_t, 1, 2> res;
     
     uint32_t mask_sum = (uint32_t)dlib::sum(red_mask) + (uint32_t)dlib::sum(blue_mask) + (uint32_t)dlib::sum(black_mask);
-    //res = (uint32_t)dlib::sum(red_mask), (uint32_t)dlib::sum(blue_mask), (uint32_t)dlib::sum(black_mask), (uint32_t)dlib::sum(gray_mask);
+
     res = mask_sum, (uint32_t)(rgb_crop.size() - mask_sum);
     return res;
 
 }   // end of get_color_match
 
-
+// ----------------------------------------------------------------------------
 
 #endif  //COLOR_MATCH_H_
