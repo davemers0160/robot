@@ -274,10 +274,14 @@ int main(int argc, char** argv)
         // start the main loop       
 #if defined(USE_ROS)
         while (ros::ok())
+        {
+        
+            detect_list.det.clear();
+            detect_list_filtered.det.clear();
 #else
         while (key != 'q')
-#endif
         {
+#endif
 
             // Grab an image
             state = zed.grab(runtime_parameters);
@@ -425,7 +429,7 @@ int main(int argc, char** argv)
         // Close the camera
         zed.close();
         
-        std::cout << "End of Program." << std::endl;
+
 
     }
 #if defined(USE_ROS)
@@ -449,9 +453,10 @@ int main(int argc, char** argv)
 
 #endif
 
-    std::cout << "Press Enter to Close..." << std::endl;
+    std::cout << "End of Program." << std::endl;    
+    //std::cout << "Press Enter to Close..." << std::endl;
 
-    std::cin.ignore();
+    //std::cin.ignore();
     return 0;
 
 }   // end of main
