@@ -309,7 +309,9 @@ int main(int argc, char** argv)
                 std::vector<dlib::mmod_rect> d = net(rgb_img);
                 stop_time = std::chrono::system_clock::now();
                 elapsed_time = std::chrono::duration_cast<d_sec>(stop_time - start_time);
-                                
+
+                //std::cout << "Run Time (s): " << elapsed_time.count() << std::endl;
+                       
                 prune_detects(d, 0.3);
                 
                 overlay_bounding_box(cv_filtered, dlib2cv_rect(crop_rect), "crop", cv::Scalar(0, 255, 255), false);
@@ -406,7 +408,7 @@ int main(int argc, char** argv)
                 image_det_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "rgb8", cv_filtered).toImageMsg());
                 image_det_raw_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "rgb8", cv_raw).toImageMsg());
 
-                //depth_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "32FC1", cv_dm).toImageMsg());
+                depth_pub.publish(cv_bridge::CvImage(std_msgs::Header(), "32FC1", cv_dm).toImageMsg());
 #else
                 // Display image and depth using cv:Mat which share sl:Mat data
                 cv::imshow("Image", cv_image);
