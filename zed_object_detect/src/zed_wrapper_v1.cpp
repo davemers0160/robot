@@ -155,7 +155,7 @@ int main(int argc, char** argv)
     //image_transport::Publisher depth_pub = image_it.advertise(depth_topic, 1);
     
     ros::Publisher image_det_pub = zed_node.advertise<sensor_msgs::Image>(image_det_topic, 1);
-    ros::Publisher image_det_raw_pub = obj_det_node.advertise<sensor_msgs::Image>(image_det_topic_raw, 1);
+    ros::Publisher image_det_raw_pub = zed_node.advertise<sensor_msgs::Image>(image_det_topic_raw, 1);
     ros::Publisher depth_pub = zed_node.advertise<sensor_msgs::Image>(depth_topic, 1);
     
     ros::Publisher cam_info_pub = zed_node.advertise<sensor_msgs::CameraInfo>(cam_info_topic, 1);
