@@ -45,6 +45,10 @@ if("${PLATFORM}" STREQUAL "")
 endif()
 message("Platform: " ${PLATFORM})
 
+# find the root of the main project
+string(FIND ${PROJECT_SOURCE_DIR} "/" INDEX REVERSE)
+string(SUBSTRING ${PROJECT_SOURCE_DIR} 0 ${INDEX} PR_ROOT)
+
 if(${PLATFORM} STREQUAL "Laptop")
     set(COMMON_ROOT "D:/Common")
     set(DLIB_CONTRIB "D:/Projects/dlib-contrib")
@@ -75,6 +79,7 @@ endif()
 
 
 set(project_includes "include" 
+    "${PR_ROOT}/common/include"
     "${COMMON_ROOT}/include"
     "${DLIB_CONTRIB}/include"
     )

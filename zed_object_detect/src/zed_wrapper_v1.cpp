@@ -19,17 +19,15 @@
 
 // Custom includes
 #include "zed_wrapper.h"
-//#include "get_platform.h"
-//#include "get_current_time.h"
 #include "num2string.h"
 #include "file_ops.h"
 #include "sleep_ms.h"
 #include "ocv_threshold_functions.h"
+#include "color_match.h"
 
 // Net Version
 #include "obj_det_net_rgb_v10.h"
 #include "overlay_bounding_box.h"
-#include "prune_detects.h"
 
 // dlib includes
 #include <dlib/dnn.h>
@@ -37,7 +35,7 @@
 
 // dlib-contrib includes
 #include <dlib_pixel_operations.h>
-
+#include <prune_detects.h>
 
 #if defined(USE_ROS)
 
@@ -65,7 +63,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
-#include <opencv2/core/cuda.hpp>
+//#include <opencv2/core/cuda.hpp>
 
 // ZED Includes
 #include <sl/Camera.hpp>
@@ -77,9 +75,6 @@
 // opencv 4 vs opencv 3 naming convention change
 #define CV_BGRA2RGB cv::COLOR_BGRA2RGB 
 #endif
-
-// ----------------------------------------------------------------------------
-
 
 
 // ----------------------------------------------------------------------------
@@ -168,7 +163,7 @@ int main(int argc, char** argv)
     zed_node.param<double>("/zed2/loop_rate", rate, 5);
     
     // get the network weights file
-    zed_node.param<std::string>("/zed_node/net_file", net_file, "/home/jax/catkin_ws/src/robot/zed_object_detect/nets/dc3_rgb_v04_40_40_150_55_HPC_final_net.dat");
+    zed_node.param<std::string>("/zed_node/net_file", net_file, "/home/jax/catkin_ws/src/robot/common/nets/dc3_rgb_v04_40_40_150_55_HPC_final_net.dat");
     
     // get the cropping parameters
     zed_node.param<int>("/zed_node/crop_x", crop_x, 270);
@@ -182,7 +177,7 @@ int main(int argc, char** argv)
     ::object_detect::object_det_list detect_list;
     ::object_detect::object_det_list detect_list_filtered;
 #else
-    net_file = "D:/Projects/robot/obj_det/nets/dc3_rgb_v10e_035_035_100_90_HPC_final_net.dat";
+    net_file = "D:/Projects/robot/common/nets/dc3_rgb_v10e_035_035_100_90_HPC_final_net.dat";
 #endif    
 
     dlib::rectangle crop_rect(crop_x, crop_y, crop_x + crop_w - 1, crop_y + crop_h - 1);
