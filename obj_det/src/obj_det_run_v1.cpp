@@ -254,7 +254,7 @@ int main(int argc, char** argv)
         
         //std::array<dlib::matrix<uint8_t>, array_depth> a_img;
         dlib::matrix<dlib::rgb_pixel> rgb_img;
-        dlib::matrix<uint32_t, 1, 4> cm;
+        dlib::matrix<uint32_t, 1, 2> cm;
         
         cv::Mat raw_img;
         
