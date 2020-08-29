@@ -29,12 +29,20 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 option(USE_AVX_INSTRUCTIONS  "Compile the program with AVX instructions"  ON)
 
 # use this option to turn compilation with ROS off for Windows and non-ROS linux testing
-option(USE_ROS "Compile the program with ROS" ON)
+if(WIN32)
+    option(USE_ROS "Compile the program with ROS" OFF)
+else()
+    option(USE_ROS "Compile the program with ROS" ON)
+endif()
 
 # This looks for an environment variable called PLATFORM.  This can be used to point
 # cmake to various locations based on the individual machines that the code is complied on
 set(PLATFORM "$ENV{PLATFORM}" CACHE INTERNAL "Copied from environment variable")
 message("Platform: " ${PLATFORM})
+
+# find the root of the main project
+string(FIND ${PROJECT_SOURCE_DIR} "/" INDEX REVERSE)
+string(SUBSTRING ${PROJECT_SOURCE_DIR} 0 ${INDEX} PR_ROOT)
 
 if(${PLATFORM} STREQUAL "Laptop")
     set(COMMON_ROOT "D:/Common")
@@ -70,6 +78,7 @@ set(OBJ_DET_LIBS "${OBJ_DET_ROOT}/obj_det_lib/build/libobj_det.so")
 
 
 set(project_includes "include" 
+    "${PR_ROOT}/common/include"
     "${COMMON_ROOT}/include"
     "${DLIB_CONTRIB}/include"
     #"${OBJ_DET_DIRS}"
