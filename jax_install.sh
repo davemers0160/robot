@@ -115,7 +115,7 @@ pip install -U tensorflow_hub numpy launchpadlib pandas Cython contextlib2 pillo
 #/home/$USER/.local/bin/pip install tensorflow-gpu==1.14 tensorflow_hub --user --ignore-installed
 #wget https://developer.download.nvidia.com/compute/redist/jp/v411/tensorflow-gpu/
 
-pip install --extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v411/ tensorflow-gpu==1.13.0rc0+nv19.2 --user
+#pip install --extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v411/ tensorflow-gpu==1.13.0rc0+nv19.2 --user
 #wget https://developer.download.nvidia.com/compute/redist/jp/v411/tensorflow-gpu/tensorflow_gpu-1.13.0rc0+nv19.2-cp27-cp27mu-linux_aarch64.whl
 #/home/$USER/.local/bin/pip install tensorflow_gpu-1.13.0rc0+nv19.2-cp27-cp27mu-linux_aarch64.whl --user
 
@@ -135,6 +135,7 @@ rm dlib-19.19.zip
 git clone -b 'v3.0.3' --single-branch https://github.com/stereolabs/zed-ros-wrapper.git /home/$USER/catkin_ws/src/zed-ros-wrapper
 git clone https://github.com/davemers0160/robot.git /home/$USER/catkin_ws/src/robot
 git clone https://github.com/davemers0160/Common.git /home/$USER/Projects/Common
+git clone https://github.com/davemers0160/dlib-contrib.git /home/$USER/Projects/dlib-contrib
 
 
 ## ----------------------------------------------------------------------------
@@ -146,41 +147,38 @@ catkin_make -j6
 ## ----------------------------------------------------------------------------
 ## get a couple of object detection models
 cd /home/$USER
-git clone https://github.com/tensorflow/models /home/$USER/models
-#git checkout 7b95816b5384c32219782bc60c0403e03e57b121 <- nope
-#git checkout 8518d053936aaf30afb9ed0a4ea01baddca5bd17 <- nope
+#git clone https://github.com/tensorflow/models /home/$USER/models
 # last commit that works
-git checkout 0fc994b6762b7bfe971cc9f370b40d2cd987fb66 
+#git checkout 0fc994b6762b7bfe971cc9f370b40d2cd987fb66 
 #git checkout c627506ff35030eb1f64d4e926b7e5a177718b6e <- works
 #git checkout 898cc54020ba3b11ac8b6a10b288a99dece083a1 <- works
 #git checkout a17ba721befc53479f4a5aaecb0b3bb66e1e22bb <- works
 
-cd /home/$USER/models/research
-#wget -O protobuf.zip https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip
-wget -O protobuf.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.7.0/protoc-3.7.0-linux-aarch_64.zip
-unzip protobuf.zip 
-./bin/protoc object_detection/protos/*.proto --python_out=.
+#cd /home/$USER/models/research
+#wget -O protobuf.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.7.0/protoc-3.7.0-linux-aarch_64.zip
+#unzip protobuf.zip 
+#./bin/protoc object_detection/protos/*.proto --python_out=.
 
-cd /home/$USER
+#cd /home/$USER
 #wget http://download.tensorflow.org/models/object_detection/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
 #tar -xzvf ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
 #mv ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03 ssd_resnet50_v1_fpn
 #rm ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
 
-wget http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v2_oid_v4_2018_12_12.tar.gz
-tar -xzvf ssd_mobilenet_v2_oid_v4_2018_12_12.tar.gz
-mv ssd_mobilenet_v2_oid_v4_2018_12_12 ssd_mobilenet_v2_oid
-rm ssd_mobilenet_v2_oid_v4_2018_12_12.tar.gz
+#wget http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v2_oid_v4_2018_12_12.tar.gz
+#tar -xzvf ssd_mobilenet_v2_oid_v4_2018_12_12.tar.gz
+#mv ssd_mobilenet_v2_oid_v4_2018_12_12 ssd_mobilenet_v2_oid
+#rm ssd_mobilenet_v2_oid_v4_2018_12_12.tar.gz
     
-wget http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_resnet_v2_atrous_oid_v4_2018_12_12.tar.gz
-tar -xzvf faster_rcnn_inception_resnet_v2_atrous_oid_v4_2018_12_12.tar.gz
-mv faster_rcnn_inception_resnet_v2_atrous_oid_v4_2018_12_12 faster_rcnn_inception_resnet_v2_oid
-rm faster_rcnn_inception_resnet_v2_atrous_oid_v4_2018_12_12.tar.gz
+#wget http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_resnet_v2_atrous_oid_v4_2018_12_12.tar.gz
+#tar -xzvf faster_rcnn_inception_resnet_v2_atrous_oid_v4_2018_12_12.tar.gz
+#mv faster_rcnn_inception_resnet_v2_atrous_oid_v4_2018_12_12 faster_rcnn_inception_resnet_v2_oid
+#rm faster_rcnn_inception_resnet_v2_atrous_oid_v4_2018_12_12.tar.gz
 
-wget http://download.tensorflow.org/models/object_detection/ssd_resnet101_v1_fpn_shared_box_predictor_oid_512x512_sync_2019_01_20.tar.gz
-tar -xzvf ssd_resnet101_v1_fpn_shared_box_predictor_oid_512x512_sync_2019_01_20.tar.gz
-mv ssd_resnet101_v1_fpn_shared_box_predictor_oid_512x512_sync_2019_01_20 ssd_resnet101_v1_fpn_oid
-rm ssd_resnet101_v1_fpn_shared_box_predictor_oid_512x512_sync_2019_01_20.tar.gz
+#wget http://download.tensorflow.org/models/object_detection/ssd_resnet101_v1_fpn_shared_box_predictor_oid_512x512_sync_2019_01_20.tar.gz
+#tar -xzvf ssd_resnet101_v1_fpn_shared_box_predictor_oid_512x512_sync_2019_01_20.tar.gz
+#mv ssd_resnet101_v1_fpn_shared_box_predictor_oid_512x512_sync_2019_01_20 ssd_resnet101_v1_fpn_oid
+#rm ssd_resnet101_v1_fpn_shared_box_predictor_oid_512x512_sync_2019_01_20.tar.gz
 
 ## ----------------------------------------------------------------------------
 ## put the everything in the right paths
