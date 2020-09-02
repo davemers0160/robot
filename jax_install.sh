@@ -90,6 +90,8 @@ sudo rosdep init
 sudo rosdep fix-permissions
 rosdep update
 
+sudo ln -s /usr/include/opencv4 /usr/include/opencv
+
 echo "source /opt/ros/melodic/setup.bash" >> /home/$USER/.bashrc
 echo "export PLATFORM=JAX" >> /home/$USER/.bashrc
 
