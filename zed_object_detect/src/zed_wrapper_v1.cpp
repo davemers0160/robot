@@ -68,13 +68,7 @@
 // ZED Includes
 #include <sl/Camera.hpp>
 
-
 // -------------------------------GLOBALS--------------------------------------
-
-#if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
-// opencv 4 vs opencv 3 naming convention change
-#define CV_BGRA2RGB cv::COLOR_BGRA2RGB 
-#endif
 
 
 // ----------------------------------------------------------------------------
@@ -168,7 +162,7 @@ int main(int argc, char** argv)
     zed_node.param<double>("/zed2/loop_rate", rate, 5);
     
     // get the network weights file
-    zed_node.param<std::string>("/zed_node/net_file", net_file, "/home/jax/catkin_ws/src/robot/common/nets/dc3_rgb_v04_40_40_150_55_HPC_final_net.dat");
+    zed_node.param<std::string>("/zed_node/net_file", net_file, "/home/jax/catkin_ws/src/robot/common/nets/dc3_rgb_v10e_035_035_100_90_HPC_final_net.dat");
     
     // get the cropping parameters
     zed_node.param<int>("/zed_node/crop_x", crop_x, 270);
@@ -219,12 +213,17 @@ int main(int argc, char** argv)
     // ----------------------------------------------------------------------------------------
     
     // Set camera configuration parameters
+    CUcontext zed_cuda_context;
+    cuCtxGetCurrent(&zed_cuda_context);
+
     sl::InitParameters init_parameters;
     init_parameters.camera_resolution = sl::RESOLUTION::HD720;      // Use HD720 video mode
-    init_parameters.camera_fps = rate;                              // Set the frame rate
+    init_parameters.camera_fps = 15;                                // Set the frame rate
     init_parameters.depth_mode = sl::DEPTH_MODE::PERFORMANCE;       // Use PERFORMANCE depth mode
     init_parameters.coordinate_units = sl::UNIT::METER;             // Use meters for depth measurements
-    
+    init_parameters.sdk_cuda_ctx = zed_cuda_context;                // set
+    init_parameters.sdk_gpu_id = 0;                                 // set the gpu id to the first gpu
+
     try {
 
         // Open the camera
@@ -260,12 +259,12 @@ int main(int argc, char** argv)
         std::cout << "------------------------------------------------------------------" << std::endl;
         std::cout << "Camera Info:" << std::endl;
         std::cout << "Image Size (h x w): " << img_h << " x " << img_w << std::endl;
+        std::cout << "Angular Resolution (AZ, EL): " << h_res << ", " << v_res << std::endl;
         std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
         
         dlib::matrix<dlib::rgb_pixel> rgb_img;
         dlib::matrix<uint32_t, 1, 2> cm;
-        
-        
+                
         std::cout << "Running..." << std::endl << std::endl;
                 
         bool valid_detect;
@@ -310,7 +309,7 @@ int main(int argc, char** argv)
                 stop_time = std::chrono::system_clock::now();
                 elapsed_time = std::chrono::duration_cast<d_sec>(stop_time - start_time);
 
-                //std::cout << "Run Time (s): " << elapsed_time.count() << std::endl;
+                std::cout << "Run Time (s): " << elapsed_time.count() << std::endl;
                        
                 prune_detects(d, 0.3);
                 
@@ -434,19 +433,17 @@ int main(int argc, char** argv)
 
 
     }
-#if defined(USE_ROS)
-     catch(ros::Exception& e)
-     {
-         ROS_ERROR("ROS exception %s at line number %d on function %s in file %s", e.what(), __LINE__, __FUNCTION__, __FILE__);
 
-        //std::cout << "Press Enter to close..." << std::endl;
-        //std::cin.ignore();
-     }
-    catch(cv::Exception &e)
+#if defined(USE_ROS)
+    catch(ros::Exception& e)
+    {
+        ROS_ERROR("ROS exception %s at line number %d on function %s in file %s", e.what(), __LINE__, __FUNCTION__, __FILE__);
+    }
+    catch (cv::Exception& e)
     {
         ROS_ERROR("OpenCV exception %s at line number %d on function %s in file %s", e.what(), __LINE__, __FUNCTION__, __FILE__);
-        
     }
+
 #else
     catch (std::exception& e)
     {
@@ -456,9 +453,8 @@ int main(int argc, char** argv)
 #endif
 
     std::cout << "End of Program." << std::endl;    
-    //std::cout << "Press Enter to Close..." << std::endl;
 
-    //std::cin.ignore();
+    std::cin.ignore();
     return 0;
 
 }   // end of main

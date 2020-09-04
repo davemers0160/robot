@@ -41,6 +41,11 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
+// -------------------------------GLOBALS--------------------------------------
+#if defined(_WIN32) | defined(__WIN32__) | defined(__WIN32) | defined(_WIN64) | defined(__WIN64)
+// opencv 4 vs opencv 3 naming convention change
+#define CV_BGRA2RGB cv::COLOR_BGRA2RGB 
+#endif
 
 // ----------------------------------------------------------------------------
 template <typename T>
