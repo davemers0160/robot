@@ -309,7 +309,7 @@ int main(int argc, char** argv)
                 stop_time = std::chrono::system_clock::now();
                 elapsed_time = std::chrono::duration_cast<d_sec>(stop_time - start_time);
 
-                std::cout << "Run Time (s): " << elapsed_time.count() << std::endl;
+                //std::cout << "Run Time (s): " << elapsed_time.count() << std::endl;
                        
                 prune_detects(d, 0.3);
                 
