@@ -103,6 +103,7 @@ if(UNIX)
             message_filters
             message_generation
             image_transport
+            dynamic_reconfigure
         )
 
         add_message_files(
@@ -118,6 +119,10 @@ if(UNIX)
 #            geometry_msgs
         )
 
+        generate_dynamic_reconfigure_options(
+            cfg/zed_config.cfg
+        )
+        
         catkin_package(
             CATKIN_DEPENDS
             roscpp
@@ -132,6 +137,7 @@ if(UNIX)
             message_filters
             message_runtime
             image_transport
+            dynamic_reconfigure
         )
 
         set(project_includes ${project_includes} ${catkin_INCLUDE_DIRS})

@@ -9,7 +9,7 @@
   <maintainer email="user@todo.todo">user</maintainer>
   <license>MIT</license>
 
-  <url type="repository">https://github.com/robot/obj_det</url>  
+  <url type="repository">https://github.com/davemers0160/robot/zed_object_detect</url>  
 
   <buildtool_depend>catkin</buildtool_depend>  
   
@@ -19,7 +19,7 @@
   <build_depend>sensor_msgs</build_depend>
   <build_depend>cv_bridge</build_depend>
   <build_depend>image_transport</build_depend>
-
+  <build_depend>dynamic_reconfigure</build_depend>
 
   <!-- <build_depend>geometry_msgs</build_depend> -->
   <build_depend>message_filters</build_depend>  
@@ -32,7 +32,8 @@
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>cv_bridge</exec_depend>
   <exec_depend>image_transport</exec_depend>
-
+  <exec_depend>dynamic_reconfigure</exec_depend>
+  
   <!-- <exec_depend>geometry_msgs</exec_depend> -->
   <exec_depend>message_filters</exec_depend>
   <exec_depend>message_generation</exec_depend>

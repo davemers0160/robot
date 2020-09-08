@@ -44,6 +44,9 @@
 #include <cv_bridge/cv_bridge.h>
 #include <std_msgs/String.h>
 
+#include <dynamic_reconfigure/server.h>
+#include <zed_obj_det_project/zed_Config.h>
+
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
@@ -69,6 +72,84 @@
 #include <sl/Camera.hpp>
 
 // -------------------------------GLOBALS--------------------------------------
+// global camera variable to allow dynamic reconfig of camera settings
+sl::Camera zed;
+
+
+// ----------------------Dynamic Reconfigure Callback--------------------------
+#if defined(USE_ROS)
+
+void reconfig_callback(zed_obj_det_project::zed_Config &config, uint32_t level)
+{
+
+    //frame_rate = config.pub_frame_rate;
+/*    
+    brightness = config.brightness;    
+    contrast = config.contrast;
+    hue = config.hue;
+    saturation = config.saturation;
+    sharpness = config.sharpness;
+    gamma = config.gamma;
+    auto_exposure_gain = config.auto_exposure_gain;
+    gain = config.gain;
+    exposure = config.exposure;
+    auto_whitebalance = config.auto_whitebalance;
+    whitebalance_temperature = config.whitebalance_temperature;
+*/    
+    switch(level)
+    {
+        case 4:
+            zed.setCameraSettings(sl::VIDEO_SETTINGS::BRIGHTNESS, config.brightness);
+            break;
+            
+        case 5:
+            zed.setCameraSettings(sl::VIDEO_SETTINGS::CONTRAST, config.contrast);
+            break;
+            
+        case 6:
+            zed.setCameraSettings(sl::VIDEO_SETTINGS::HUE, config.hue);
+            break;
+            
+        case 7:
+            zed.setCameraSettings(sl::VIDEO_SETTINGS::SATURATION, config.saturation);
+            break;
+            
+        case 8:
+            zed.setCameraSettings(sl::VIDEO_SETTINGS::SHARPNESS, config.sharpness);
+            break;
+            
+        case 9:
+            zed.setCameraSettings(sl::VIDEO_SETTINGS::GAMMA, config.gamma);
+            break;
+            
+        case 10:
+            zed.setCameraSettings(sl::VIDEO_SETTINGS::AEC_AGC, config.auto_exposure_gain);
+            break;
+            
+        case 11:
+            zed.setCameraSettings(sl::VIDEO_SETTINGS::GAIN, config.gain);
+            break;
+            
+        case 12:
+            zed.setCameraSettings(sl::VIDEO_SETTINGS::EXPOSURE, config.exposure);
+            break;
+
+        case 13:
+            zed.setCameraSettings(sl::VIDEO_SETTINGS::WHITEBALANCE_AUTO, config.auto_whitebalance);
+            break;
+            
+        case 14:
+            zed.setCameraSettings(sl::VIDEO_SETTINGS::WHITEBALANCE_TEMPERATURE, config.whitebalance_temperature);
+            break;                    
+
+        default:
+            break;
+    
+    }
+
+}
+
+#endif
 
 
 // ----------------------------------------------------------------------------
@@ -98,7 +179,7 @@ int main(int argc, char** argv)
     static const std::string dnn_input_topic = obj_root_topic + "dnn_input";
           
     // Create a ZED camera object
-    sl::Camera zed;
+    //sl::Camera zed;
     sl::ERROR_CODE state;
         
     unsigned long img_h;
@@ -135,7 +216,7 @@ int main(int argc, char** argv)
     // configure the basic ROS stuff
 
     // initialize the ros node
-    ros::init(argc, argv, "zed2");
+    ros::init(argc, argv, "zed_node");
 
     // NodeHandle is the main access point to communications with the ROS system
     ros::NodeHandle zed_node;
@@ -159,7 +240,7 @@ int main(int argc, char** argv)
         
     // get the required parameters 
     // get the rate at which the frames are grabbed
-    zed_node.param<double>("/zed2/loop_rate", rate, 5);
+    zed_node.param<double>("/zed2/loop_rate", rate, 10);
     
     // get the network weights file
     zed_node.param<std::string>("/zed_node/net_file", net_file, "/home/jax/catkin_ws/src/robot/common/nets/dc3_rgb_v10e_035_035_100_90_HPC_final_net.dat");
@@ -175,6 +256,18 @@ int main(int argc, char** argv)
     
     ::object_detect::object_det_list detect_list;
     ::object_detect::object_det_list detect_list_filtered;
+
+
+    // setup the dynamic reconfigure
+    dynamic_reconfigure::Server<zed_obj_det_project::zed_Config> server;
+    dynamic_reconfigure::Server<zed_obj_det_project::zed_Config>::CallbackType f;
+
+    f = boost::bind(&reconfig_callback, _1, _2);
+    server.setCallback(f);
+    
+    
+    //zed_node.param<int>("/brightness", brightness, 6);
+
 #else
     net_file = "D:/Projects/robot/common/nets/dc3_rgb_v10e_035_035_100_90_HPC_final_net.dat";
 #endif    
@@ -277,11 +370,17 @@ int main(int argc, char** argv)
         
             detect_list.det.clear();
             detect_list_filtered.det.clear();
+            
+            // reconfigure the camera 
+            //zed.setCameraSettings(sl::VIDEO_SETTINGS::BRIGHTNESS, brightness);
+            
 #else
         while (key != 'q')
         {
 #endif
 
+
+            
             // Grab an image
             state = zed.grab(runtime_parameters);
             
