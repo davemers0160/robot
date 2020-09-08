@@ -24,7 +24,7 @@ zed_node: {
     loop_rate:          10,
     
     # the location of the network weights file
-    net_file:           "/home/precision/dc_ws/src/robot/common/nets/dc3_rgb_v10e_035_035_100_90_HPC_final_net.dat",
+    net_file:           "/home/jax/catkin_ws/src/robot/common/nets/dc3_rgb_v10e_035_035_100_90_HPC_final_net.dat",
     
     # image cropping parameters
     crop_x:             128,
