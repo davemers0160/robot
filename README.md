@@ -2,9 +2,11 @@
 
 This code repository is the official code for the 2020 Director's Cup Robotic Challenge.  The code is targeted towards the Nvidia Jetson Xavier running the Nvidia Jetpack 4.3.
 
+The Jetson Xavier Jetpack needs to be installed first before the rest of the code can be installed.
+
 ## Dependencies
 
-The code in this repository has the following dependecies
+The code in this repository has the following dependecies:
 
 1. [CMake v2.8.12+](https://cmake.org/download/ )
 2. [dlib library v19.19+](http://dlib.net/ )
