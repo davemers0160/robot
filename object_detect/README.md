@@ -1,4 +1,4 @@
-# DWM1001 Project
+# Object Detect Project
 This project is designed to interface with the Stereolabs ZED/ZED2 stereo camera
 
 ## Dependencies
@@ -32,7 +32,7 @@ The object_detect project is a catkin package, and depends on the following ROS 
 
 To launch the object_detect node from `~/catkin_ws` use:
 
-  $ roslaunch src/robot/object_detect/launch/object_detect.launch
+    $ roslaunch src/robot/object_detect/launch/object_detect.launch
 
 
 ### Parameters
