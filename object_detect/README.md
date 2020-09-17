@@ -40,13 +40,10 @@ To launch the object_detect node from `~/catkin_ws` use:
 To configure the parameters of the dwm_wrapper node you can modify the configuration YAML file in the `params` folder.  The parameters that can be changed are:
 
   - loop_rate: The update rate for processing an image
-
   - img_topic: The topic to get the input RGB image
   - depth_topic: The topic to get the depth information
   - cam_info_topic: The topic to get the information on the camera
-    
   - net_file: The absolute path to the network weights file
-  
   - crop_x: The left pixel location for the image processing window
   - crop_y: The top pixel location for the image processing window
   - crop_w: The width of the crop window
