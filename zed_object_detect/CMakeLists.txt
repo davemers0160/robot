@@ -102,7 +102,7 @@ if(UNIX)
             cv_bridge
             message_filters
             message_generation
-            image_transport
+            #image_transport
             dynamic_reconfigure
         )
 
@@ -115,8 +115,6 @@ if(UNIX)
         generate_messages(DEPENDENCIES
             std_msgs
     	    sensor_msgs
-#            nav_msgs
-#            geometry_msgs
         )
 
         generate_dynamic_reconfigure_options(
@@ -130,13 +128,9 @@ if(UNIX)
             std_msgs
             sensor_msgs
             cv_bridge
-#            nav_msgs
-#            geometry_msgs
-#            dynamic_reconfigure
-#            stereo_msgs
             message_filters
             message_runtime
-            image_transport
+            #image_transport
             dynamic_reconfigure
         )
 

@@ -1,5 +1,6 @@
 # Object Detect Project
-This project is designed to interface with the Stereolabs ZED/ZED2 stereo camera
+
+This project is designed to interface with the Stereolabs ZED/ZED2 stereo camera using the zed_ros_wrapper package
 
 ## Dependencies
 
@@ -13,6 +14,7 @@ External repositories:
 
 1. [davemers0160 common code repository](https://github.com/davemers0160/Common )
 2. [davemers0160 dlib-contrib repository](https://github.com/davemers0160/dlib-contrib )
+3. [Stereolabs zed_ros_wrapper](https://github.com/stereolabs/zed-ros-wrapper )
 
 The object_detect project is a catkin package, and depends on the following ROS packages:
 
@@ -33,7 +35,6 @@ The object_detect project is a catkin package, and depends on the following ROS 
 To launch the object_detect node from `~/catkin_ws` use:
 
     $ roslaunch src/robot/object_detect/launch/object_detect.launch
-
 
 ### Parameters
 
