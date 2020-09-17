@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+
+<launch>
+
+    <arg name="node_name"                 default="obj_det" />
+    <arg name="package_name"              default="object_detect" />
+
+    <node name="$(arg node_name)" pkg="$(arg package_name)" type="obj_det_ex" output="screen">
+
+    </node>
+
+    <rosparam file="$(find object_detect)/params/obj_det_params.yaml" />
+
+</launch>
+
+
+

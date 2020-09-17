@@ -15,11 +15,6 @@ obj_det: {
     net_file:           "/home/jax/catkin_ws/src/robot/common/nets/dc3_rgb_v10e_035_035_100_90_HPC_final_net.dat",
     
     # image cropping parameters
-    #crop_x:             270,
-    #crop_y:             200,
-    #crop_w:             720,
-    #crop_h:             420,
-
     crop_x:             128,
     crop_y:             196,
     crop_w:             1024,

@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------
-#  Root CMake file for the DWM1001 Project
+#  Root CMake file for the Object Detect Project
 # ----------------------------------------------------------------------------
 #
 # To perform an out of source build do the following on the command line:
@@ -72,16 +72,15 @@ else()
     include(~/dlib-19.19/dlib/cmake)
 endif()
 
-set(OBJ_DET_ROOT "~/Projects/dlib_object_detection")
-set(OBJ_DET_DIRS "${OBJ_DET_ROOT}/obj_det_lib/include")
-set(OBJ_DET_LIBS "${OBJ_DET_ROOT}/obj_det_lib/build/libobj_det.so")
+#set(OBJ_DET_ROOT "~/Projects/dlib_object_detection")
+#set(OBJ_DET_DIRS "${OBJ_DET_ROOT}/obj_det_lib/include")
+#set(OBJ_DET_LIBS "${OBJ_DET_ROOT}/obj_det_lib/build/libobj_det.so")
 
 
 set(project_includes "include" 
     "${PR_ROOT}/common/include"
     "${COMMON_ROOT}/include"
     "${DLIB_CONTRIB}/include"
-    #"${OBJ_DET_DIRS}"
     )
 
 if (${USE_ROS})
@@ -100,10 +99,6 @@ if(UNIX)
             std_msgs
             sensor_msgs
             cv_bridge
-#            nav_msgs
-#            geometry_msgs
-#            dynamic_reconfigure
-#            roslint
             message_filters
             message_generation
         )
@@ -117,8 +112,6 @@ if(UNIX)
         generate_messages(DEPENDENCIES
             std_msgs
     	    sensor_msgs
-#            nav_msgs
-#            geometry_msgs
         )
 
         catkin_package(
@@ -128,10 +121,6 @@ if(UNIX)
             std_msgs
             sensor_msgs
             cv_bridge
-#            nav_msgs
-#            geometry_msgs
-#            dynamic_reconfigure
-#            stereo_msgs
             message_filters
             message_runtime
         )

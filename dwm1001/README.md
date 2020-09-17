@@ -36,7 +36,7 @@ To launch the dwm_wrapper from `~/catkin_ws` use:
 
 ### Parameters
 
-To configure the parameters of the dwm_wrapper node you can modify the configuration YAML file in the `params` folder.  The parameters that can be changed
+To configure the parameters of the dwm_wrapper node you can modify the configuration YAML file in the `params` folder.  The parameters that can be changed are:
 
   - serial_port: the name of the serial port to connect to
   - max_observations:  the maximum number of observations to use to calculate the enemy locations
@@ -70,8 +70,6 @@ From the directory that contains this file, execute the following commands in a 
 
 ```
 mkdir build
-mkdir results
-mkdir nets
 cd build
 cmake -G "Visual Studio 15 2017 Win64" -T host=x64 ..
 cmake --build . --config Release
@@ -85,8 +83,6 @@ From the directory that contains this file, execute the following commands in a 
 
 ```
 mkdir build
-mkdir results
-mkdir nets
 cd build
 cmake ..
 cmake --build . --config Release -- -j4
