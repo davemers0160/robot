@@ -1,2 +1,0 @@
-
-object_det[] det
