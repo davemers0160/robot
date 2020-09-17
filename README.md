@@ -51,4 +51,15 @@ This folder contains the code for that performs object detection to identify box
 
 This files contains the configuration script to install the required libraries, download the correct repos and compile the code.
 
+## Building the project
+
+Open a terminal, clone the repository, update the dependencies and build the packages:
+
+    $ mkdir catkin_ws
+    $ mkdir catkin_ws/src
+    $ cd ~/catkin_ws/src
+    $ git clone https://github.com/davemers0160/robot.git
+    $ cd ../
+    $ catkin_make -DCMAKE_BUILD_TYPE=Release -j6
+    $ source ./devel/setup.bash
 

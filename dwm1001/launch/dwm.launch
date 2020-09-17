@@ -1,24 +1,13 @@
 <?xml version="1.0"?>
-<!--
-
--->
 
 <launch>
-    <!-- <arg name="svo_file" default="path/to/svo/file.svo">  -->
-    <!--<arg name="svo_file"             default="" />  -->
-
-    <!-- <arg name="stream" default="<ip_address>:<port>">  -->
-    <!-- <arg name="stream"               default="" />  -->
 
     <arg name="node_name"                 default="dwm_ex" />
     <arg name="package_name"              default="dwm_wrapper" />
 
-    <!--<arg name="cam_pitch"             default="0.0" />  Orientation respect to base frame (i.e. "base_link) -->
-    <!--<arg name="cam_yaw"               default="0.0" />  Orientation respect to base frame (i.e. "base_link) -->
-
     <!-- <node name="$(arg node_name)" pkg="dwm_wrapper" type="dwm_ex" output="screen"> -->
     <node name="enemy_locations" pkg="$(arg package_name)" type="dwm_ex" output="screen">
-
+    
     </node>
 
     <rosparam file="$(find dwm_wrapper)/params/dwm_params.yaml" />

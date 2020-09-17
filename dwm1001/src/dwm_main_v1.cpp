@@ -58,9 +58,8 @@ void pose_callback(const geometry_msgs::Pose::ConstPtr& msg)
     current_location[2] = msg->position.z;
     valid_pose_msg = true;
 
-    //ROS_INFO("Seq: [%d]", msg->header.seq);
     ROS_INFO("Robot Position-> x: [%f], y: [%f], z: [%f]", msg->position.x, msg->position.y, msg->position.z);
-    //ROS_INFO("Orientation-> x: [%f], y: [%f], z: [%f], w: [%f]", msg->orientation.x, msg->orientation.y, msg->orientation.z, msg->orientation.w);
+
 }
 #endif
 
@@ -77,9 +76,6 @@ int main(int argc, char** argv)
     // dwm variables
     dwm_object tag;
     std::vector<dwm_location> anchor;
-    //std::vector<dwm_version> version;
-    //std::vector<anchor_pos> anchor;
-    //dwm_location tag_position;
 
     list<target_locator> target;
 

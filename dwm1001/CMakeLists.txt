@@ -61,8 +61,6 @@ else()
     include(~/dlib-19.19/dlib/cmake)
 endif()
 
-#include(${COMMON_ROOT}/cmake_utils/use_cpp_11.cmake)
-#include(${COMMON_ROOT}/cmake_utils/use_sse_avx.cmake)
 
 set(project_includes "include" "${COMMON_ROOT}/include")
 
@@ -80,25 +78,17 @@ if(UNIX)
             roscpp
             rosconsole
             std_msgs
-#            nav_msgs
-#            sensor_msgs
             geometry_msgs
-#            dynamic_reconfigure
-#            roslint
             message_generation
         )
 
         add_message_files(
             FILES
-#            target_location.msg
-#            target_location_list.msg
             point_array.msg
             )
 
         generate_messages(DEPENDENCIES
             std_msgs
-#            nav_msgs
-#    	     sensor_msgs
             geometry_msgs
             )
 
@@ -107,11 +97,7 @@ if(UNIX)
             roscpp
             rosconsole
             std_msgs
-#            sensor_msgs
-#            nav_msgs
             geometry_msgs
-#            dynamic_reconfigure
-#           stereo_msgs
             message_runtime
             )
 
@@ -169,46 +155,46 @@ if(WIN32)
 
 elseif(UNIX)
 
-if(USE_ROS)
-    include_directories(${project_includes})
+    if(USE_ROS)
+        include_directories(${project_includes})
 
-    add_executable(${exe_name} ${SOURCES})
-    target_link_libraries(${exe_name} dlib::dlib ${LINK_LIBRARIES})
-    add_dependencies(${exe_name} ${catkin_EXPORTED_TARGETS}) # ${PROJECT_NAME}_gencfg)
-    target_compile_options(${exe_name} PRIVATE ${active_preprocessor_switches})
+        add_executable(${exe_name} ${SOURCES})
+        target_link_libraries(${exe_name} dlib::dlib ${LINK_LIBRARIES})
+        add_dependencies(${exe_name} ${catkin_EXPORTED_TARGETS})
+        target_compile_options(${exe_name} PRIVATE ${active_preprocessor_switches})
 
-    message("")
-#    message("catkin_EXPORTED_TARGETS: ${catkin_EXPORTED_TARGETS}")
-#    roslint_cpp()
+        message("")
+    #    message("catkin_EXPORTED_TARGETS: ${catkin_EXPORTED_TARGETS}")
+    #    roslint_cpp()
 
-###############################################################################
-# INSTALL
+    ###############################################################################
+    # INSTALL
 
-    install(TARGETS
-        ${exe_name}
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-        )
+        install(TARGETS
+            ${exe_name}
+            ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+            LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+            RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+            )
 
-    #install(FILES
-    #    nodelet_plugins.xml
-    #    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-    #)
+        #install(FILES
+        #    nodelet_plugins.xml
+        #    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+        #)
 
-    install(DIRECTORY
-        launch
-        urdf
-        params
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-        )
+        install(DIRECTORY
+            launch
+            urdf
+            params
+            DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+            )
 
-else()
-    include_directories(${project_includes})
-    add_executable(${exe_name} ${SOURCES})
-    target_link_libraries(${exe_name} dlib::dlib)
+    else()
+        include_directories(${project_includes})
+        add_executable(${exe_name} ${SOURCES})
+        target_link_libraries(${exe_name} dlib::dlib)
 
-endif()
+    endif()
 
 endif()
 
