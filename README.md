@@ -4,6 +4,8 @@ This code repository is the official code for the 2020 Director's Cup Robotic Ch
 
 The Jetson Xavier Jetpack needs to be installed first before the rest of the code can be installed.
 
+The training of the DNN for the object detection was done using the following repo: [davemers0160 dlib_object_detection repository](https://github.com/davemers0160/dlib_object_detection ).  The network was trained using the RGB trainer.
+
 ## Dependencies
 
 The code in this repository has the following dependecies:
@@ -18,8 +20,7 @@ External repositories:
 
 1. [davemers0160 common code repository](https://github.com/davemers0160/Common )
 2. [davemers0160 dlib-contrib repository](https://github.com/davemers0160/dlib-contrib )
-3. [davemers0160 dlib_object_detection repository](https://github.com/davemers0160/dlib_object_detection )
-4. [Stereolabs zed_ros_wrapper](https://github.com/stereolabs/zed-ros-wrapper )
+3. [Stereolabs zed_ros_wrapper](https://github.com/stereolabs/zed-ros-wrapper )
 
 ## Repository Breakdown
 
