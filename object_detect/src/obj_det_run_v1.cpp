@@ -378,7 +378,9 @@ int main(int argc, char** argv)
                 if(detect_list.det.size() > 0)
                 {
                     box_string = box_string.substr(0, box_string.length()-1);
-                    boxes_pub.publish(box_string);
+                    std_msgs::String msg;
+                    msg.data = box_string.c_str();
+                    boxes_pub.publish(msg);
                     
                     razel_raw_pub.publish(detect_list);
                 }
