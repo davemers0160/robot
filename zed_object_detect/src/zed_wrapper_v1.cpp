@@ -28,10 +28,12 @@
 // Net Version
 #include "obj_det_net_rgb_v10.h"
 #include "overlay_bounding_box.h"
+#include "dlib_overlay_bbox.h"
 
 // dlib includes
 #include <dlib/dnn.h>
 #include <dlib/image_transforms.h>
+#include <dlib/opencv/cv_image.h>
 
 // dlib-contrib includes
 #include <dlib_pixel_operations.h>
